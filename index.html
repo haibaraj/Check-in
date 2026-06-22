@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>打工人的蓄电池 v2.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .grid-cell { aspect-ratio: 1; }
+        .exp-pop {
+            animation: popUp 0.6s ease-out forwards;
+        }
+        @keyframes popUp {
+            0% { opacity: 0; transform: translateY(0) scale(0.7); }
+            50% { opacity: 1; transform: translateY(-20px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1); }
+        }
+    </style>
+</head>
+<body class="p-4 max-w-md mx-auto pb-24">
+
+    <!-- 顶部状态与经验值看板 -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm text-center mb-4 relative">
+        <!-- 经验值漂浮动画触发点 -->
+        <div id="exp-container" class="absolute left-1/2 -top-4 -translate-x-1/2 pointer-events-none"></div>
+        
+        <h1 class="text-xl font-bold text-gray-800">打工人的蓄电池 v2.0 🔋</h1>
+        <p class="text-xs text-gray-400 mt-1" id="today-date">2026年6月22日</p>
+        
+        <!-- 经验值大数字 -->
+        <div class="mt-4 flex items-center justify-center space-x-2">
+            <span class="text-3xl font-extrabold text-amber-500" id="total-exp">0</span>
+            <span class="text-sm font-bold text-gray-500 bg-amber-50 px-2 py-0.5 rounded-full">当前总经验值 EXP</span>
+        </div>
+    </div>
+
+    <!-- 赏金兑换所 -->
+    <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-4 shadow-md text-white mb-5">
+        <h2 class="font-bold text-sm mb-3 flex items-center">🎁 打工人赏金兑换所</h2>
+        <div class="space-y-3">
+            <!-- 奶茶进度 -->
+            <div>
+                <div class="flex justify-between text-xs font-medium mb-1">
+                    <span>🧋 奶茶 (15 EXP)</span>
+                    <button onclick="redeem(15, '一杯热乎乎的奶茶')" id="btn-redeem-15" class="bg-white text-orange-600 text-2xs px-2.5 py-0.5 rounded-full font-bold shadow-sm disabled:opacity-50">兑换</button>
+                </div>
+                <div class="bg-white/20 rounded-full h-2 p-0.5">
+                    <div id="bar-15" class="bg-white h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            <!-- 螺蛳粉进度 -->
+            <div>
+                <div class="flex justify-between text-xs font-medium mb-1">
+                    <span>🍜 豪华加菜螺蛳粉 (30 EXP)</span>
+                    <button onclick="redeem(30, '一碗香辣臭爽的螺蛳粉')" id="btn-redeem-30" class="bg-white text-orange-600 text-2xs px-2.5 py-0.5 rounded-full font-bold shadow-sm disabled:opacity-50">兑换</button>
+                </div>
+                <div class="bg-white/20 rounded-full h-2 p-0.5">
+                    <div id="bar-30" class="bg-white h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 动态任务列表区 -->
+    <div class="space-y-3.5 mb-6" id="tasks-list-container">
+        <!-- JS 动态渲染 -->
+    </div>
+
+    <!-- 历史能量墙 -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-gray-800 text-sm">最近 14 天充能记录</h2>
+            <span class="text-2xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md font-medium" id="streak-text">累计充能 0 天</span>
+        </div>
+        <div class="grid grid-cols-7 gap-2" id="history-grid"></div>
+    </div>
+
+    <!-- 管理中心（增删改查） -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h2 class="font-bold text-gray-800 text-sm mb-3 flex items-center">⚙️ 目标管理中心</h2>
+        
+        <!-- 添加/修改表单 -->
+        <div class="space-y-3">
+            <input type="hidden" id="edit-id">
+            <div class="flex space-x-2">
+                <input type="text" id="input-emoji" placeholder="图标(如 📚)" class="w-16 border border-gray-200 rounded-xl px-2 py-2 text-center text-sm focus:outline-emerald-500">
+                <input type="text" id="input-title" placeholder="新目标(如 听音乐10分钟)" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-emerald-500">
+            </div>
+            <input type="text" id="input-desc" placeholder="一句话鼓励语(如 每天放松一下下)" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-emerald-500">
+            <button onclick="saveTask()" id="btn-save" class="w-full bg-emerald-500 text-white font-bold text-sm py-2.5 rounded-xl shadow-sm active:scale-98 transition-transform">💡 确认添加新目标</button>
+        </div>
+
+        <!-- 现有目标列表（带修改/删除） -->
+        <div class="mt-4 border-t border-gray-100 pt-3">
+            <p class="text-2xs text-gray-400 mb-2">当前正在执行的目标（可修改或删除）：</p>
+            <div class="space-y-2" id="manage-list-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // 日期工具
+        function getTodayStr() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        // 默认内置目标
+        const defaultTasks = [
+            { id: "t1", emoji: "📚", title: "看书 15 分钟", desc: "睡前翻 3 页，无痛充电" },
+            { id: "t2", emoji: "🚴", title: "骑车充能", desc: "工作日通勤或周日上午骑行" },
+            { id: "t3", emoji: "🛏️", title: "23:00 前熄灯躺下", desc: "留足8小时，不和运动死磕" }
+        ];
+
+        // 初始化本地数据
+        let tasks = JSON.parse(localStorage.getItem('打工人任务列表')) || defaultTasks;
+        let appData = JSON.parse(localStorage.getItem('打工人打卡数据v2')) || {};
+        let totalExp = parseInt(localStorage.getItem('打工人总经验值')) || 0;
+
+        const todayStr = getTodayStr();
+        if (!appData[todayStr]) appData[todayStr] = [];
+
+        // 核心渲染主函数
+        function renderAll() {
+            // 1. 渲染今日打卡列表
+            const listContainer = document.getElementById('tasks-list-container');
+            listContainer.innerHTML = '';
+            
+            if(tasks.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-6 text-xs text-gray-400 bg-white rounded-2xl">目前没有目标，在下方添加一个吧！</div>`;
+            }
+
+            tasks.forEach(task => {
+                const isChecked = appData[todayStr].includes(task.id);
+                const btn = document.createElement('button');
+                btn.className = `w-full bg-white active:scale-98 transition-all duration-100 rounded-2xl p-4 shadow-sm flex items-center justify-between border-2 ${isChecked ? 'border-emerald-500 bg-emerald-50/10' : 'border-transparent'}`;
+                btn.onclick = () => toggleTask(task.id);
+
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3 text-left">
+                        <div class="text-2xl bg-gray-50 p-2 rounded-xl">${task.emoji}</div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">${task.title}</h3>
+                            <p class="text-2xs text-gray-400 mt-0.5">${task.desc}</p>
+                        </div>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold transition-colors ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'}">
+                        ${isChecked ? '✓' : ''}
+                    </div>
+                `;
+                listContainer.appendChild(btn);
+            });
+
+            // 2. 更新经验值和赏金商店
+            document.getElementById('total-exp').innerText = totalExp;
+            
+            const p15 = Math.min((totalExp / 15) * 100, 100);
+            const p30 = Math.min((totalExp / 30) * 100, 100);
+            document.getElementById('bar-15').style.width = `${p15}%`;
+            document.getElementById('bar-30').style.width = `${p30}%`;
+            
+            document.getElementById('btn-redeem-15').disabled = totalExp < 15;
+            document.getElementById('btn-redeem-30').disabled = totalExp < 30;
+
+            // 3. 渲染管理中心列表
+            const manageContainer = document.getElementById('manage-list-container');
+            manageContainer.innerHTML = '';
+            tasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-gray-50 p-2 rounded-xl text-xs";
+                div.innerHTML = `
+                    <span class="font-medium text-gray-700">${task.emoji} ${task.title}</span>
+                    <div class="space-x-2">
+                        <button onclick="editTask('${task.id}')" class="text-emerald-600 font-bold">修改</button>
+                        <button onclick="deleteTask('${task.id}')" class="text-red-500 font-bold">删除</button>
+                    </div>
+                `;
+                manageContainer.appendChild(div);
+            });
+
+            // 4. 渲染日期和能量墙
+            renderGrid();
+        }
+
+        // 打卡状态切换
+        function toggleTask(id) {
+            const index = appData[todayStr].indexOf(id);
+            const expContainer = document.getElementById('exp-container');
+            
+            if (index > -1) {
+                // 取消打卡
+                appData[todayStr].splice(index, 1);
+                totalExp = Math.max(0, totalExp - 1);
+                showExpFeedback('-1 EXP', 'text-red-500');
+            } else {
+                // 打卡成功
+                appData[todayStr].push(id);
+                totalExp += 1;
+                showExpFeedback('+1 EXP ✨', 'text-amber-500 font-bold text-lg');
+            }
+            
+            saveData();
+            renderAll();
+        }
+
+        // 飘字动画效果
+        function showExpFeedback(text, colorClass) {
+            const div = document.createElement('div');
+            div.className = `absolute exp-pop ${colorClass}`;
+            div.innerText = text;
+            const container = document.getElementById('exp-container');
+            container.appendChild(div);
+            setTimeout(() => div.remove(), 600);
+        }
+
+        // 兑换奖品
+        function redeem(cost, prizeName) {
+            if (totalExp >= cost) {
+                if(confirm(`确定要消耗 ${cost} 经验值兑换 ${prizeName} 吗？奖励自己，理直气壮！`)) {
+                    totalExp -= cost;
+                    saveData();
+                    renderAll();
+                    alert(`🎉 兑换成功！今晚就去享受 ${prizeName} 吧，你值得！`);
+                }
+            }
+        }
+
+        // 增与改的保存
+        function saveTask() {
+            const emoji = document.getElementById('input-emoji').value.trim() || "🎯";
+            const title = document.getElementById('input-title').value.trim();
+            const desc = document.getElementById('input-desc').value.trim() || "坚持就是胜利";
+            const editId = document.getElementById('edit-id').value;
+
+            if (!title) { alert("目标名称不能为空哦！"); return; }
+
+            if (editId) {
+                // 修改模式
+                const task = tasks.find(t => t.id === editId);
+                if (task) { task.emoji = emoji; task.title = title; task.desc = desc; }
+                document.getElementById('edit-id').value = '';
+                document.getElementById('btn-save').innerText = "💡 确认添加新目标";
+            } else {
+                // 新增模式
+                const newId = 't_' + Date.now();
+                tasks.push({ id: newId, emoji, title, desc });
+            }
+
+            localStorage.setItem('打工人任务列表', JSON.stringify(tasks));
+            // 清空输入框
+            document.getElementById('input-emoji').value = '';
+            document.getElementById('input-title').value = '';
+            document.getElementById('input-desc').value = '';
+            
+            renderAll();
+        }
+
+        // 修改按钮填表
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                document.getElementById('input-emoji').value = task.emoji;
+                document.getElementById('input-title').value = task.title;
+                document.getElementById('input-desc').value = task.desc;
+                document.getElementById('edit-id').value = task.id;
+                document.getElementById('btn-save').innerText = "💾 保存修改";
+                document.getElementById('input-title').focus();
+            }
+        }
+
+        // 删除任务
+        function deleteTask(id) {
+            if (confirm("确定要删除这个目标吗？（已打卡获得的数据和经验不会丢失）")) {
+                tasks = tasks.filter(t => t.id !== id);
+                localStorage.setItem('打工人任务列表', JSON.stringify(tasks));
+                renderAll();
+            }
+        }
+
+        // 渲染过去14天的能量墙
+        function renderGrid() {
+            const gridContainer = document.getElementById('history-grid');
+            gridContainer.innerHTML = '';
+            let totalStreak = 0;
+
+            for (let i = 13; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                
+                const doneCount = appData[key] ? appData[key].length : 0;
+                let bgColor = 'bg-gray-100';
+                
+                if (doneCount > 0) {
+                    totalStreak++;
+                    if (doneCount === 1) bgColor = 'bg-emerald-100';
+                    else if (doneCount === 2) bgColor = 'bg-emerald-300';
+                    else bgColor = 'bg-emerald-500';
+                }
+
+                const cell = document.createElement('div');
+                const isToday = (i === 0);
+                cell.className = `${bgColor} grid-cell rounded-md flex items-center justify-center text-2xs transition-colors duration-300`;
+                cell.innerHTML = `<span class="${isToday ? 'text-gray-800 font-bold border-b-2 border-gray-800' : 'text-gray-400'}">${d.getDate()}</span>`;
+                gridContainer.appendChild(cell);
+            }
+            document.getElementById('streak-text').innerText = `累计充能 ${totalStreak} 天`;
+        }
+
+        function saveData() {
+            localStorage.setItem('打工人打卡数据v2', JSON.stringify(appData));
+            localStorage.setItem('打工人总经验值', totalExp);
+        }
+
+        // 初始化
+        const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        const todayDateObj = new Date();
+        document.getElementById('today-date').innerText = `${todayDateObj.getFullYear()}年${todayDateObj.getMonth()+1}月${todayDateObj.getDate()}日 ${days[todayDateObj.getDay()]}`;
+
+        renderAll();
+    </script>
+</body>
+</html>
