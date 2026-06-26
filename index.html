@@ -252,6 +252,7 @@
           <div>
             <p class="text-xs text-slate-400 font-bold">奖励商店</p>
             <p class="text-3xl font-black tracking-tight mt-1 text-amber-500">{{ userProfile.currentExp }} <span class="text-xs text-slate-400 font-normal">EXP</span></p>
+            <p class="text-[11px] text-slate-400 mt-1">今日已兑换 {{ todayRedeemCount }} 次</p>
           </div>
           <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-xs font-black px-3 py-2 rounded-full shadow-sm">＋ 上架心愿</button>
         </div>
@@ -260,19 +261,48 @@
           <span class="icon-line text-amber-500" v-html="icon('gift')"></span>
           <span>欲望杂货铺</span>
         </h2>
-        <div class="grid grid-cols-2 gap-3 scroll-area mb-4 shrink-0 max-h-[42vh]">
-          <article v-for="item in storeItems" :key="item.id" class="soft-card p-3 rounded-3xl flex flex-col justify-between relative min-h-[132px]" :class="item.stock === 0 ? 'opacity-50 grayscale' : ''">
-            <div class="absolute top-2 right-2 flex gap-1.5">
-              <button @click="openStoreModal(item)" class="text-xs bg-slate-100 p-1 rounded-md text-slate-500"><span class="icon-line" v-html="icon('edit')"></span></button>
-              <button @click="deleteStoreItem(item.id)" class="text-xs bg-red-50 p-1 rounded-md text-red-400"><span class="icon-line" v-html="icon('trash')"></span></button>
+        <div class="mb-3 space-y-2">
+          <div class="flex gap-2 overflow-x-auto pb-1">
+            <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">全部</button>
+            <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">可兑换</button>
+            <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">EXP 不足</button>
+            <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">已售罄</button>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-400">
+            <span>共 {{ filteredStoreItems.length }} 个心愿</span>
+            <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-white border border-slate-100 text-slate-500 font-black px-3 py-1.5 rounded-full">
+              价格 {{ storeSort === 'asc' ? '低到高' : '高到低' }}
+            </button>
+          </div>
+        </div>
+        <div class="space-y-3 scroll-area mb-4 shrink-0 max-h-[42vh]">
+          <div v-if="filteredStoreItems.length === 0" class="text-center py-8 text-slate-300 text-sm">当前筛选下没有心愿商品</div>
+          <article
+            v-for="item in filteredStoreItems"
+            :key="item.id"
+            @touchstart="startStoreLongPress(item)"
+            @touchmove="cancelStoreLongPress"
+            @touchend="cancelStoreLongPress"
+            @mousedown="startStoreLongPress(item)"
+            @mouseup="cancelStoreLongPress"
+            @mouseleave="cancelStoreLongPress"
+            @contextmenu.prevent="showStoreAction(item)"
+            class="soft-card p-4 rounded-3xl flex items-center gap-3 relative min-h-[104px] active:scale-[0.99] transition-all select-none"
+            :class="item.stock === 0 ? 'opacity-50 grayscale' : ''"
+          >
+            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <span class="icon-line" v-html="icon('gift')"></span>
             </div>
-            <div class="pt-5 pr-10">
-              <h3 class="font-black text-sm text-slate-800 line-clamp-2 mb-1">{{ item.name }}</h3>
-              <p class="text-[11px] text-slate-400">库存 {{ item.stock === -1 ? '无限次' : item.stock + ' 次' }}</p>
+            <div class="min-w-0 flex-1 pr-1">
+              <h3 class="font-black text-sm text-slate-800 truncate">{{ item.name }}</h3>
+              <div class="mt-1 flex flex-wrap gap-1.5">
+                <span class="text-[10px] bg-slate-50 text-slate-400 px-2 py-1 rounded-full">库存 {{ item.stock === -1 ? '无限次' : item.stock + ' 次' }}</span>
+                <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-1 rounded-full">{{ item.expCost }} EXP</span>
+              </div>
+              <p class="text-[10px] text-slate-300 mt-2">长按可编辑或删除</p>
             </div>
-            <div class="mt-4 flex justify-between items-center">
-              <span class="text-amber-600 font-black text-sm">{{ item.expCost }} EXP</span>
-              <button @click="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-black px-3 py-2 rounded-xl transition-colors shadow-sm" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-950 text-white active:scale-95'">
+            <div class="shrink-0">
+              <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-black px-4 py-2.5 rounded-full transition-colors shadow-sm whitespace-nowrap" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
                 {{ item.stock === 0 ? '售罄' : userProfile.currentExp < item.expCost ? '不足' : '兑换' }}
               </button>
             </div>
@@ -287,14 +317,16 @@
           <div class="flex-1 min-h-0 scroll-area text-xs space-y-2 text-slate-500">
             <div v-if="rewardHistory.length === 0" class="text-center py-8 text-slate-300">暂无兑换记录</div>
             <div v-for="log in rewardHistory" :key="log.id" class="border-b border-slate-50 pb-2">
-              <div class="flex justify-between items-center gap-2">
-                <span class="truncate">兑换 <strong>{{ log.rewardName }}</strong></span>
-                <div class="flex items-center gap-2 shrink-0">
-                  <span class="text-red-500 font-black">-{{ log.costExp }} EXP</span>
+              <div class="flex justify-between items-start gap-2">
+                <div class="min-w-0 flex-1">
+                  <p class="truncate">兑换 <strong>{{ log.rewardName }}</strong></p>
+                  <p class="text-[10px] text-slate-300 mt-0.5">{{ formatDateTime(log.timestamp) }}</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span class="text-red-500 font-black whitespace-nowrap">-{{ log.costExp }} EXP</span>
                   <button @click="deleteRewardLog(log.id)" class="text-[10px] text-red-400 bg-red-50 px-1.5 py-1 rounded-lg active:bg-red-100">删除</button>
                 </div>
               </div>
-              <p class="text-[10px] text-slate-300 mt-0.5">{{ formatDateTime(log.timestamp) }}</p>
             </div>
           </div>
         </div>
@@ -314,6 +346,15 @@
         <button @click="editHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('edit')"></span><span>编辑</span></button>
         <button @click="deleteHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl"><span class="icon-line" v-html="icon('trash')"></span><span>删除</span></button>
         <button @click="closeModal('habitAction')" class="w-full text-center py-3 text-sm font-bold text-slate-400 active:bg-slate-50 rounded-2xl">取消关闭</button>
+      </div>
+    </div>
+
+    <div v-if="modals.storeAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('storeAction')">
+      <div class="bg-white w-full rounded-t-3xl p-4 max-w-md space-y-2 sheet-enter">
+        <div class="text-center text-xs text-slate-400 border-b border-slate-50 pb-2">{{ selectedStoreItem ? selectedStoreItem.name : '心愿管理' }}</div>
+        <button @click="editStoreFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('edit')"></span><span>编辑</span></button>
+        <button @click="deleteStoreFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl"><span class="icon-line" v-html="icon('trash')"></span><span>删除</span></button>
+        <button @click="closeModal('storeAction')" class="w-full text-center py-3 text-sm font-bold text-slate-400 active:bg-slate-50 rounded-2xl">取消关闭</button>
       </div>
     </div>
 
@@ -505,17 +546,21 @@
           { id: 's3', name: '睡一个懒觉', expCost: 15, stock: -1 }
         ]);
         const rewardHistory = ref([]);
+        const storeFilter = ref('all');
+        const storeSort = ref('asc');
 
-        const modals = ref({ habit: false, habitAction: false, habitCalendar: false, retroactive: false, store: false });
+        const modals = ref({ habit: false, habitAction: false, habitCalendar: false, retroactive: false, store: false, storeAction: false });
         const habitForm = ref(getBlankHabit());
         const storeForm = ref(getBlankStoreItem());
         const activeRetroHabitId = ref(null);
         const retroDate = ref('');
         const selectedHabitItem = ref(null);
+        const selectedStoreItem = ref(null);
         const habitCalendarMonth = ref(todayLocalDate().slice(0, 7));
         const selectedHabitDate = ref(todayLocalDate());
         const dialog = ref({ visible: false, type: 'alert', title: '提示', message: '', resolve: null });
         let habitPressTimer = null;
+        let storePressTimer = null;
         let suppressHabitTap = false;
 
         function structuredCloneSafe(data) {
@@ -747,6 +792,16 @@
         const todayCompletedCount = computed(() => doneHabits.value.length);
         const todayProgressPercent = computed(() => habits.value.length ? Math.round((todayCompletedCount.value / habits.value.length) * 100) : 0);
         const isAllDoneToday = computed(() => habits.value.length > 0 && pendingHabits.value.length === 0);
+        const todayRedeemCount = computed(() => rewardHistory.value.filter(log => formatDate(new Date(log.timestamp)) === todayStr.value).length);
+        const filteredStoreItems = computed(() => {
+          const filtered = storeItems.value.filter(item => {
+            if (storeFilter.value === 'available') return item.stock !== 0 && userProfile.value.currentExp >= item.expCost;
+            if (storeFilter.value === 'locked') return item.stock !== 0 && userProfile.value.currentExp < item.expCost;
+            if (storeFilter.value === 'soldout') return item.stock === 0;
+            return true;
+          });
+          return [...filtered].sort((a, b) => storeSort.value === 'asc' ? a.expCost - b.expCost : b.expCost - a.expCost);
+        });
 
         function getWeekRange(dateStr = todayStr.value) {
           const date = parseDate(dateStr);
@@ -864,6 +919,20 @@
             }
             if (navigator.vibrate) {
               navigator.vibrate(120);
+            }
+          } catch (error) {
+            console.warn('震动调用失败。', error);
+          }
+        }
+
+        function vibrateShort() {
+          try {
+            if (window.plus && plus.device && typeof plus.device.vibrate === 'function') {
+              plus.device.vibrate(80);
+              return;
+            }
+            if (navigator.vibrate) {
+              navigator.vibrate(80);
             }
           } catch (error) {
             console.warn('震动调用失败。', error);
@@ -1057,6 +1126,38 @@
           modals.value.store = true;
         }
 
+        function showStoreAction(item) {
+          cancelStoreLongPress();
+          selectedStoreItem.value = item;
+          modals.value.storeAction = true;
+        }
+
+        function startStoreLongPress(item) {
+          cancelStoreLongPress();
+          storePressTimer = setTimeout(() => showStoreAction(item), 550);
+        }
+
+        function cancelStoreLongPress() {
+          if (storePressTimer) {
+            clearTimeout(storePressTimer);
+            storePressTimer = null;
+          }
+        }
+
+        function editStoreFromAction() {
+          if (!selectedStoreItem.value) return;
+          modals.value.storeAction = false;
+          openStoreModal(selectedStoreItem.value);
+        }
+
+        async function deleteStoreFromAction() {
+          if (!selectedStoreItem.value) return;
+          const id = selectedStoreItem.value.id;
+          modals.value.storeAction = false;
+          await deleteStoreItem(id);
+          selectedStoreItem.value = null;
+        }
+
         function saveStoreItem() {
           const data = { ...storeForm.value, name: storeForm.value.name.trim(), expCost: Number(storeForm.value.expCost), stock: Number(storeForm.value.stock) };
           if (!data.name) return showAlert('请填写商品名称');
@@ -1087,7 +1188,9 @@
           userProfile.value.currentExp -= item.expCost;
           if (item.stock > 0) item.stock -= 1;
           rewardHistory.value.unshift({ id: getId('r'), rewardName: item.name, costExp: item.expCost, timestamp: Date.now() });
+          vibrateShort();
           syncStorageData();
+          showAlert(`已成功兑换「${item.name}」`, '兑换成功');
         }
 
         async function deleteRewardLog(id) {
@@ -1154,14 +1257,14 @@
         });
 
         return {
-          activeTab, userProfile, habits, checkIns, storeItems, rewardHistory,
+          activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, storeFilter, storeSort, filteredStoreItems, todayRedeemCount,
           dialog, closeDialog,
-          modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, habitCalendarMonth, selectedHabitDate,
+          modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, selectedStoreItem, habitCalendarMonth, selectedHabitDate,
           todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
           pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, isAllDoneToday,
           icon, formatDateTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, openHabitModal, saveHabit,
           deleteHabitDirectly, showHabitAction, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, openHabitCalendar, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
-          openStoreModal, saveStoreItem, deleteStoreItem, redeemReward, deleteRewardLog
+          openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, deleteRewardLog
         };
       }
     }).mount('#app');
