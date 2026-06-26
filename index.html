@@ -19,7 +19,7 @@
       -webkit-user-select: none;
       -webkit-tap-highlight-color: transparent;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #e5e7eb;
+      background: #eef1f6;
       position: fixed;
       inset: 0;
     }
@@ -30,7 +30,6 @@
     .nav-bottom { padding-bottom: env(safe-area-inset-bottom); }
     .sheet-enter { animation: sheetUp .18s ease-out; }
     .fade-enter { animation: fadeIn .15s ease-out; }
-    .budget-alert { animation: pulseText 1s infinite; }
     .app-root {
       height: 100vh;
       height: 100dvh;
@@ -54,171 +53,218 @@
     @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes pulseText { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
-    .chart-num { font-variant-numeric: tabular-nums; }
+    .habit-move, .habit-enter-active, .habit-leave-active { transition: all 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+    .habit-enter-from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    .habit-leave-to { opacity: 0; transform: translateY(-12px) scale(0.97); }
+    .habit-leave-active { position: absolute; width: 100%; }
+    .soft-card {
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(226,232,240,.9);
+      box-shadow: 0 10px 30px rgba(15,23,42,.06);
+    }
+    .icon-line {
+      width: 1.05rem;
+      height: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+    .icon-line svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
   </style>
 </head>
 <body class="text-slate-800">
-  <div id="app" class="app-root max-w-md mx-auto bg-slate-50 shadow-2xl relative overflow-hidden">
+  <div id="app" class="app-root max-w-md mx-auto bg-[#f7f8fb] shadow-2xl relative overflow-hidden">
     <main class="app-main overflow-hidden">
-      <section v-show="activeTab === 'detail'" class="h-full flex flex-col  min-h-0 overflow-hidden">
-        <header class="bg-gradient-to-br from-amber-400 via-amber-300 to-orange-200 text-slate-950 px-4 pt-6 pb-5 rounded-b-[1.75rem] shadow-sm">
-          <div class="flex justify-between items-center mb-4">
+      <section v-show="activeTab === 'habit'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
+        <div class="mb-4">
+          <div class="flex justify-between items-start mb-3">
             <div>
-              <p class="text-xs text-amber-900 font-semibold">移动自律账本</p>
-              <h1 class="text-xl font-black tracking-tight">📊 我的账本</h1>
+              <p class="text-xs text-slate-400 font-bold">My Check in</p>
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">今日自律</h1>
+              <p class="text-[11px] text-slate-400 mt-1">轻点打卡，长按管理</p>
             </div>
-            <div class="flex gap-2">
-              <button @click="openLedgerModal(null)" class="bg-amber-500 active:bg-amber-600 text-white px-3 py-2 rounded-full text-xs font-black shadow-sm">＋ 记账</button>
-              <button @click="openBudgetModal" class="bg-black/10 active:bg-black/15 px-3 py-2 rounded-full text-xs font-bold">
-                预算 ¥{{ formatMoney(monthlyBudget) }}
-              </button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-white/35 rounded-2xl py-2 px-1">
-              <p class="text-[11px] text-slate-700">本月收入</p>
-              <p class="text-sm sm:text-base font-black text-emerald-700 truncate">+{{ formatMoney(currentMonthIncome) }}</p>
-            </div>
-            <div class="bg-white/35 rounded-2xl py-2 px-1">
-              <p class="text-[11px] text-slate-700">本月支出</p>
-              <p class="text-sm sm:text-base font-black text-red-600 truncate">-{{ formatMoney(currentMonthExpense) }}</p>
-            </div>
-            <div class="bg-white/35 rounded-2xl py-2 px-1">
-              <p class="text-[11px] text-slate-700">净结余</p>
-              <p class="text-sm sm:text-base font-black truncate" :class="currentMonthBalance >= 0 ? 'text-slate-950' : 'text-red-700'">
-                {{ currentMonthBalance >= 0 ? '+' : '' }}{{ formatMoney(currentMonthBalance) }}
-              </p>
+            <div class="flex gap-2 pt-1">
+              <button @click="openHabitCalendar" class="text-xs bg-white text-slate-700 px-3 py-2 rounded-full font-black shadow-sm border border-slate-100">记录</button>
+              <button @click="openHabitModal(null)" class="text-xs bg-amber-400 text-slate-950 px-3 py-2 rounded-full font-black shadow-sm">＋ 目标</button>
             </div>
           </div>
 
-          <div class="mt-4 bg-black/10 rounded-full h-3 overflow-hidden">
-            <div class="h-full transition-all duration-500" :class="budgetUsagePercentage >= 80 ? 'bg-red-500' : 'bg-emerald-600'" :style="{ width: Math.min(budgetUsagePercentage, 100) + '%' }"></div>
-          </div>
-          <div class="flex justify-between items-center mt-1.5 text-xs text-slate-700">
-            <span>预算消耗 {{ budgetUsagePercentage.toFixed(1) }}%</span>
-            <span v-if="budgetUsagePercentage >= 80" class="text-red-700 font-black budget-alert">预算超支警告</span>
-          </div>
-        </header>
-
-        <div class="flex-1 min-h-0 p-4 space-y-4 scroll-area">
-          <div v-if="groupedLedgers.length === 0" class="text-center py-16 text-slate-400 text-sm">
-            📭 本月还没有记账明细，点击下方 ＋ 开始记账
-          </div>
-
-          <article v-for="group in groupedLedgers" :key="group.date" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div class="bg-slate-50 px-3 py-2 flex justify-between items-center text-xs text-slate-500 font-bold border-b border-slate-100">
-              <span>📅 {{ group.date }}</span>
-              <div class="flex gap-3 min-w-0">
-                <span v-if="group.income > 0" class="text-emerald-600 truncate">入 +{{ formatMoney(group.income) }}</span>
-                <span v-if="group.expense > 0" class="text-red-500 truncate">支 -{{ formatMoney(group.expense) }}</span>
+          <div class="soft-card rounded-3xl p-4">
+            <div class="grid grid-cols-3 gap-2 text-center mb-4">
+              <div class="bg-amber-50 rounded-2xl py-3 px-1">
+                <p class="text-[10px] text-amber-700 font-bold">可用 EXP</p>
+                <p class="text-lg font-black text-amber-600 mt-0.5">{{ userProfile.currentExp }}</p>
+              </div>
+              <div class="bg-slate-50 rounded-2xl py-3 px-1">
+                <p class="text-[10px] text-slate-400 font-bold">累计获取</p>
+                <p class="text-lg font-black text-slate-800 mt-0.5">{{ userProfile.totalExp }}</p>
+              </div>
+              <div class="bg-emerald-50 rounded-2xl py-3 px-1">
+                <p class="text-[10px] text-emerald-700 font-bold">今日完成</p>
+                <p class="text-lg font-black text-emerald-600 mt-0.5">{{ todayCompletedCount }}/{{ habits.length }}</p>
               </div>
             </div>
-            <div class="divide-y divide-slate-50">
-              <button v-for="item in group.items" :key="item.id" @click="showLedgerAction(item)" class="w-full p-3 flex justify-between items-center active:bg-slate-50 text-left">
-                <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-lg shrink-0">{{ getCategoryEmoji(item.category) }}</div>
-                  <div class="min-w-0">
-                    <p class="text-sm font-bold text-slate-800 truncate">
-                      {{ item.category }}
-                      <span v-if="item.isRecurring" class="text-[10px] bg-amber-100 text-amber-800 px-1 rounded ml-1">固定</span>
-                    </p>
-                    <p class="text-xs text-slate-400 mt-0.5 truncate max-w-[210px]">{{ item.remark || '无备注' }}</p>
-                  </div>
-                </div>
-                <span class="text-sm font-black shrink-0" :class="item.type === 'income' ? 'text-emerald-600' : 'text-slate-900'">
-                  {{ item.type === 'income' ? '+' : '-' }}{{ formatMoney(item.amount) }}
-                </span>
-              </button>
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs text-slate-500 font-bold">今日进度</span>
+              <span class="text-xs text-amber-600 font-black">{{ todayProgressPercent }}%</span>
             </div>
-          </article>
-        </div>
-      </section>
-
-      <section v-show="activeTab === 'habit'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="bg-slate-950 text-white rounded-3xl p-4 mb-4 shadow-sm">
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="text-xs text-slate-400">当前可用 EXP</p>
-              <p class="text-3xl font-black text-amber-400 tracking-tight mt-1">{{ userProfile.currentExp }} <span class="text-xs text-white font-normal">pts</span></p>
-            </div>
-            <div class="text-right border-l border-slate-700 pl-4">
-              <p class="text-xs text-slate-400">累计总获取</p>
-              <p class="text-base font-black text-slate-100 mt-1">{{ userProfile.totalExp }} EXP</p>
+            <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full bg-amber-400 rounded-full transition-all duration-500" :style="{ width: todayProgressPercent + '%' }"></div>
             </div>
           </div>
         </div>
 
         <div class="flex justify-between items-center mb-3">
-          <h2 class="text-base font-black text-slate-800">🎯 自律打卡目标</h2>
-          <button @click="openHabitModal(null)" class="text-xs bg-amber-400 text-slate-950 px-3 py-2 rounded-full font-black shadow-sm">＋ 新增目标</button>
+          <div>
+            <h2 class="text-base font-black text-slate-800 flex items-center gap-1.5">
+              <span class="icon-line text-amber-500" v-html="icon('target')"></span>
+              <span>自律打卡目标</span>
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">轻点打卡，长按可补签、编辑或删除</p>
+          </div>
         </div>
 
         <div class="flex-1 min-h-0 scroll-area">
           <div v-if="habits.length === 0" class="text-center py-16 text-slate-400 text-sm">
-            🏃‍♂️ 还没有设置自律目标，快添加一个吧
+            还没有设置自律目标，快添加一个吧
           </div>
 
-          <article v-else class="bg-white rounded-3xl shadow-sm border border-slate-100 divide-y divide-slate-100 overflow-hidden">
-            <div v-for="habit in habits" :key="habit.id" class="p-4">
-              <div class="flex justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-1.5 mb-1">
-                    <h3 class="font-black text-sm text-slate-800 truncate">{{ habit.name }}</h3>
-                    <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md shrink-0">{{ translateFreq(habit.frequencyType) }}</span>
-                  </div>
-                  <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
-                    <span>🔥 连击 <strong class="text-amber-600">{{ habit.currentStreak || 0 }}</strong> 天</span>
-                    <span>🏆 最高 {{ habit.maxStreak || 0 }} 天</span>
-                    <span class="text-emerald-600 font-bold">💎 +{{ habit.expReward }} EXP</span>
-                  </div>
-                </div>
-                <div class="flex items-start gap-1">
-                  <button @click="openHabitModal(habit)" class="p-1.5 text-slate-400 active:text-slate-700">✏️</button>
-                  <button @click="deleteHabitDirectly(habit.id)" class="p-1.5 text-red-400 active:text-red-600">🗑️</button>
-                </div>
-              </div>
-
-              <div v-if="habit.frequencyType === 'weekly'" class="mt-3">
-                <div class="flex justify-between text-[11px] text-slate-500 mb-1">
-                  <span>本周累计 {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
-                  <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">本周已达成</span>
-                </div>
-                <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
-                </div>
-              </div>
-
-              <div class="mt-3 flex justify-end gap-2">
-                <template v-if="isHabitDoneToday(habit.id)">
-                  <span class="text-xs font-black text-emerald-600 bg-emerald-50 px-2.5 py-2 rounded-xl">✅ 今日已打卡</span>
-                  <button @click="undoCheckIn(habit.id)" class="text-xs font-bold text-red-500 bg-red-50 px-2.5 py-2 rounded-xl">撤销</button>
-                </template>
-                <template v-else>
-                  <button @click="triggerCheckIn(habit.id, false)" class="bg-amber-400 text-slate-950 text-xs font-black px-4 py-2 rounded-xl shadow-sm active:scale-95">打卡</button>
-                  <button @click="openRetroactiveModal(habit.id)" class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-xl">补签</button>
-                </template>
-              </div>
+          <div v-else>
+            <div v-if="isAllDoneToday" class="mb-4 bg-gradient-to-r from-emerald-50 to-amber-50 border border-emerald-100 rounded-3xl p-4">
+              <p class="text-sm font-black text-emerald-700 flex items-center gap-1.5">
+                <span class="icon-line" v-html="icon('checkCircle')"></span>
+                <span>今天目标全部完成</span>
+              </p>
+              <p class="text-xs text-slate-500 mt-1">状态不错，奖励自己一下也可以。</p>
             </div>
-          </article>
+
+            <div v-if="pendingHabits.length > 0" class="mb-4">
+              <h3 class="text-xs font-black text-slate-400 mb-2 px-1">待打卡 ({{ pendingHabits.length }})</h3>
+              <transition-group name="habit" tag="div" class="space-y-2 relative">
+                <article
+                  v-for="habit in pendingHabits"
+                  :key="habit.id"
+                  @click="toggleHabitToday(habit.id)"
+                  @touchstart="startHabitLongPress(habit)"
+                  @touchmove="cancelHabitLongPress"
+                  @touchend="cancelHabitLongPress"
+                  @mousedown="startHabitLongPress(habit)"
+                  @mouseup="cancelHabitLongPress"
+                  @mouseleave="cancelHabitLongPress"
+                  @contextmenu.prevent="showHabitAction(habit)"
+                  class="soft-card rounded-3xl p-4 active:scale-[0.99] transition-all select-none"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5 mb-1">
+                        <h3 class="font-black text-sm truncate text-slate-800">{{ habit.name }}</h3>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 bg-indigo-50 text-indigo-600">{{ translateFreq(habit.frequencyType) }}</span>
+                      </div>
+                      <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+                        <span class="font-bold text-orange-500">连击 {{ habit.currentStreak || 0 }} 天</span>
+                        <span class="text-slate-400">最高 {{ habit.maxStreak || 0 }} 天</span>
+                        <span class="font-bold text-emerald-600">+{{ habit.expReward }} EXP</span>
+                      </div>
+                      <div class="mt-2 flex gap-1">
+                        <span v-for="n in 7" :key="n" class="w-2 h-2 rounded-full" :class="n <= Math.min(habit.currentStreak || 0, 7) ? 'bg-amber-400' : 'bg-slate-100'"></span>
+                      </div>
+                    </div>
+                    <div class="shrink-0 bg-amber-400 text-slate-950 text-xs font-black px-4 py-2.5 rounded-full shadow-sm">
+                      打卡
+                    </div>
+                  </div>
+
+                  <div v-if="habit.frequencyType === 'weekly'" class="mt-3">
+                    <div class="flex justify-between text-[11px] text-slate-500 mb-1">
+                      <span>本周累计 {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
+                      <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">本周已达成</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
+                    </div>
+                  </div>
+                </article>
+              </transition-group>
+            </div>
+
+            <div v-if="doneHabits.length > 0">
+              <h3 class="text-xs font-black text-slate-400 mb-2 px-1">已完成 ({{ doneHabits.length }})</h3>
+              <transition-group name="habit" tag="div" class="space-y-2 relative">
+                <article
+                  v-for="habit in doneHabits"
+                  :key="habit.id"
+                  @click="toggleHabitToday(habit.id)"
+                  @touchstart="startHabitLongPress(habit)"
+                  @touchmove="cancelHabitLongPress"
+                  @touchend="cancelHabitLongPress"
+                  @mousedown="startHabitLongPress(habit)"
+                  @mouseup="cancelHabitLongPress"
+                  @mouseleave="cancelHabitLongPress"
+                  @contextmenu.prevent="showHabitAction(habit)"
+                  class="rounded-3xl border p-4 active:scale-[0.99] transition-all select-none bg-white/70 border-emerald-100"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-1.5 mb-1">
+                        <h3 class="font-black text-sm truncate text-slate-500">{{ habit.name }}</h3>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 bg-emerald-50 text-emerald-600">{{ translateFreq(habit.frequencyType) }}</span>
+                      </div>
+                      <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
+                        <span>连击 {{ habit.currentStreak || 0 }} 天</span>
+                        <span>最高 {{ habit.maxStreak || 0 }} 天</span>
+                        <span>+{{ habit.expReward }} EXP</span>
+                      </div>
+                    </div>
+                    <div class="shrink-0 bg-emerald-50 text-emerald-600 text-xs font-black px-3 py-2.5 rounded-full border border-emerald-100">
+                      已完成 ✓
+                    </div>
+                  </div>
+
+                  <div v-if="habit.frequencyType === 'weekly'" class="mt-3">
+                    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                      <span>本周累计 {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
+                      <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">本周已达成</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+                      <div class="h-full bg-emerald-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
+                    </div>
+                  </div>
+                </article>
+              </transition-group>
+            </div>
+          </div>
+
+          <div class="scroll-end-spacer"></div>
         </div>
       </section>
 
       <section v-show="activeTab === 'store'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="bg-amber-400 text-slate-950 rounded-3xl p-4 mb-4 flex justify-between items-center shadow-sm">
+        <div class="soft-card rounded-3xl p-4 mb-4 flex justify-between items-center">
           <div>
-            <p class="text-xs text-amber-900 font-bold">小金库可用经验值</p>
-            <p class="text-3xl font-black tracking-tight mt-1">{{ userProfile.currentExp }} <span class="text-xs font-normal">EXP</span></p>
+            <p class="text-xs text-slate-400 font-bold">奖励商店</p>
+            <p class="text-3xl font-black tracking-tight mt-1 text-amber-500">{{ userProfile.currentExp }} <span class="text-xs text-slate-400 font-normal">EXP</span></p>
           </div>
-          <button @click="openStoreModal(null)" class="bg-slate-950 text-white text-xs font-black px-3 py-2 rounded-full shadow-sm">＋ 上架心愿</button>
+          <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-xs font-black px-3 py-2 rounded-full shadow-sm">＋ 上架心愿</button>
         </div>
 
-        <h2 class="text-base font-black text-slate-800 mb-3">🛒 欲望杂货铺</h2>
+        <h2 class="text-base font-black text-slate-800 mb-3 flex items-center gap-1.5">
+          <span class="icon-line text-amber-500" v-html="icon('gift')"></span>
+          <span>欲望杂货铺</span>
+        </h2>
         <div class="grid grid-cols-2 gap-3 scroll-area mb-4 shrink-0 max-h-[42vh]">
-          <article v-for="item in storeItems" :key="item.id" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between relative min-h-[132px]" :class="item.stock === 0 ? 'opacity-50 grayscale' : ''">
+          <article v-for="item in storeItems" :key="item.id" class="soft-card p-3 rounded-3xl flex flex-col justify-between relative min-h-[132px]" :class="item.stock === 0 ? 'opacity-50 grayscale' : ''">
             <div class="absolute top-2 right-2 flex gap-1.5">
-              <button @click="openStoreModal(item)" class="text-xs bg-slate-100 p-1 rounded-md">✏️</button>
-              <button @click="deleteStoreItem(item.id)" class="text-xs bg-red-50 p-1 rounded-md">🗑️</button>
+              <button @click="openStoreModal(item)" class="text-xs bg-slate-100 p-1 rounded-md text-slate-500"><span class="icon-line" v-html="icon('edit')"></span></button>
+              <button @click="deleteStoreItem(item.id)" class="text-xs bg-red-50 p-1 rounded-md text-red-400"><span class="icon-line" v-html="icon('trash')"></span></button>
             </div>
             <div class="pt-5 pr-10">
               <h3 class="font-black text-sm text-slate-800 line-clamp-2 mb-1">{{ item.name }}</h3>
@@ -233,13 +279,16 @@
           </article>
         </div>
 
-        <div class="bg-white rounded-2xl p-3 border border-slate-100 flex-1 flex flex-col min-h-0">
-          <h3 class="text-xs font-black text-slate-400 mb-2">📜 历史心愿兑换日志</h3>
+        <div class="soft-card rounded-3xl p-3 flex-1 flex flex-col min-h-0">
+          <h3 class="text-xs font-black text-slate-400 mb-2 flex items-center gap-1.5">
+            <span class="icon-line" v-html="icon('list')"></span>
+            <span>历史心愿兑换日志</span>
+          </h3>
           <div class="flex-1 min-h-0 scroll-area text-xs space-y-2 text-slate-500">
             <div v-if="rewardHistory.length === 0" class="text-center py-8 text-slate-300">暂无兑换记录</div>
             <div v-for="log in rewardHistory" :key="log.id" class="border-b border-slate-50 pb-2">
               <div class="flex justify-between items-center gap-2">
-                <span class="truncate">🎉 兑换 <strong>{{ log.rewardName }}</strong></span>
+                <span class="truncate">兑换 <strong>{{ log.rewardName }}</strong></span>
                 <div class="flex items-center gap-2 shrink-0">
                   <span class="text-red-500 font-black">-{{ log.costExp }} EXP</span>
                   <button @click="deleteRewardLog(log.id)" class="text-[10px] text-red-400 bg-red-50 px-1.5 py-1 rounded-lg active:bg-red-100">删除</button>
@@ -251,165 +300,102 @@
         </div>
       </section>
 
-      <section v-show="activeTab === 'chart'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="bg-slate-200 p-1 rounded-2xl flex justify-between mb-3">
-          <button v-for="t in ['week', 'month', 'year']" :key="t" @click="setChartPeriod(t)" class="flex-1 text-center text-xs font-black py-2 rounded-xl transition-all" :class="chartPeriod === t ? 'bg-amber-400 text-slate-950 shadow-sm' : 'text-slate-500'">
-            {{ t === 'week' ? '周' : t === 'month' ? '月' : '年' }}
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between mb-3 bg-white rounded-2xl px-3 py-2 border border-slate-100">
-          <button @click="shiftChartPeriod(-1)" class="text-xs font-black text-slate-500 active:text-amber-600 px-2">◀ 上一{{ chartPeriod === 'week' ? '周' : chartPeriod === 'month' ? '月' : '年' }}</button>
-          <span class="text-xs font-black text-slate-800">{{ chartPeriodLabel }}</span>
-          <button @click="shiftChartPeriod(1)" class="text-xs font-black text-slate-500 active:text-amber-600 px-2">下一{{ chartPeriod === 'week' ? '周' : chartPeriod === 'month' ? '月' : '年' }} ▶</button>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 mb-4 text-center">
-          <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
-            <p class="text-[11px] text-emerald-700 font-bold">周期总收入</p>
-            <p class="text-base font-black text-emerald-600 truncate chart-num">+{{ formatMoney(periodSummary.income) }}</p>
-          </div>
-          <div class="bg-red-50 border border-red-100 rounded-2xl p-3">
-            <p class="text-[11px] text-red-700 font-bold">周期总支出</p>
-            <p class="text-base font-black text-red-500 truncate chart-num">-{{ formatMoney(periodSummary.expense) }}</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-3xl p-4 border border-slate-100 flex flex-col items-center justify-center min-h-[200px] mb-4 shadow-sm">
-          <div v-show="chartData.length > 0" class="relative w-44 h-44">
-            <canvas id="customCanvasChart" width="176" height="176" class="w-full h-full"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <p class="text-[10px] text-slate-400">总支出</p>
-              <p class="text-xs font-black text-slate-800 truncate max-w-[90px] text-center">{{ formatMoney(periodSummary.expense) }}</p>
-            </div>
-          </div>
-          <div v-if="chartData.length === 0" class="text-center py-12 text-slate-400 text-sm">
-            👻 该周期内没有任何支出数据
-          </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-3 border border-slate-100 flex-1 min-h-0 scroll-area">
-          <h3 class="text-xs font-black text-slate-400 mb-3">📊 支出结构分类占比</h3>
-          <div class="space-y-3">
-            <div v-if="chartData.length === 0" class="text-center py-8 text-slate-300 text-xs">暂无结构数据</div>
-            <div v-for="item in chartData" :key="item.category" class="flex items-center justify-between text-xs">
-              <div class="flex items-center gap-2 flex-1 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: item.color }"></span>
-                <span class="font-bold text-slate-700 w-16 truncate">{{ item.category }}</span>
-                <div class="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden mx-2">
-                  <div class="h-full rounded-full" :style="{ backgroundColor: item.color, width: item.percentage + '%' }"></div>
-                </div>
-              </div>
-              <div class="text-right pl-2 shrink-0">
-                <span class="text-slate-900 font-black font-mono">{{ item.percentage }}%</span>
-                <span class="text-slate-400 block text-[10px]">{{ formatMoney(item.amount) }}元</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur border-t border-slate-200 h-14 shadow-xl flex justify-around items-center z-40 nav-bottom">
-      <button @click="activeTab = 'detail'" class="flex flex-col items-center justify-center w-14 h-full" :class="activeTab === 'detail' ? 'text-amber-500' : 'text-slate-400'"><span class="text-xl">📋</span><span class="text-[10px] font-bold mt-0.5">明细</span></button>
-      <button @click="activeTab = 'habit'" class="flex flex-col items-center justify-center w-14 h-full" :class="activeTab === 'habit' ? 'text-amber-500' : 'text-slate-400'"><span class="text-xl">🎯</span><span class="text-[10px] font-bold mt-0.5">打卡</span></button>
-      <button @click="activeTab = 'store'" class="flex flex-col items-center justify-center w-14 h-full" :class="activeTab === 'store' ? 'text-amber-500' : 'text-slate-400'"><span class="text-xl">🛒</span><span class="text-[10px] font-bold mt-0.5">商店</span></button>
-      <button @click="openChartTab" class="flex flex-col items-center justify-center w-14 h-full" :class="activeTab === 'chart' ? 'text-amber-500' : 'text-slate-400'"><span class="text-xl">📈</span><span class="text-[10px] font-bold mt-0.5">图表</span></button>
+    <nav class="fixed bottom-3 left-4 right-4 max-w-sm mx-auto bg-white/90 backdrop-blur rounded-full h-14 shadow-xl border border-slate-100 flex justify-around items-center z-40 nav-bottom p-1">
+      <button @click="activeTab = 'habit'" class="flex-1 h-full rounded-full flex items-center justify-center gap-1.5 text-xs font-black transition-all" :class="activeTab === 'habit' ? 'bg-amber-100 text-amber-700' : 'text-slate-400'"><span class="icon-line" v-html="icon('target')"></span><span>今日打卡</span></button>
+      <button @click="activeTab = 'store'" class="flex-1 h-full rounded-full flex items-center justify-center gap-1.5 text-xs font-black transition-all" :class="activeTab === 'store' ? 'bg-amber-100 text-amber-700' : 'text-slate-400'"><span class="icon-line" v-html="icon('gift')"></span><span>奖励商店</span></button>
     </nav>
 
-    <div v-if="modals.ledger" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('ledger')">
-      <div class="bg-white w-full rounded-t-3xl p-5 max-w-md sheet-enter">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-black text-base text-slate-800">{{ ledgerForm.id ? '✏️ 修改记账' : '📝 新增记账' }}</h3>
-          <button @click="openCategorySetting" class="text-xs text-amber-700 font-black bg-amber-50 px-2.5 py-1.5 rounded-lg">自定义分类</button>
-        </div>
-        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl mb-4">
-          <button @click="setLedgerType('expense')" class="py-2 text-xs font-black rounded-xl" :class="ledgerForm.type === 'expense' ? 'bg-red-500 text-white shadow-sm' : 'text-slate-500'">支出</button>
-          <button @click="setLedgerType('income')" class="py-2 text-xs font-black rounded-xl" :class="ledgerForm.type === 'income' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500'">收入</button>
-        </div>
-        <div class="space-y-3 text-xs">
-          <label class="block">
-            <span class="block text-slate-500 mb-1">金额（元）</span>
-            <input type="number" min="0" step="0.01" v-model.number="ledgerForm.amount" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm font-black text-slate-900 focus:outline-none focus:border-amber-400" />
-          </label>
-          <label class="block">
-            <span class="block text-slate-500 mb-1">选择分类</span>
-            <select v-model="ledgerForm.category" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-amber-400">
-              <option v-for="cat in filteredCategories" :key="cat.name" :value="cat.name">{{ cat.emoji }} {{ cat.name }}</option>
-            </select>
-          </label>
-          <label class="block">
-            <span class="block text-slate-500 mb-1">物品描述 / 备注</span>
-            <input type="text" v-model.trim="ledgerForm.remark" placeholder="比如：买了一杯香草拿铁" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 focus:outline-none focus:border-amber-400" />
-          </label>
-          <div class="grid grid-cols-2 gap-3">
-            <label class="block">
-              <span class="block text-slate-500 mb-1">发生日期</span>
-              <input type="date" v-model="ledgerForm.recordDate" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 focus:outline-none focus:border-amber-400" />
-            </label>
-            <label class="flex items-center pt-5 pl-1">
-              <input type="checkbox" v-model="ledgerForm.isRecurring" class="w-4 h-4 accent-amber-400" />
-              <span class="ml-1.5 text-slate-600 font-bold">月固定项</span>
-            </label>
-          </div>
-        </div>
-        <div class="mt-6 flex gap-3">
-          <button @click="closeModal('ledger')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black text-xs">取消</button>
-          <button @click="saveLedger" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black text-xs shadow-sm">确认保存</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="modals.ledgerAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('ledgerAction')">
+    <div v-if="modals.habitAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habitAction')">
       <div class="bg-white w-full rounded-t-3xl p-4 max-w-md space-y-2 sheet-enter">
-        <div class="text-center text-xs text-slate-400 border-b border-slate-50 pb-2">📋 账单细项管理</div>
-        <button @click="editLedgerFromAction" class="w-full text-center py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl">✏️ 编辑</button>
-        <button @click="deleteLedgerFromAction" class="w-full text-center py-3 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl">🗑️ 删除</button>
-        <button @click="closeModal('ledgerAction')" class="w-full text-center py-3 text-sm font-bold text-slate-400 active:bg-slate-50 rounded-2xl">取消关闭</button>
+        <div class="text-center text-xs text-slate-400 border-b border-slate-50 pb-2">{{ selectedHabitItem ? selectedHabitItem.name : '打卡项管理' }}</div>
+        <button @click="retroHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('calendar')"></span><span>补签</span></button>
+        <button @click="editHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('edit')"></span><span>编辑</span></button>
+        <button @click="deleteHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl"><span class="icon-line" v-html="icon('trash')"></span><span>删除</span></button>
+        <button @click="closeModal('habitAction')" class="w-full text-center py-3 text-sm font-bold text-slate-400 active:bg-slate-50 rounded-2xl">取消关闭</button>
       </div>
     </div>
 
-    <div v-if="modals.category" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('category')">
-      <div class="bg-white w-full max-w-sm rounded-3xl p-4 text-xs">
+    <div v-if="modals.habitCalendar" class="fixed inset-0 bg-slate-50 z-[70] max-w-md mx-auto flex flex-col p-4 fade-enter">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <p class="text-xs text-slate-400 font-bold">最近 5 年</p>
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>打卡记录</span></h2>
+        </div>
+        <button @click="closeModal('habitCalendar')" class="bg-white text-slate-500 px-3 py-2 rounded-full text-xs font-black shadow-sm border border-slate-100">关闭</button>
+      </div>
+
+      <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-black text-slate-500 bg-slate-50 px-3 py-2 rounded-full active:text-amber-600">◀ 上月</button>
+          <span class="text-base font-black text-slate-800">{{ habitCalendarMonthLabel }}</span>
+          <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-black text-slate-500 bg-slate-50 px-3 py-2 rounded-full active:text-amber-600">下月 ▶</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 text-center mb-4">
+          <div class="bg-slate-50 rounded-2xl py-2">
+            <p class="text-[10px] text-slate-400 font-bold">打卡天数</p>
+            <p class="text-sm font-black text-slate-800">{{ habitMonthStats.checkedDays }} 天</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl py-2">
+            <p class="text-[10px] text-slate-400 font-bold">累计完成</p>
+            <p class="text-sm font-black text-emerald-600">{{ habitMonthStats.totalChecks }} 次</p>
+          </div>
+          <div class="bg-slate-50 rounded-2xl py-2">
+            <p class="text-[10px] text-slate-400 font-bold">月完成率</p>
+            <p class="text-sm font-black text-amber-600">{{ habitMonthStats.completionRate }}%</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
+          <span v-for="w in ['一','二','三','四','五','六','日']" :key="w" class="text-[10px] font-black text-slate-400">{{ w }}</span>
+        </div>
+        <div class="grid grid-cols-7 gap-1.5">
+          <button
+            v-for="day in habitCalendarDays"
+            :key="day.key"
+            @click="day.date && selectHabitCalendarDate(day.date)"
+            class="min-h-[54px] rounded-xl p-1.5 text-center border transition-colors"
+            :class="[
+              day.date ? 'bg-slate-50 border-slate-50 active:bg-amber-50' : 'bg-transparent border-transparent',
+              day.date === selectedHabitDate ? 'ring-2 ring-amber-400 bg-amber-50' : '',
+              day.date === todayStr ? 'text-amber-600' : 'text-slate-600'
+            ]"
+          >
+            <template v-if="day.date">
+              <p class="text-xs font-black">{{ day.day }}</p>
+              <div class="mt-1 flex flex-wrap justify-center gap-0.5">
+                <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span v-if="day.items.length > 4" class="text-[8px] text-emerald-500 leading-none">+</span>
+              </div>
+            </template>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm flex-1 min-h-0 flex flex-col">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="font-black text-sm text-slate-800">⚙️ 配置账目分类</h3>
-          <button @click="closeModal('category')" class="text-slate-400 font-black">关闭</button>
+          <h3 class="text-sm font-black text-slate-800">{{ selectedHabitDate }} 打卡记录</h3>
+          <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} 项</span>
         </div>
-        <div class="space-y-2 max-h-52 scroll-area mb-4 border-b border-slate-100 pb-3">
-          <div v-for="cat in categories" :key="cat.name" class="flex justify-between items-center bg-slate-50 p-2 rounded-xl">
-            <span>{{ cat.emoji }} {{ cat.name }} · {{ cat.type === 'expense' ? '支出' : '收入' }}</span>
-            <button v-if="!cat.isPreset" @click="deleteCategory(cat.name)" class="text-red-500 font-black px-1">删除</button>
+        <div class="flex-1 min-h-0 scroll-area space-y-2">
+          <div v-if="selectedHabitDateItems.length === 0" class="text-center py-10 text-slate-300 text-sm">这一天没有打卡记录</div>
+          <div v-for="item in selectedHabitDateItems" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center">
+            <div class="min-w-0">
+              <p class="text-sm font-black text-slate-800 truncate">{{ item.name }}</p>
+              <p class="text-[11px] text-slate-400">{{ item.isRetro ? '补签记录' : '正常打卡' }}</p>
+            </div>
+            <span class="text-xs font-black text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
           </div>
-        </div>
-        <div class="space-y-2">
-          <p class="font-black text-slate-600">新增分类</p>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" placeholder="图标" v-model.trim="newCategory.emoji" class="bg-slate-50 border border-slate-200 p-2 rounded-xl text-center" />
-            <input type="text" placeholder="名称" v-model.trim="newCategory.name" class="col-span-2 bg-slate-50 border border-slate-200 p-2 rounded-xl" />
-          </div>
-          <select v-model="newCategory.type" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl">
-            <option value="expense">支出属性</option>
-            <option value="income">收入属性</option>
-          </select>
-          <button @click="addCategory" class="w-full bg-slate-950 text-white font-black py-2.5 rounded-xl">确认添加</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="modals.budget" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('budget')">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-4 text-xs">
-        <h3 class="font-black text-sm text-slate-800 mb-2">💸 修改月度预算</h3>
-        <input type="number" min="0" v-model.number="tempBudget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-base font-black text-center text-slate-900 focus:outline-none mb-4" />
-        <div class="flex gap-2">
-          <button @click="closeModal('budget')" class="flex-1 bg-slate-100 text-slate-500 py-2.5 rounded-xl font-black">取消</button>
-          <button @click="saveBudget" class="flex-1 bg-amber-400 text-slate-950 py-2.5 rounded-xl font-black shadow-sm">保存</button>
+          <div class="scroll-end-spacer"></div>
         </div>
       </div>
     </div>
 
     <div v-if="modals.habit" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habit')">
       <div class="bg-white w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
-        <h3 class="font-black text-base text-slate-800 mb-4">{{ habitForm.id ? '✏️ 修改自律目标' : '🏃‍♂️ 新增自律目标' }}</h3>
+        <h3 class="font-black text-base text-slate-800 mb-4">{{ habitForm.id ? '修改自律目标' : '新增自律目标' }}</h3>
         <div class="space-y-3">
           <label class="block">
             <span class="block text-slate-500 mb-1">目标名称</span>
@@ -442,7 +428,7 @@
 
     <div v-if="modals.retroactive" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('retroactive')">
       <div class="bg-white w-full max-w-xs rounded-3xl p-4 text-xs">
-        <h3 class="font-black text-sm text-slate-800 mb-2">📅 历史补签</h3>
+        <h3 class="font-black text-sm text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>历史补签</span></h3>
         <p class="text-slate-400 mb-3">可补签今天及过去日期；补签后会重新计算连续天数。</p>
         <input type="date" v-model="retroDate" :max="todayStr" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-center mb-4 text-sm font-black focus:outline-none" />
         <div class="flex gap-2">
@@ -454,7 +440,7 @@
 
     <div v-if="modals.store" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('store')">
       <div class="bg-white w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
-        <h3 class="font-black text-base text-slate-800 mb-4">{{ storeForm.id ? '✏️ 修改心愿属性' : '🎁 上架心愿商品' }}</h3>
+        <h3 class="font-black text-base text-slate-800 mb-4">{{ storeForm.id ? '修改心愿属性' : '上架心愿商品' }}</h3>
         <div class="space-y-3">
           <label class="block">
             <span class="block text-slate-500 mb-1">心愿商品名称</span>
@@ -499,9 +485,6 @@
       setup() {
         const STORAGE = {
           profile: 'my_checkin_profile_v3',
-          budget: 'my_checkin_budget_v3',
-          categories: 'my_checkin_categories_v3',
-          ledgers: 'my_checkin_ledgers_v3',
           habits: 'my_checkin_habits_v3',
           checkIns: 'my_checkin_checkins_v3',
           store: 'my_checkin_store_v3',
@@ -512,44 +495,28 @@
         const DB_STORE = 'app_data';
         let dbPromise = null;
 
-        const defaultCategories = [
-          { emoji: '🍔', name: '餐饮美食', type: 'expense', isPreset: true },
-          { emoji: '🛍️', name: '日常购物', type: 'expense', isPreset: true },
-          { emoji: '🚗', name: '交通打车', type: 'expense', isPreset: true },
-          { emoji: '🎮', name: '休闲娱乐', type: 'expense', isPreset: true },
-          { emoji: '🏠', name: '房租水电', type: 'expense', isPreset: true },
-          { emoji: '💰', name: '固定工资', type: 'income', isPreset: true },
-          { emoji: '💻', name: '兼职外快', type: 'income', isPreset: true }
-        ];
-
-        const activeTab = ref('detail');
-        const chartPeriod = ref('month');
-        const chartOffset = ref(0);
+        const activeTab = ref('habit');
         const userProfile = ref({ currentExp: 0, totalExp: 0 });
-        const monthlyBudget = ref(2000);
-        const categories = ref(structuredCloneSafe(defaultCategories));
-        const ledgers = ref([]);
         const habits = ref([]);
         const checkIns = ref([]);
         const storeItems = ref([
-          { id: 's1', name: '🥤 喝一杯冰镇奶茶', expCost: 20, stock: -1 },
-          { id: 's2', name: '🎮 畅玩两小时游戏', expCost: 35, stock: 5 },
-          { id: 's3', name: '🛌 睡一个懒觉', expCost: 15, stock: -1 }
+          { id: 's1', name: '喝一杯冰镇奶茶', expCost: 20, stock: -1 },
+          { id: 's2', name: '畅玩两小时游戏', expCost: 35, stock: 5 },
+          { id: 's3', name: '睡一个懒觉', expCost: 15, stock: -1 }
         ]);
         const rewardHistory = ref([]);
 
-        const modals = ref({ ledger: false, ledgerAction: false, category: false, budget: false, habit: false, retroactive: false, store: false });
-        const ledgerForm = ref(getBlankLedger());
-        const newCategory = ref({ emoji: '✨', name: '', type: 'expense' });
-        const tempBudget = ref(2000);
+        const modals = ref({ habit: false, habitAction: false, habitCalendar: false, retroactive: false, store: false });
         const habitForm = ref(getBlankHabit());
         const storeForm = ref(getBlankStoreItem());
         const activeRetroHabitId = ref(null);
         const retroDate = ref('');
-        const selectedLedgerItem = ref(null);
-        const periodSummary = ref({ income: 0, expense: 0 });
-        const chartData = ref([]);
+        const selectedHabitItem = ref(null);
+        const habitCalendarMonth = ref(todayLocalDate().slice(0, 7));
+        const selectedHabitDate = ref(todayLocalDate());
         const dialog = ref({ visible: false, type: 'alert', title: '提示', message: '', resolve: null });
+        let habitPressTimer = null;
+        let suppressHabitTap = false;
 
         function structuredCloneSafe(data) {
           if (data === undefined || data === null) return data;
@@ -584,16 +551,25 @@
           return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         }
 
-        function getBlankLedger() {
-          return { id: null, type: 'expense', amount: '', category: '餐饮美食', remark: '', recordDate: todayLocalDate(), isRecurring: false, recurringRoot: null };
-        }
-
         function getBlankHabit() {
           return { id: null, name: '', frequencyType: 'daily', weeklyTarget: 3, expReward: 10, currentStreak: 0, maxStreak: 0 };
         }
 
         function getBlankStoreItem() {
           return { id: null, name: '', expCost: 15, stock: -1 };
+        }
+
+        function icon(name) {
+          const icons = {
+            target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>',
+            gift: '<svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"></path><path d="M2 7h20v5H2z"></path><path d="M12 7v14"></path><path d="M12 7H8.5A2.5 2.5 0 1 1 11 4.5L12 7z"></path><path d="M12 7h3.5A2.5 2.5 0 1 0 13 4.5L12 7z"></path></svg>',
+            calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>',
+            checkCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>',
+            edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"></path></svg>',
+            trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 15H6L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>',
+            list: '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>'
+          };
+          return icons[name] || '';
         }
 
         function openDatabase() {
@@ -662,15 +638,11 @@
         async function syncStorageData() {
           await Promise.all([
             writeDBValue(STORAGE.profile, userProfile.value),
-            writeDBValue(STORAGE.budget, monthlyBudget.value),
-            writeDBValue(STORAGE.categories, categories.value),
-            writeDBValue(STORAGE.ledgers, ledgers.value),
             writeDBValue(STORAGE.habits, habits.value),
             writeDBValue(STORAGE.checkIns, checkIns.value),
             writeDBValue(STORAGE.store, storeItems.value),
             writeDBValue(STORAGE.rewardHistory, rewardHistory.value)
           ]);
-          if (activeTab.value === 'chart') renderCustomChart();
         }
 
         async function migrateOldDataIfNeeded() {
@@ -684,18 +656,12 @@
           try {
             if (hasV3LocalData) {
               userProfile.value = readLocalJSON(STORAGE.profile, { currentExp: 0, totalExp: 0 });
-              monthlyBudget.value = Number(readLocalJSON(STORAGE.budget, 2000)) || 0;
-              categories.value = readLocalJSON(STORAGE.categories, defaultCategories);
-              ledgers.value = readLocalJSON(STORAGE.ledgers, []);
               habits.value = readLocalJSON(STORAGE.habits, []);
               checkIns.value = readLocalJSON(STORAGE.checkIns, []);
               storeItems.value = readLocalJSON(STORAGE.store, storeItems.value);
               rewardHistory.value = readLocalJSON(STORAGE.rewardHistory, []);
             } else {
               userProfile.value = readLocalJSON('my_checkin_profile_v2', { currentExp: 0, totalExp: 0 });
-              monthlyBudget.value = Number(localStorage.getItem('my_checkin_budget')) || 2000;
-              categories.value = readLocalJSON('my_checkin_categories', defaultCategories);
-              ledgers.value = readLocalJSON('my_checkin_ledgers', []);
               habits.value = readLocalJSON('my_checkin_habits', []);
               checkIns.value = readLocalJSON('my_checkin_checkins', []);
               storeItems.value = readLocalJSON('my_checkin_store', storeItems.value);
@@ -711,9 +677,6 @@
         async function loadLocalStorage() {
           await migrateOldDataIfNeeded();
           userProfile.value = await readDBValue(STORAGE.profile, { currentExp: 0, totalExp: 0 });
-          monthlyBudget.value = Number(await readDBValue(STORAGE.budget, 2000)) || 0;
-          categories.value = await readDBValue(STORAGE.categories, defaultCategories);
-          ledgers.value = await readDBValue(STORAGE.ledgers, []);
           habits.value = await readDBValue(STORAGE.habits, []);
           checkIns.value = await readDBValue(STORAGE.checkIns, []);
           storeItems.value = await readDBValue(STORAGE.store, storeItems.value);
@@ -724,14 +687,6 @@
         function normalizeData() {
           userProfile.value.currentExp = Math.max(0, Number(userProfile.value.currentExp) || 0);
           userProfile.value.totalExp = Math.max(0, Number(userProfile.value.totalExp) || 0);
-          ledgers.value = ledgers.value
-            .filter(item => item && item.recordDate && item.type && item.category)
-            .map(item => ({
-              ...item,
-              amount: roundMoney(item.amount),
-              isRecurring: Boolean(item.isRecurring),
-              recurringRoot: item.recurringRoot || (item.isRecurring ? item.id : null)
-            }));
           habits.value = habits.value.map(habit => ({
             ...getBlankHabit(),
             ...habit,
@@ -742,56 +697,13 @@
           }));
           checkIns.value = checkIns.value.filter(item => item && item.habitId && item.date);
           storeItems.value = storeItems.value.map(item => ({ ...item, expCost: Math.max(1, Number(item.expCost) || 1), stock: Number(item.stock) }));
-          categories.value = categories.value.length ? categories.value : structuredCloneSafe(defaultCategories);
           habits.value.forEach(habit => recalculateHabitStreak(habit.id));
         }
 
         const todayStr = computed(() => todayLocalDate());
-        const filteredCategories = computed(() => categories.value.filter(cat => cat.type === ledgerForm.value.type));
-        const currentMonthIncome = computed(() => monthlyTotal('income'));
-        const currentMonthExpense = computed(() => monthlyTotal('expense'));
-        const currentMonthBalance = computed(() => currentMonthIncome.value - currentMonthExpense.value);
-        const budgetUsagePercentage = computed(() => monthlyBudget.value > 0 ? (currentMonthExpense.value / monthlyBudget.value) * 100 : 0);
-
-        const groupedLedgers = computed(() => {
-          const currentYM = todayStr.value.slice(0, 7);
-          const groups = {};
-          ledgers.value
-            .filter(item => item.recordDate && item.recordDate.slice(0, 7) === currentYM)
-            .sort((a, b) => b.recordDate.localeCompare(a.recordDate) || b.id.localeCompare(a.id))
-            .forEach(item => {
-              if (!groups[item.recordDate]) groups[item.recordDate] = { date: item.recordDate, items: [], income: 0, expense: 0 };
-              groups[item.recordDate].items.push(item);
-              groups[item.recordDate][item.type === 'income' ? 'income' : 'expense'] += Number(item.amount) || 0;
-            });
-          return Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
-        });
-
-        function monthlyTotal(type) {
-          const currentYM = todayStr.value.slice(0, 7);
-          return ledgers.value
-            .filter(item => item.type === type && item.recordDate && item.recordDate.slice(0, 7) === currentYM)
-            .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-        }
-
-        function roundMoney(value) {
-          return Math.round((Number(value) || 0) * 100) / 100;
-        }
 
         function clamp(value, min, max) {
           return Math.min(max, Math.max(min, value));
-        }
-
-        function formatMoney(value) {
-          const num = roundMoney(value);
-          if (!Number.isFinite(num)) return '0.00';
-          if (Math.abs(num) >= 1e15) return num.toExponential(2);
-          let str = num.toFixed(2);
-          if (str.length > 14) {
-            const exp = num.toExponential(2);
-            if (exp.length < str.length) str = exp;
-          }
-          return str;
         }
 
         function formatDateTime(timestamp) {
@@ -822,102 +734,6 @@
           if (resolver) resolver(result);
         }
 
-        function getCategoryEmoji(catName) {
-          return categories.value.find(c => c.name === catName)?.emoji || '📝';
-        }
-
-        function setLedgerType(type) {
-          ledgerForm.value.type = type;
-          ledgerForm.value.category = categories.value.find(cat => cat.type === type)?.name || '';
-        }
-
-        function openLedgerModal(item = null) {
-          if (item) {
-            ledgerForm.value = { ...item };
-          } else {
-            ledgerForm.value = getBlankLedger();
-            ledgerForm.value.category = categories.value.find(cat => cat.type === 'expense')?.name || '';
-          }
-          modals.value.ledger = true;
-        }
-
-        function saveLedger() {
-          const amount = roundMoney(ledgerForm.value.amount);
-          if (!amount || amount <= 0) return showAlert('请输入大于 0 的有效金额');
-          if (!ledgerForm.value.category) return showAlert('请选择一个账目分类');
-          if (!ledgerForm.value.recordDate) return showAlert('请选择账目发生日期');
-
-          const data = { ...ledgerForm.value, amount };
-          if (data.id) {
-            data.recurringRoot = data.isRecurring ? (data.recurringRoot || data.id) : null;
-            const index = ledgers.value.findIndex(item => item.id === data.id);
-            if (index !== -1) ledgers.value[index] = data;
-          } else {
-            data.id = getId('l');
-            data.recurringRoot = data.isRecurring ? data.id : null;
-            ledgers.value.push(data);
-          }
-          modals.value.ledger = false;
-          syncStorageData();
-        }
-
-        function showLedgerAction(item) {
-          selectedLedgerItem.value = item;
-          modals.value.ledgerAction = true;
-        }
-
-        function editLedgerFromAction() {
-          modals.value.ledgerAction = false;
-          openLedgerModal(selectedLedgerItem.value);
-        }
-
-        async function deleteLedgerFromAction() {
-          if (!selectedLedgerItem.value) return;
-          const ok = await showConfirm('确认删除本条流水账单记录吗？');
-          if (!ok) return;
-          ledgers.value = ledgers.value.filter(item => item.id !== selectedLedgerItem.value.id);
-          modals.value.ledgerAction = false;
-          selectedLedgerItem.value = null;
-          syncStorageData();
-        }
-
-        function openCategorySetting() {
-          modals.value.category = true;
-        }
-
-        function addCategory() {
-          const name = newCategory.value.name.trim();
-          const emoji = newCategory.value.emoji.trim() || '✨';
-          if (!name) return showAlert('分类名称不可为空');
-          if (categories.value.some(cat => cat.name === name)) return showAlert('该分类已存在');
-          categories.value.push({ emoji, name, type: newCategory.value.type, isPreset: false });
-          newCategory.value = { emoji: '✨', name: '', type: 'expense' };
-          syncStorageData();
-        }
-
-        async function deleteCategory(name) {
-          if (ledgers.value.some(item => item.category === name)) {
-            const ok = await showConfirm('该分类已有账单使用，删除后历史账单会显示默认图标，确认删除吗？');
-            if (!ok) return;
-          }
-          categories.value = categories.value.filter(cat => cat.name !== name);
-          if (ledgerForm.value.category === name) ledgerForm.value.category = filteredCategories.value[0]?.name || '';
-          syncStorageData();
-        }
-
-        function openBudgetModal() {
-          tempBudget.value = monthlyBudget.value;
-          modals.value.budget = true;
-        }
-
-        function saveBudget() {
-          const budget = roundMoney(tempBudget.value);
-          if (budget < 0) return showAlert('预算不能为负数');
-          monthlyBudget.value = budget;
-          modals.value.budget = false;
-          syncStorageData();
-        }
-
         function translateFreq(type) {
           return type === 'weekly' ? '每周累计' : '每日要求';
         }
@@ -925,6 +741,12 @@
         function isHabitDoneToday(habitId) {
           return checkIns.value.some(item => item.habitId === habitId && item.date === todayStr.value);
         }
+
+        const pendingHabits = computed(() => habits.value.filter(h => !isHabitDoneToday(h.id)));
+        const doneHabits = computed(() => habits.value.filter(h => isHabitDoneToday(h.id)));
+        const todayCompletedCount = computed(() => doneHabits.value.length);
+        const todayProgressPercent = computed(() => habits.value.length ? Math.round((todayCompletedCount.value / habits.value.length) * 100) : 0);
+        const isAllDoneToday = computed(() => habits.value.length > 0 && pendingHabits.value.length === 0);
 
         function getWeekRange(dateStr = todayStr.value) {
           const date = parseDate(dateStr);
@@ -943,6 +765,109 @@
             .map(item => item.date)).size;
           const target = clamp(Number(habit.weeklyTarget) || 3, 1, 7);
           return { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
+        }
+
+        function getHabitItemsByDate(dateStr) {
+          return checkIns.value
+            .filter(item => item.date === dateStr)
+            .map(item => {
+              const habit = habits.value.find(h => h.id === item.habitId);
+              return habit ? { id: habit.id, logId: item.id, name: habit.name, expGained: item.expGained, isRetro: item.isRetro } : null;
+            })
+            .filter(Boolean);
+        }
+
+        function monthDiffFromCurrent(ym) {
+          const now = parseDate(todayStr.value);
+          const [year, month] = ym.split('-').map(Number);
+          return (year - now.getFullYear()) * 12 + (month - 1 - now.getMonth());
+        }
+
+        function isHabitCalendarMonthAllowed(ym) {
+          const diff = monthDiffFromCurrent(ym);
+          return diff <= 0 && diff >= -60;
+        }
+
+        const habitCalendarMonthLabel = computed(() => {
+          const [year, month] = habitCalendarMonth.value.split('-').map(Number);
+          return `${year}年${month}月`;
+        });
+
+        const habitCalendarDays = computed(() => {
+          const days = [];
+          const [year, month] = habitCalendarMonth.value.split('-').map(Number);
+          const first = new Date(year, month - 1, 1);
+          const total = new Date(year, month, 0).getDate();
+          const leading = (first.getDay() + 6) % 7;
+          for (let i = 0; i < leading; i++) {
+            days.push({ key: `blank_${i}`, date: '', day: '', items: [] });
+          }
+          for (let day = 1; day <= total; day++) {
+            const d = new Date(year, month - 1, day);
+            const date = formatDate(d);
+            days.push({
+              key: date,
+              date,
+              day: String(day),
+              items: getHabitItemsByDate(date)
+            });
+          }
+          return days;
+        });
+
+        const selectedHabitDateItems = computed(() => getHabitItemsByDate(selectedHabitDate.value));
+        const habitMonthStats = computed(() => {
+          const [year, month] = habitCalendarMonth.value.split('-').map(Number);
+          const monthStart = `${habitCalendarMonth.value}-01`;
+          const totalDaysOfMonth = new Date(year, month, 0).getDate();
+          const currentYM = todayStr.value.slice(0, 7);
+          const effectiveDays = habitCalendarMonth.value === currentYM
+            ? Number(todayStr.value.slice(8, 10))
+            : totalDaysOfMonth;
+          const monthEnd = `${habitCalendarMonth.value}-${String(effectiveDays).padStart(2, '0')}`;
+          const logs = checkIns.value.filter(item => item.date >= monthStart && item.date <= monthEnd);
+          const checkedDays = new Set(logs.map(item => item.date)).size;
+          return {
+            checkedDays,
+            totalChecks: logs.length,
+            completionRate: effectiveDays > 0 ? Math.round((checkedDays / effectiveDays) * 100) : 0
+          };
+        });
+
+        function openHabitCalendar() {
+          habitCalendarMonth.value = todayStr.value.slice(0, 7);
+          selectedHabitDate.value = todayStr.value;
+          modals.value.habitCalendar = true;
+        }
+
+        function shiftHabitCalendarMonth(direction) {
+          const [year, month] = habitCalendarMonth.value.split('-').map(Number);
+          const target = new Date(year, month - 1 + direction, 1);
+          const nextYM = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}`;
+          if (!isHabitCalendarMonthAllowed(nextYM)) return;
+          habitCalendarMonth.value = nextYM;
+          const selectedMonth = selectedHabitDate.value.slice(0, 7);
+          if (selectedMonth !== nextYM) {
+            selectedHabitDate.value = `${nextYM}-01`;
+          }
+        }
+
+        function selectHabitCalendarDate(date) {
+          selectedHabitDate.value = date;
+        }
+
+        function vibrateOnCheckIn() {
+          try {
+            if (window.plus && plus.device && typeof plus.device.vibrate === 'function') {
+              plus.device.vibrate(120);
+              return;
+            }
+            if (navigator.vibrate) {
+              navigator.vibrate(120);
+            }
+          } catch (error) {
+            console.warn('震动调用失败。', error);
+          }
         }
 
         function openHabitModal(habit = null) {
@@ -976,6 +901,58 @@
           habits.value = habits.value.filter(item => item.id !== id);
           checkIns.value = checkIns.value.filter(item => item.habitId !== id);
           syncStorageData();
+        }
+
+        function showHabitAction(habit) {
+          cancelHabitLongPress();
+          selectedHabitItem.value = habit;
+          modals.value.habitAction = true;
+          suppressHabitTap = true;
+        }
+
+        function startHabitLongPress(habit) {
+          cancelHabitLongPress();
+          suppressHabitTap = false;
+          habitPressTimer = setTimeout(() => showHabitAction(habit), 550);
+        }
+
+        function cancelHabitLongPress() {
+          if (habitPressTimer) {
+            clearTimeout(habitPressTimer);
+            habitPressTimer = null;
+          }
+        }
+
+        function toggleHabitToday(habitId) {
+          if (suppressHabitTap) {
+            suppressHabitTap = false;
+            return;
+          }
+          if (isHabitDoneToday(habitId)) {
+            undoCheckIn(habitId);
+          } else {
+            triggerCheckIn(habitId, false);
+          }
+        }
+
+        function editHabitFromAction() {
+          if (!selectedHabitItem.value) return;
+          modals.value.habitAction = false;
+          openHabitModal(selectedHabitItem.value);
+        }
+
+        function retroHabitFromAction() {
+          if (!selectedHabitItem.value) return;
+          modals.value.habitAction = false;
+          openRetroactiveModal(selectedHabitItem.value.id);
+        }
+
+        async function deleteHabitFromAction() {
+          if (!selectedHabitItem.value) return;
+          const id = selectedHabitItem.value.id;
+          modals.value.habitAction = false;
+          await deleteHabitDirectly(id);
+          selectedHabitItem.value = null;
         }
 
         function recalculateHabitStreak(habitId) {
@@ -1026,11 +1003,12 @@
           let expGained = Number(habit.expReward) || 0;
           if (result.currentStreak > 0 && result.currentStreak % 7 === 0 && isDateInLatestRun(habitId, targetDate)) {
             expGained += 10;
-            showAlert(`🎉 连续 ${result.currentStreak} 天达成，额外奖励 10 EXP！`, '连击奖励');
+            showAlert(`连续 ${result.currentStreak} 天达成，额外奖励 10 EXP！`, '连击奖励');
           }
           checkIn.expGained = expGained;
           userProfile.value.currentExp += expGained;
           userProfile.value.totalExp += expGained;
+          vibrateOnCheckIn();
           syncStorageData();
         }
 
@@ -1119,139 +1097,6 @@
           syncStorageData();
         }
 
-        function setChartPeriod(period) {
-          chartPeriod.value = period;
-          chartOffset.value = 0;
-          renderCustomChart();
-        }
-
-        function shiftChartPeriod(direction) {
-          const maxOffset = chartPeriod.value === 'year' ? 5 : chartPeriod.value === 'month' ? 60 : 260;
-          const next = chartOffset.value + direction;
-          if (next < -maxOffset || next > 0) return;
-          chartOffset.value = next;
-          renderCustomChart();
-        }
-
-        const chartPeriodLabel = computed(() => {
-          const now = parseDate(todayStr.value);
-          const offset = chartOffset.value;
-          if (chartPeriod.value === 'week') {
-            const target = new Date(now);
-            target.setDate(target.getDate() + offset * 7);
-            const range = getWeekRange(formatDate(target));
-            return `${range.start} ~ ${range.end}`;
-          }
-          if (chartPeriod.value === 'month') {
-            const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-            return `${target.getFullYear()}年${target.getMonth() + 1}月`;
-          }
-          const year = now.getFullYear() + offset;
-          return `${year}年`;
-        });
-
-        function openChartTab() {
-          activeTab.value = 'chart';
-          renderCustomChart();
-        }
-
-        function calculatePeriodData() {
-          const now = parseDate(todayStr.value);
-          const offset = chartOffset.value;
-          let filterFn;
-          if (chartPeriod.value === 'week') {
-            const target = new Date(now);
-            target.setDate(target.getDate() + offset * 7);
-            const range = getWeekRange(formatDate(target));
-            filterFn = date => date >= range.start && date <= range.end;
-          } else if (chartPeriod.value === 'month') {
-            const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
-            const ym = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}`;
-            filterFn = date => date && date.slice(0, 7) === ym;
-          } else {
-            const year = String(now.getFullYear() + offset);
-            filterFn = date => date && date.slice(0, 4) === year;
-          }
-
-          const periodItems = ledgers.value.filter(item => filterFn(item.recordDate));
-          const expCategoryMap = {};
-          let income = 0;
-          let expense = 0;
-          periodItems.forEach(item => {
-            if (item.type === 'income') income += Number(item.amount) || 0;
-            if (item.type === 'expense') {
-              expense += Number(item.amount) || 0;
-              expCategoryMap[item.category] = (expCategoryMap[item.category] || 0) + Number(item.amount);
-            }
-          });
-          periodSummary.value = { income, expense };
-          const palette = ['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#8b5cf6', '#ec4899', '#64748b', '#14b8a6'];
-          chartData.value = Object.entries(expCategoryMap)
-            .map(([category, amount], index) => ({ category, amount, percentage: expense > 0 ? Math.round((amount / expense) * 100) : 0, color: palette[index % palette.length] }))
-            .sort((a, b) => b.amount - a.amount);
-        }
-
-        function renderCustomChart() {
-          calculatePeriodData();
-          nextTick(() => {
-            const canvas = document.getElementById('customCanvasChart');
-            if (!canvas || chartData.value.length === 0) return;
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const total = chartData.value.reduce((sum, item) => sum + item.amount, 0);
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = Math.min(centerX, centerY) - 8;
-            let startAngle = -Math.PI / 2;
-            chartData.value.forEach(slice => {
-              const sliceAngle = total > 0 ? (slice.amount / total) * Math.PI * 2 : 0;
-              ctx.beginPath();
-              ctx.moveTo(centerX, centerY);
-              ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
-              ctx.closePath();
-              ctx.fillStyle = slice.color;
-              ctx.fill();
-              startAngle += sliceAngle;
-            });
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius * 0.62, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-          });
-        }
-
-        function daysInMonth(year, month) {
-          return new Date(year, month, 0).getDate();
-        }
-
-        async function handleRecurringVerification() {
-          const currentYM = todayStr.value.slice(0, 7);
-          const processKey = `my_checkin_recurring_processed_${currentYM}`;
-          const hasProcessed = await readDBValue(processKey, false);
-          if (hasProcessed) return;
-          const [year, month] = currentYM.split('-').map(Number);
-          const roots = new Map();
-          ledgers.value
-            .filter(item => item.isRecurring && item.recordDate && item.recordDate.slice(0, 7) < currentYM)
-            .sort((a, b) => b.recordDate.localeCompare(a.recordDate))
-            .forEach(item => {
-              const root = item.recurringRoot || item.id;
-              if (!roots.has(root)) roots.set(root, item);
-            });
-
-          roots.forEach(template => {
-            const root = template.recurringRoot || template.id;
-            const day = Math.min(Number(template.recordDate.slice(8, 10)) || 1, daysInMonth(year, month));
-            const recordDate = `${currentYM}-${String(day).padStart(2, '0')}`;
-            const exists = ledgers.value.some(item => item.recurringRoot === root && item.recordDate && item.recordDate.slice(0, 7) === currentYM);
-            if (!exists) {
-              ledgers.value.push({ ...template, id: getId('l_auto'), recordDate, recurringRoot: root, isRecurring: true });
-            }
-          });
-          await writeDBValue(processKey, true);
-          await syncStorageData();
-        }
-
         function installTouchScrollGuard() {
           let startY = 0;
 
@@ -1306,21 +1151,17 @@
         onMounted(async () => {
           installTouchScrollGuard();
           await loadLocalStorage();
-          await handleRecurringVerification();
-          renderCustomChart();
         });
 
         return {
-          activeTab, chartPeriod, chartOffset, chartPeriodLabel, userProfile, monthlyBudget, categories, ledgers, habits, checkIns, storeItems, rewardHistory,
+          activeTab, userProfile, habits, checkIns, storeItems, rewardHistory,
           dialog, closeDialog,
-          modals, ledgerForm, newCategory, tempBudget, habitForm, storeForm, activeRetroHabitId, retroDate, selectedLedgerItem,
-          todayStr, filteredCategories, currentMonthIncome, currentMonthExpense, currentMonthBalance, budgetUsagePercentage,
-          groupedLedgers, periodSummary, chartData,
-          formatMoney, formatDateTime, closeModal, getCategoryEmoji, setLedgerType, openLedgerModal, saveLedger,
-          showLedgerAction, editLedgerFromAction, deleteLedgerFromAction, openCategorySetting, addCategory, deleteCategory,
-          openBudgetModal, saveBudget, translateFreq, isHabitDoneToday, getHabitWeekStats, openHabitModal, saveHabit,
-          deleteHabitDirectly, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
-          openStoreModal, saveStoreItem, deleteStoreItem, redeemReward, deleteRewardLog, setChartPeriod, shiftChartPeriod, openChartTab, renderCustomChart
+          modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, habitCalendarMonth, selectedHabitDate,
+          todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
+          pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, isAllDoneToday,
+          icon, formatDateTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, openHabitModal, saveHabit,
+          deleteHabitDirectly, showHabitAction, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, openHabitCalendar, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
+          openStoreModal, saveStoreItem, deleteStoreItem, redeemReward, deleteRewardLog
         };
       }
     }).mount('#app');
