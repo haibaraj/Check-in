@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>My Check in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>呱呱呱呱呱呱</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -26,7 +26,7 @@
     input, select, textarea { font-size: 16px; }
     button { touch-action: manipulation; }
     ::-webkit-scrollbar { display: none; }
-    .safe-bottom { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+    .safe-bottom { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
     .nav-bottom { padding-bottom: env(safe-area-inset-bottom); }
     .sheet-enter { animation: sheetUp .18s ease-out; }
     .fade-enter { animation: fadeIn .15s ease-out; }
@@ -47,21 +47,65 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
-      /* 确保滚动区域内部永远有至少 5.5rem（包含导航栏高度和间距）的空白尾部 */
       padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
     }
     @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes toastSlideIn { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    @keyframes toastSlideOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -20px); opacity: 0; } }
+    .event-toast-enter-active { animation: toastSlideIn .25s ease-out; }
+    .event-toast-leave-active { animation: toastSlideOut .2s ease-in; }
     @keyframes pulseText { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+    @keyframes checkBounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.15); }
+      60% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+    .check-bounce { animation: checkBounce .35s ease-out; }
+    .float-exp {
+      animation: floatUp .8s ease-out forwards;
+      position: absolute;
+      pointer-events: none;
+      font-weight: 900;
+      font-size: 14px;
+      color: #f59e0b;
+      z-index: 30;
+    }
     .habit-move, .habit-enter-active, .habit-leave-active { transition: all 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
     .habit-enter-from { opacity: 0; transform: translateY(12px) scale(0.97); }
     .habit-leave-to { opacity: 0; transform: translateY(-12px) scale(0.97); }
     .habit-leave-active { position: absolute; width: 100%; }
+  :root{--bg-main:#f7f8fb;--bg-card:rgba(255,255,255,.94);--bg-card-solid:#fff;--border-card:rgba(226,232,240,.9);--shadow-card:rgba(15,23,42,.06);--text-primary:#0f172a;--text-secondary:#64748b;--text-muted:#94a3b8;--text-faint:#cbd5e1;--bg-input:#f1f5f9;--border-input:#e2e8f0;--bg-overlay:rgba(0,0,0,.55);--bg-nav:rgba(255,255,255,.9);--bg-badge:#f8fafc;--theme-50:#fffbeb;--theme-100:#fef3c7;--theme-400:#fbbf24;--theme-500:#f59e0b;--theme-600:#d97706;--theme-700:#b45309;--shimmer-from:#f1f5f9;--shimmer-mid:#e2e8f0}
+  .dark{--bg-main:#1a1a2e;--bg-card:rgba(37,37,64,.94);--bg-card-solid:#252540;--border-card:rgba(55,55,90,.9);--shadow-card:rgba(0,0,0,.2);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--text-faint:#475569;--bg-input:#1e1e3a;--border-input:#2d2d50;--bg-overlay:rgba(0,0,0,.7);--bg-nav:rgba(37,37,64,.92);--bg-badge:#2d2d50;--shimmer-from:#252540;--shimmer-mid:#1e1e3a}
+  .theme-amber{--theme-50:#fffbeb;--theme-100:#fef3c7;--theme-400:#fbbf24;--theme-500:#f59e0b;--theme-600:#d97706;--theme-700:#b45309}
+  .theme-rose{--theme-50:#fff1f2;--theme-100:#ffe4e6;--theme-400:#fb7185;--theme-500:#f43f5e;--theme-600:#e11d48;--theme-700:#be123c}
+  .theme-violet{--theme-50:#f5f3ff;--theme-100:#ede9fe;--theme-400:#a78bfa;--theme-500:#8b5cf6;--theme-600:#7c3aed;--theme-700:#6d28d9}
+  .theme-emerald{--theme-50:#ecfdf5;--theme-100:#d1fae5;--theme-400:#34d399;--theme-500:#10b981;--theme-600:#059669;--theme-700:#047857}
+  .theme-sky{--theme-50:#f0f9ff;--theme-100:#e0f2fe;--theme-400:#38bdf8;--theme-500:#0ea5e9;--theme-600:#0284c7;--theme-700:#0369a1}
+  .heat-cell{border-radius:3px;transition:all .15s;cursor:pointer;width:14px;height:14px}
+  .heat-cell:hover{transform:scale(1.3)}
+  .heat-0{background:var(--bg-input)}.heat-1{background:#9be9a8}.heat-2{background:#40c463}.heat-3{background:#30a14e}.heat-4{background:#216e39}
+  .dark .heat-0{background:#161b22}.dark .heat-1{background:#0e4429}.dark .heat-2{background:#006d32}.dark .heat-3{background:#26a641}.dark .heat-4{background:#39d353}
     .soft-card {
-      background: rgba(255,255,255,.94);
-      border: 1px solid rgba(226,232,240,.9);
-      box-shadow: 0 10px 30px rgba(15,23,42,.06);
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      box-shadow: 0 10px 30px var(--shadow-card);
     }
+    .modal-card { background: var(--bg-card-solid); }
+    .dark .text-slate-800, .dark .text-slate-900 { color: var(--text-primary) !important; }
+    .dark .text-slate-700 { color: var(--text-secondary) !important; }
+    .dark .text-slate-600 { color: var(--text-secondary) !important; }
+    .dark .text-slate-500 { color: var(--text-muted) !important; }
+    .dark .text-slate-400 { color: var(--text-muted) !important; }
+    .dark .text-slate-300 { color: var(--text-faint) !important; }
+    .dark .bg-slate-50, .dark .bg-slate-100 { background: var(--bg-input) !important; }
+    .dark .bg-white\/70 { background: var(--bg-card) !important; }
+    .dark .border-slate-50, .dark .border-slate-100 { border-color: var(--border-input) !important; }
     .icon-line {
       width: 1.05rem;
       height: 1.05rem;
@@ -79,45 +123,63 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+    .loading-shimmer {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
   </style>
 </head>
-<body class="text-slate-800">
-  <div id="app" class="app-root max-w-md mx-auto bg-[#f7f8fb] shadow-2xl relative overflow-hidden">
-    <main class="app-main overflow-hidden">
-      <section v-show="activeTab === 'habit'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="mb-4">
-          <div class="flex justify-between items-start mb-3">
-            <div>
-              <p class="text-xs text-slate-400 font-bold">My Check in</p>
-              <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">今日自律</h1>
-              <p class="text-[11px] text-slate-400 mt-1">轻点打卡，长按管理</p>
-            </div>
-            <div class="flex gap-2 pt-1">
-              <button @click="openHabitCalendar" class="text-xs bg-white text-slate-700 px-3 py-2 rounded-full font-black shadow-sm border border-slate-100">记录</button>
-              <button @click="openHabitModal(null)" class="text-xs bg-amber-400 text-slate-950 px-3 py-2 rounded-full font-black shadow-sm">＋ 目标</button>
-            </div>
-          </div>
+<body>
+  <div id="app" class="app-root max-w-md mx-auto relative overflow-hidden" :class="[darkMode?'dark':'','theme-'+themeColor]" :data-theme="themeColor">
 
-          <div class="soft-card rounded-3xl p-4">
-            <div class="grid grid-cols-3 gap-2 text-center mb-4">
-              <div class="bg-amber-50 rounded-2xl py-3 px-1">
-                <p class="text-[10px] text-amber-700 font-bold">可用 EXP</p>
+    <!-- 加载遮罩 -->
+    <div v-if="appLoading" class="absolute inset-0 z-[90] bg-[#f7f8fb] flex flex-col items-center justify-center gap-4">
+      <div class="w-16 h-16 rounded-3xl bg-amber-400 flex items-center justify-center">
+        <span class="icon-line !w-8 !h-8 text-slate-950" v-html="icon('target')"></span>
+      </div>
+      <div class="text-center">
+        <p class="text-sm font-black text-slate-800">呱呱呱呱呱呱</p>
+        <p class="text-xs text-slate-400 mt-1">{{t('loading')}}</p>
+      </div>
+    </div>
+
+    <main class="app-main overflow-hidden">
+      <!-- 今日打卡 Tab -->
+      <section v-show="activeTab === 'habit'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
+        <div class="mb-3">
+          <div class="soft-card rounded-3xl p-3">
+            <div class="grid grid-cols-3 gap-2 text-center mb-3">
+              <div class="bg-amber-50 rounded-2xl py-2.5 px-1">
+                <p class="text-[10px] text-amber-700 font-bold">{{t('availableEXP')}}</p>
                 <p class="text-lg font-black text-amber-600 mt-0.5">{{ userProfile.currentExp }}</p>
+                <p class="text-[10px] font-black text-amber-500">Lv{{ userProfile.level }}</p>
+                <div class="mt-1">
+                  <div class="h-1 rounded-full bg-amber-200/60 overflow-hidden">
+                    <div class="h-full bg-amber-400 rounded-full transition-all duration-300" :style="{ width: levelProgress.percent + '%' }"></div>
+                  </div>
+                  <p v-if="levelProgress.next" class="text-[8px] text-amber-400 mt-0.5">Lv{{ userProfile.level + 1 }}: {{ levelProgress.remaining }} EXP</p>
+                  <p v-else class="text-[8px] text-amber-400 mt-0.5">MAX</p>
+                </div>
               </div>
-              <div class="bg-slate-50 rounded-2xl py-3 px-1">
-                <p class="text-[10px] text-slate-400 font-bold">累计获取</p>
-                <p class="text-lg font-black text-slate-800 mt-0.5">{{ userProfile.totalExp }}</p>
+              <div class="bg-slate-50 rounded-2xl py-2.5 px-1">
+                <p class="text-[10px] text-slate-400 font-bold">{{t('totalEarned')}}</p>
+                <p class="text-lg font-black text-slate-700 mt-0.5">{{ userProfile.totalExp }}</p>
               </div>
-              <div class="bg-emerald-50 rounded-2xl py-3 px-1">
-                <p class="text-[10px] text-emerald-700 font-bold">今日完成</p>
-                <p class="text-lg font-black text-emerald-600 mt-0.5">{{ todayCompletedCount }}/{{ habits.length }}</p>
+              <div class="bg-emerald-50 rounded-2xl py-2.5 px-1">
+                <p class="text-[10px] text-emerald-700 font-bold">{{t('todayDone')}}</p>
+                <p class="text-lg font-black text-emerald-600 mt-0.5">{{ todayCompletedCount }}/{{ activeHabits.length }}</p>
               </div>
             </div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-xs text-slate-500 font-bold">今日进度</span>
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs text-slate-500 font-bold">{{t('todayProgress')}}</span>
               <span class="text-xs text-amber-600 font-black">{{ todayProgressPercent }}%</span>
             </div>
-            <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
               <div class="h-full bg-amber-400 rounded-full transition-all duration-500" :style="{ width: todayProgressPercent + '%' }"></div>
             </div>
           </div>
@@ -127,28 +189,35 @@
           <div>
             <h2 class="text-base font-black text-slate-800 flex items-center gap-1.5">
               <span class="icon-line text-amber-500" v-html="icon('target')"></span>
-              <span>自律打卡目标</span>
+              <span>{{t('checkGoals')}}</span>
             </h2>
-            <p class="text-[11px] text-slate-400 mt-0.5">轻点打卡，长按可补签、编辑或删除</p>
+            <p class="text-[11px] text-slate-300 mt-0.5">{{t('longPressHint')}}</p>
           </div>
+          <button @click="openHabitModal(null)" class="text-xs bg-amber-400 text-slate-950 px-3.5 py-2 rounded-full font-black shadow-sm min-h-[40px]">{{t('addGoal')}}</button>
         </div>
 
         <div class="flex-1 min-h-0 scroll-area">
-          <div v-if="habits.length === 0" class="text-center py-16 text-slate-400 text-sm">
-            还没有设置自律目标，快添加一个吧
+          <div v-if="activeHabits.length === 0" class="soft-card rounded-3xl p-6 text-center text-sm">
+            <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+              <span class="icon-line !w-7 !h-7" v-html="icon('target')"></span>
+            </div>
+            <p class="font-black text-slate-800">{{t('createFirstGoal')}}</p>
+            <p class="text-xs text-slate-400 mt-2 leading-relaxed">{{t('firstGoalDesc')}}</p>
+            <button @click="openHabitModal(null)" class="mt-4 bg-amber-400 text-slate-950 px-5 py-3 rounded-full text-sm font-black shadow-sm min-h-[44px]">{{t('addGoal')}}</button>
           </div>
 
           <div v-else>
             <div v-if="isAllDoneToday" class="mb-4 bg-gradient-to-r from-emerald-50 to-amber-50 border border-emerald-100 rounded-3xl p-4">
               <p class="text-sm font-black text-emerald-700 flex items-center gap-1.5">
                 <span class="icon-line" v-html="icon('checkCircle')"></span>
-                <span>今天目标全部完成</span>
+                <span>{{t('allDoneToday')}}</span>
               </p>
-              <p class="text-xs text-slate-500 mt-1">状态不错，奖励自己一下也可以。</p>
+              <p class="text-xs text-slate-500 mt-1">{{t('allDoneDesc')}}</p>
             </div>
 
+            <!-- 待打卡 -->
             <div v-if="pendingHabits.length > 0" class="mb-4">
-              <h3 class="text-xs font-black text-slate-400 mb-2 px-1">待打卡 ({{ pendingHabits.length }})</h3>
+              <h3 class="text-xs font-black text-slate-300 mb-2 px-1">{{t('pending')}} ({{ pendingHabits.length }})</h3>
               <transition-group name="habit" tag="div" class="space-y-2 relative">
                 <article
                   v-for="habit in pendingHabits"
@@ -168,36 +237,50 @@
                       <div class="flex items-center gap-1.5 mb-1">
                         <h3 class="font-black text-sm truncate text-slate-800">{{ habit.name }}</h3>
                         <span class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 bg-indigo-50 text-indigo-600">{{ translateFreq(habit.frequencyType) }}</span>
+                        <span v-if="isWeekend" class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 font-black bg-amber-50 text-amber-600">{{t('doubleEXP')}}</span>
                       </div>
-                      <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs">
-                        <span class="font-bold text-orange-500">连击 {{ habit.currentStreak || 0 }} 天</span>
-                        <span class="text-slate-400">最高 {{ habit.maxStreak || 0 }} 天</span>
-                        <span class="font-bold text-emerald-600">+{{ habit.expReward }} EXP</span>
+                      <div class="flex items-center gap-x-2 text-xs">
+                        <span class="font-bold text-orange-500">{{t('streak')}} {{ habit.currentStreak || 0 }} {{t('days')}}</span>
+                        <span class="text-slate-300">·</span>
+                        <span class="text-slate-400">{{t('best')}} {{ habit.maxStreak || 0 }} {{t('days')}}</span>
                       </div>
-                      <div class="mt-2 flex gap-1">
-                        <span v-for="n in 7" :key="n" class="w-2 h-2 rounded-full" :class="n <= Math.min(habit.currentStreak || 0, 7) ? 'bg-amber-400' : 'bg-slate-100'"></span>
+                      <div class="mt-2 flex items-center gap-2">
+                        <div class="flex gap-1">
+                          <span v-for="n in 7" :key="n" class="w-2 h-2 rounded-full" :class="n <= Math.min(habit.currentStreak || 0, 7) ? 'bg-amber-400' : 'bg-slate-100'"></span>
+                        </div>
+                        <span class="text-[10px] text-slate-300">+{{ habit.expReward }} EXP</span>
                       </div>
                     </div>
-                    <div class="shrink-0 bg-amber-400 text-slate-950 text-xs font-black px-4 py-2.5 rounded-full shadow-sm">
-                      打卡
+                    <div class="shrink-0 bg-amber-400 text-slate-950 text-sm font-black px-5 py-3 rounded-full shadow-sm min-h-[44px] flex items-center">
+                      {{t('checkin')}}
                     </div>
                   </div>
 
                   <div v-if="habit.frequencyType === 'weekly'" class="mt-3">
-                    <div class="flex justify-between text-[11px] text-slate-500 mb-1">
-                      <span>本周累计 {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
-                      <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">本周已达成</span>
+                    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                      <span>{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
+                      <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">{{t('weekMet')}}</span>
                     </div>
                     <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
                       <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
+                    </div>
+                  </div>
+                  <div v-if="habit.frequencyType === 'monthly'" class="mt-3">
+                    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                      <span>{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
+                      <span v-if="getHabitMonthStats(habit).isMet" class="text-emerald-600 font-bold">{{t('monthMet')}}</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div>
                     </div>
                   </div>
                 </article>
               </transition-group>
             </div>
 
+            <!-- 已完成 -->
             <div v-if="doneHabits.length > 0">
-              <h3 class="text-xs font-black text-slate-400 mb-2 px-1">已完成 ({{ doneHabits.length }})</h3>
+              <h3 class="text-xs font-black text-slate-300 mb-2 px-1">{{t('completed')}} ({{ doneHabits.length }})</h3>
               <transition-group name="habit" tag="div" class="space-y-2 relative">
                 <article
                   v-for="habit in doneHabits"
@@ -218,24 +301,35 @@
                         <h3 class="font-black text-sm truncate text-slate-500">{{ habit.name }}</h3>
                         <span class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 bg-emerald-50 text-emerald-600">{{ translateFreq(habit.frequencyType) }}</span>
                       </div>
-                      <div class="flex flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
-                        <span>连击 {{ habit.currentStreak || 0 }} 天</span>
-                        <span>最高 {{ habit.maxStreak || 0 }} 天</span>
+                      <div class="flex items-center gap-x-2 text-xs text-slate-400">
+                        <span>{{t('streak')}} {{ habit.currentStreak || 0 }} {{t('days')}}</span>
+                        <span class="text-slate-300">·</span>
+                        <span>{{t('best')}} {{ habit.maxStreak || 0 }} {{t('days')}}</span>
+                        <span class="text-slate-300">·</span>
                         <span>+{{ habit.expReward }} EXP</span>
                       </div>
                     </div>
-                    <div class="shrink-0 bg-emerald-50 text-emerald-600 text-xs font-black px-3 py-2.5 rounded-full border border-emerald-100">
-                      已完成 ✓
+                    <div class="shrink-0 bg-emerald-50 text-emerald-600 text-sm font-black px-4 py-3 rounded-full border border-emerald-100 min-h-[44px] flex items-center">
+                      {{t('done')}}
                     </div>
                   </div>
 
                   <div v-if="habit.frequencyType === 'weekly'" class="mt-3">
                     <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                      <span>本周累计 {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
-                      <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">本周已达成</span>
+                      <span>{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
+                      <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">{{t('weekMet')}}</span>
                     </div>
                     <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
                       <div class="h-full bg-emerald-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
+                    </div>
+                  </div>
+                  <div v-if="habit.frequencyType === 'monthly'" class="mt-3">
+                    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                      <span>{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
+                      <span v-if="getHabitMonthStats(habit).isMet" class="text-emerald-600 font-bold">{{t('monthMet')}}</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-200 overflow-hidden">
+                      <div class="h-full bg-emerald-400 transition-all" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div>
                     </div>
                   </div>
                 </article>
@@ -247,36 +341,45 @@
         </div>
       </section>
 
+      <!-- 奖励商店 Tab -->
       <section v-show="activeTab === 'store'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="soft-card rounded-3xl p-4 mb-4 flex justify-between items-center">
+        <div class="flex-1 min-h-0 scroll-area space-y-3">
+        <div class="soft-card rounded-3xl p-4 flex justify-between items-center">
           <div>
-            <p class="text-xs text-slate-400 font-bold">奖励商店</p>
+            <p class="text-xs text-slate-300 font-bold">{{t('rewardStore')}}</p>
             <p class="text-3xl font-black tracking-tight mt-1 text-amber-500">{{ userProfile.currentExp }} <span class="text-xs text-slate-400 font-normal">EXP</span></p>
-            <p class="text-[11px] text-slate-400 mt-1">今日已兑换 {{ todayRedeemCount }} 次</p>
+            <p class="text-[11px] text-slate-300 mt-1">{{t('todayRedeemed')}} {{ todayRedeemCount }} {{t('times')}}</p>
           </div>
-          <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-xs font-black px-3 py-2 rounded-full shadow-sm">＋ 上架心愿</button>
+          <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-xs font-black px-4 py-2.5 rounded-full shadow-sm min-h-[44px]">{{t('addWish')}}</button>
         </div>
 
-        <h2 class="text-base font-black text-slate-800 mb-3 flex items-center gap-1.5">
+        <h2 class="text-base font-black text-slate-800 flex items-center gap-1.5">
           <span class="icon-line text-amber-500" v-html="icon('gift')"></span>
-          <span>欲望杂货铺</span>
+          <span>{{t('wishStore')}}</span>
         </h2>
-        <div class="mb-3 space-y-2">
+        <div class="space-y-2">
           <div class="flex gap-2 overflow-x-auto pb-1">
-            <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">全部</button>
-            <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">可兑换</button>
-            <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">EXP 不足</button>
-            <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-black px-3 py-2 rounded-full" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">已售罄</button>
+            <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('all')}}</button>
+            <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('available')}}</button>
+            <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('expNotEnough')}}</button>
+            <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('soldout')}}</button>
           </div>
           <div class="flex justify-between items-center text-xs text-slate-400">
-            <span>共 {{ filteredStoreItems.length }} 个心愿</span>
-            <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-white border border-slate-100 text-slate-500 font-black px-3 py-1.5 rounded-full">
-              价格 {{ storeSort === 'asc' ? '低到高' : '高到低' }}
+            <span>{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
+            <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-white border border-slate-100 text-slate-500 font-black px-3 py-2 rounded-full min-h-[38px]">
+              {{t('price')}} {{ storeSort==='asc' ? t('lowToHigh') : t('highToLow') }}
             </button>
           </div>
         </div>
-        <div class="space-y-3 scroll-area mb-4 shrink-0 max-h-[42vh]">
-          <div v-if="filteredStoreItems.length === 0" class="text-center py-8 text-slate-300 text-sm">当前筛选下没有心愿商品</div>
+        <div class="space-y-3 mb-3">
+          <div v-if="filteredStoreItems.length === 0" class="soft-card rounded-3xl p-6 text-center text-sm">
+            <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+              <span class="icon-line !w-7 !h-7" v-html="icon('gift')"></span>
+            </div>
+            <p class="font-black text-slate-800">{{ storeItems.length === 0 ? t('createFirstReward') : t('noWishesFiltered') }}</p>
+            <p class="text-xs text-slate-400 mt-2 leading-relaxed">{{ storeItems.length === 0 ? t('firstRewardDesc') : t('switchFilter') }}</p>
+            <button @click="openStoreModal(null)" class="mt-4 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-black shadow-sm min-h-[44px]">{{t('addWish')}}</button>
+          </div>
           <article
             v-for="item in filteredStoreItems"
             :key="item.id"
@@ -287,117 +390,384 @@
             @mouseup="cancelStoreLongPress"
             @mouseleave="cancelStoreLongPress"
             @contextmenu.prevent="showStoreAction(item)"
-            class="soft-card p-4 rounded-3xl flex items-center gap-3 relative min-h-[104px] active:scale-[0.99] transition-all select-none"
+            class="soft-card p-4 rounded-3xl flex items-center gap-3 relative min-h-[108px] active:scale-[0.99] transition-all select-none"
             :class="item.stock === 0 ? 'opacity-50 grayscale' : ''"
           >
-            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
-              <span class="icon-line" v-html="icon('gift')"></span>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <span class="icon-line !w-5 !h-5" v-html="icon('gift')"></span>
             </div>
             <div class="min-w-0 flex-1 pr-1">
               <h3 class="font-black text-sm text-slate-800 truncate">{{ item.name }}</h3>
               <div class="mt-1 flex flex-wrap gap-1.5">
-                <span class="text-[10px] bg-slate-50 text-slate-400 px-2 py-1 rounded-full">库存 {{ item.stock === -1 ? '无限次' : item.stock + ' 次' }}</span>
+                <span class="text-[10px] bg-slate-50 text-slate-400 px-2 py-1 rounded-full">{{t('stock')}} {{ item.stock===-1 ? t('unlimited') : item.stock + ' ' + t('times') }}</span>
                 <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-1 rounded-full">{{ item.expCost }} EXP</span>
               </div>
-              <p class="text-[10px] text-slate-300 mt-2">长按可编辑或删除</p>
+              <p class="text-[10px] text-slate-300 mt-2">{{t('longPressManage')}}</p>
             </div>
             <div class="shrink-0">
-              <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-black px-4 py-2.5 rounded-full transition-colors shadow-sm whitespace-nowrap" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
-                {{ item.stock === 0 ? '售罄' : userProfile.currentExp < item.expCost ? '不足' : '兑换' }}
+              <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-black px-4 py-3 rounded-full transition-colors shadow-sm whitespace-nowrap min-h-[44px]" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
+                {{ item.stock===0 ? t('soldout') : userProfile.currentExp < item.expCost ? t('notEnough') : t('redeem') }}
               </button>
             </div>
           </article>
         </div>
 
-        <div class="soft-card rounded-3xl p-3 flex-1 flex flex-col min-h-0">
-          <h3 class="text-xs font-black text-slate-400 mb-2 flex items-center gap-1.5">
-            <span class="icon-line" v-html="icon('list')"></span>
-            <span>历史心愿兑换日志</span>
-          </h3>
-          <div class="flex-1 min-h-0 scroll-area text-xs space-y-2 text-slate-500">
-            <div v-if="rewardHistory.length === 0" class="text-center py-8 text-slate-300">暂无兑换记录</div>
-            <div v-for="log in rewardHistory" :key="log.id" class="border-b border-slate-50 pb-2">
-              <div class="flex justify-between items-start gap-2">
-                <div class="min-w-0 flex-1">
-                  <p class="truncate">兑换 <strong>{{ log.rewardName }}</strong></p>
-                  <p class="text-[10px] text-slate-300 mt-0.5">{{ formatDateTime(log.timestamp) }}</p>
-                </div>
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <span class="text-red-500 font-black whitespace-nowrap">-{{ log.costExp }} EXP</span>
-                  <button @click="deleteRewardLog(log.id)" class="text-[10px] text-red-400 bg-red-50 px-1.5 py-1 rounded-lg active:bg-red-100">删除</button>
-                </div>
-              </div>
+        <div @click="openRewardHistory" class="soft-card rounded-3xl p-4 flex items-center justify-between active:scale-[0.99] transition-all select-none cursor-pointer mb-2">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
+              <span class="icon-line !w-5 !h-5" v-html="icon('list')"></span>
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-slate-700">{{t('redeemLog')}}</h3>
+              <p class="text-[11px] text-slate-300 mt-0.5">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
             </div>
           </div>
+          <div class="flex items-center gap-1.5 text-slate-300">
+            <span class="text-xs">{{t('view')}}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+          </div>
+        </div>
         </div>
       </section>
 
+    <!-- 打卡记录 Tab (Calendar/Heatmap/Stats) -->
+    <section v-show="activeTab==='calendar'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
+      <div class="flex gap-2 mb-4">
+        <button @click="calendarSubTab='calendar'" class="flex-1 text-xs font-black py-2.5 rounded-full min-h-[44px]" :class="calendarSubTab==='calendar'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('calendar')}}</button>
+        <button @click="calendarSubTab='heatmap'" class="flex-1 text-xs font-black py-2.5 rounded-full min-h-[44px]" :class="calendarSubTab==='heatmap'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('heatmap')}}</button>
+        <button @click="calendarSubTab='stats'" class="flex-1 text-xs font-black py-2.5 rounded-full min-h-[44px]" :class="calendarSubTab==='stats'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('stats')}}</button>
+      </div>
+      <!-- Calendar -->
+      <div v-show="calendarSubTab==='calendar'" class="flex-1 min-h-0 scroll-area">
+        <div class="soft-card rounded-3xl p-4 mb-4">
+          <div class="flex items-center justify-between mb-4">
+            <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('prevMonth')}}</button>
+            <span class="text-base font-black text-slate-800">{{ habitCalendarMonthLabel }}</span>
+            <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('nextMonth')}}</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center mb-4">
+            <div class="bg-slate-50 rounded-2xl py-2">
+              <p class="text-[10px] text-slate-400 font-bold">{{t('checkDays')}}</p>
+              <p class="text-sm font-black text-slate-700">{{ habitMonthStats.checkedDays }} {{t('days')}}</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl py-2">
+              <p class="text-[10px] text-slate-400 font-bold">{{t('totalCompleted')}}</p>
+              <p class="text-sm font-black text-emerald-600">{{ habitMonthStats.totalChecks }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl py-2">
+              <p class="text-[10px] text-slate-400 font-bold">{{t('monthRate')}}</p>
+              <p class="text-sm font-black text-amber-600">{{ habitMonthStats.completionRate }}%</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
+            <span v-for="(w, wi) in weekLabels" :key="wi" class="text-[10px] font-black text-slate-300">{{ w }}</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1.5">
+            <button
+              v-for="day in habitCalendarDays"
+              :key="day.key"
+              @click="day.date && selectHabitCalendarDate(day.date)"
+              class="min-h-[58px] rounded-xl p-1.5 text-center border transition-colors"
+              :class="[
+                day.date ? 'bg-slate-50 border-slate-50 active:bg-amber-50' : 'bg-transparent border-transparent',
+                day.date === selectedHabitDate ? 'ring-2 ring-amber-400 bg-amber-50' : '',
+                day.date === todayStr ? 'text-amber-600' : 'text-slate-600'
+              ]"
+            >
+              <template v-if="day.date">
+                <p class="text-xs font-black">{{ day.day }}</p>
+                <div class="mt-1 flex flex-wrap justify-center gap-0.5">
+                  <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span v-if="day.items.length > 4" class="text-[8px] text-emerald-500 leading-none">+</span>
+                </div>
+              </template>
+            </button>
+          </div>
+        </div>
+        <div class="soft-card rounded-3xl p-4 mb-4">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-black text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
+            <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} {{t('items')}}</span>
+          </div>
+          <div class="space-y-2">
+            <div v-if="selectedHabitDateItems.length === 0" class="text-center py-6 text-slate-300 text-sm">{{t('noRecords')}}</div>
+            <div v-for="item in selectedHabitDateItems" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center">
+              <div class="min-w-0">
+                <p class="text-sm font-black text-slate-800 truncate">{{ item.name }}</p>
+                <p class="text-[11px] text-slate-400">{{ item.isRetro ? t('retroRecord') : t('normalCheckin') }} <span v-if="item.time">{{item.time}}</span> <span v-if="item.note">· {{item.note}}</span></p>
+              </div>
+              <span class="text-xs font-black text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
+            </div>
+          </div>
+        </div>
+        <div class="scroll-end-spacer"></div>
+      </div>
+      <!-- Heatmap -->
+      <div v-show="calendarSubTab==='heatmap'" class="flex-1 min-h-0 scroll-area">
+        <div class="soft-card rounded-3xl p-4 mb-4">
+          <h3 class="text-sm font-black text-slate-800 mb-3">{{t('heatmapTitle')}}</h3>
+          <div class="overflow-x-auto pb-2"><div class="inline-flex gap-1" style="min-width:100%">
+            <div v-for="(week,wi) in heatmapData" :key="wi" class="flex flex-col gap-1">
+              <div v-for="(day,di) in week" :key="di" class="heat-cell" :class="'heat-'+getHeatLevel(day.count)" @click="day.date&&(heatmapSelectedDate=day.date)"></div>
+            </div>
+          </div></div>
+          <div class="flex items-center justify-end gap-1 mt-3 text-[10px] text-slate-400"><span>{{t('less')}}</span><div class="w-3 h-3 rounded-sm heat-0"></div><div class="w-3 h-3 rounded-sm heat-1"></div><div class="w-3 h-3 rounded-sm heat-2"></div><div class="w-3 h-3 rounded-sm heat-3"></div><div class="w-3 h-3 rounded-sm heat-4"></div><span>{{t('more')}}</span></div>
+        </div>
+        <div v-if="heatmapSelectedDate" class="soft-card rounded-3xl p-4 mb-4">
+          <div class="flex justify-between items-center mb-3"><h3 class="text-sm font-black text-slate-800">{{heatmapSelectedDate}} {{t('checkRecords')}}</h3><button @click="heatmapSelectedDate=''" class="text-xs text-slate-400">✕</button></div>
+          <div class="space-y-2">
+            <div v-if="getHabitItemsByDate(heatmapSelectedDate).length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noRecords')}}</div>
+            <div v-for="item in getHabitItemsByDate(heatmapSelectedDate)" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0"><p class="text-sm font-black text-slate-800 truncate">{{item.name}}</p><p class="text-[11px] text-slate-400">{{item.time||'--:--'}} <span v-if="item.note">· {{item.note}}</span></p></div><span class="text-xs font-black text-emerald-600">+{{item.expGained||0}} EXP</span></div>
+          </div>
+        </div>
+        <div class="scroll-end-spacer"></div>
+      </div>
+      <!-- Stats -->
+      <div v-show="calendarSubTab==='stats'" class="flex-1 min-h-0 scroll-area space-y-4">
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('weeklyReport')}}</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekCheckins')}}</p><p class="text-lg font-black text-amber-600">{{weeklyStats.checkins}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekRate')}}</p><p class="text-lg font-black text-amber-600">{{weeklyStats.rate}}%</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekEXP')}}</p><p class="text-lg font-black text-emerald-600">+{{weeklyStats.expGained}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekBestStreak')}}</p><p class="text-lg font-black text-orange-500">{{weeklyStats.bestStreak}}</p></div>
+          </div>
+        </div>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('monthlyReport')}}</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthCheckDays')}}</p><p class="text-lg font-black text-amber-600">{{monthlyStats.checkDays}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthRate2')}}</p><p class="text-lg font-black text-amber-600">{{monthlyStats.rate}}%</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthExpEarned')}}</p><p class="text-lg font-black text-emerald-600">+{{monthlyStats.expEarned}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthExpSpent')}}</p><p class="text-lg font-black text-red-500">-{{monthlyStats.expSpent}}</p></div>
+          </div>
+          <div class="mt-2 bg-slate-50 rounded-2xl p-3"><p class="text-[10px] text-slate-400 font-bold">{{t('mostChecked')}}</p><p class="text-sm font-black text-slate-800 mt-1">{{monthlyStats.topHabit||t('none')}}</p></div>
+        </div>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('expLogTitle')}}</h3>
+          <div v-if="expLogs.length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noExpLogs')}}</div>
+          <div v-else class="space-y-2 max-h-64 overflow-y-auto">
+            <div v-for="log in expLogs.slice(0,50)" :key="log.id" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0 flex-1"><p class="text-xs font-black text-slate-800 truncate">{{log.habitName||log.rewardName||''}}</p><p class="text-[10px] text-slate-400">{{formatDateTime(log.timestamp)}}</p></div><span class="text-xs font-black whitespace-nowrap" :class="log.amount>=0?'text-emerald-600':'text-red-500'">{{log.amount>=0?'+':''}}{{log.amount}} EXP</span></div>
+          </div>
+        </div>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('achievements')}} ({{unlockedAchievements.length}}/{{allAchievements.length}})</h3>
+          <div class="space-y-2">
+            <div v-for="ach in allAchievements" :key="ach.id" class="bg-slate-50 rounded-2xl p-3 flex items-center gap-3" :class="isAchievementUnlocked(ach.id)?'':'opacity-40'">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" :class="isAchievementUnlocked(ach.id)?'bg-amber-50':'bg-slate-100'">{{ach.icon}}</div>
+              <div class="min-w-0 flex-1"><p class="text-xs font-black text-slate-800">{{ach.name}}</p><p class="text-[10px] text-slate-400">{{ach.desc}}</p></div>
+              <div v-if="isAchievementUnlocked(ach.id)" class="text-[10px] font-black px-2 py-1 rounded-full bg-amber-50 text-amber-600">+{{ach.reward}} EXP</div>
+            </div>
+          </div>
+        </div>
+        <div class="scroll-end-spacer"></div>
+      </div>
+    </section>
+
+    <!-- 设置 Tab -->
+    <section v-show="activeTab==='settings'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
+      <div class="flex-1 min-h-0 scroll-area space-y-3">
+        <div class="mb-2"><p class="text-[10px] text-slate-300 font-bold">呱呱呱呱呱呱</p><h1 class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{{t('settings')}}</h1></div>
+        <div class="soft-card rounded-3xl p-4 space-y-1">
+          <h3 class="text-xs font-black text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('database')"></span>{{t('dataManagement')}}</h3>
+          <button @click="exportData" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700"><span class="icon-line text-emerald-500" v-html="icon('download')"></span>{{t('exportData')}}</button>
+          <button @click="triggerImportData" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700"><span class="icon-line text-blue-500" v-html="icon('upload')"></span>{{t('importData')}}</button>
+          <input type="file" ref="importFileInput" accept=".json" @change="importData" class="hidden" />
+          <div class="text-[11px] px-2 text-slate-300">{{t('lastBackup')}}: {{lastBackupDate||t('never')}}</div>
+        </div>
+        <div class="soft-card rounded-3xl p-4">
+          <button @click="showArchived=!showArchived" class="w-full flex items-center justify-between mb-2">
+            <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('archive')"></span>{{t('archivedGoals')}} ({{archivedHabits.length}})</h3>
+            <span class="icon-line text-slate-400 transition-transform" :class="showArchived?'rotate-180':''" v-html="icon('chevronDown')"></span>
+          </button>
+          <div v-show="showArchived">
+            <div v-if="archivedHabits.length===0" class="text-[11px] px-2 py-2 text-slate-300">{{t('noArchived')}}</div>
+            <div v-for="habit in archivedHabits" :key="habit.id" class="bg-slate-50 rounded-xl p-3 flex items-center justify-between mt-2"><div class="min-w-0"><p class="text-sm font-black text-slate-800 truncate">{{habit.name}}</p><p class="text-[10px] text-slate-400">{{t('best')}} {{habit.maxStreak||0}} {{t('days')}}</p></div><button @click="unarchiveHabit(habit.id)" class="text-[10px] font-black px-3 py-2 rounded-lg bg-amber-50 text-amber-600">{{t('restore')}}</button></div>
+          </div>
+        </div>
+        <div class="soft-card rounded-3xl p-4 space-y-3">
+          <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('palette')"></span>{{t('appearance')}}</h3>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line" :style="{color:darkMode?'#fbbf24':'#64748b'}" v-html="icon(darkMode?'moon':'sun')"></span><span class="text-sm font-black text-slate-800">{{t('darkMode')}}</span></div>
+            <div class="flex items-center gap-1 rounded-full p-1 bg-slate-100">
+              <button @click="setDarkMode(false)" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="!darkMode&&!darkModeAuto?'bg-amber-400 text-slate-950':'text-slate-400'">{{t('light')}}</button>
+              <button @click="setDarkMode(true)" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="darkMode&&!darkModeAuto?'bg-amber-400 text-slate-950':'text-slate-400'">{{t('dark')}}</button>
+              <button @click="setDarkMode('auto')" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="darkModeAuto?'bg-amber-400 text-slate-950':'text-slate-400'">{{t('followSystem')}}</button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-amber-500" v-html="icon('palette')"></span><span class="text-sm font-black text-slate-800">{{t('themeColor')}}</span></div>
+            <div class="flex gap-2">
+              <button v-for="c in themeColors" :key="c.value" @click="setThemeColor(c.value)" class="w-7 h-7 rounded-full flex items-center justify-center" :style="{background:c.color,boxShadow:themeColor===c.value?'0 0 0 2px white, 0 0 0 4px '+c.color:'none'}"><span v-if="themeColor===c.value" class="text-white text-xs font-black">✓</span></button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-slate-400" v-html="icon('globe')"></span><span class="text-sm font-black text-slate-800">{{t('language')}}</span></div>
+            <div class="flex items-center gap-1 rounded-full p-1 bg-slate-100">
+              <button @click="setLanguage('zh')" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="lang==='zh'?'bg-amber-400 text-slate-950':'text-slate-400'">中文</button>
+              <button @click="setLanguage('en')" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="lang==='en'?'bg-amber-400 text-slate-950':'text-slate-400'">EN</button>
+            </div>
+          </div>
+        </div>
+        <div class="soft-card rounded-3xl p-4 space-y-3">
+          <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('bell')"></span>{{t('dailyReminder')}}</h3>
+          <div class="flex items-center justify-between"><span class="text-sm text-slate-600">{{t('reminderEnabled')}}</span>
+            <div class="w-12 h-7 rounded-full p-0.5 cursor-pointer transition-colors" :style="{background:userProfile.reminderEnabled?'#f59e0b':'#e2e8f0'}" @click="toggleReminder"><div class="w-6 h-6 rounded-full bg-white shadow transition-transform" :style="{transform:userProfile.reminderEnabled?'translateX(20px)':'translateX(0)'}"></div></div>
+          </div>
+          <div v-if="userProfile.reminderEnabled"><label class="block"><span class="text-sm text-slate-600">{{t('reminderTime')}}</span><input type="time" v-model="userProfile.reminderTime" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" /></label></div>
+        </div>
+        <div class="soft-card rounded-3xl p-4 space-y-2"><h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-[11px] text-slate-300">{{t('aboutDesc')}}</p></div>
+        <button @click="showOnboarding" class="w-full soft-card rounded-3xl p-4 flex items-center gap-3 active:scale-[0.99] transition-all"><span class="icon-line text-amber-500" v-html="icon('helpCircle')"></span><span class="text-sm font-black text-slate-800">{{t('viewTutorial')}}</span></button>
+        <div class="soft-card rounded-3xl p-4">
+          <button @click="resetApp" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span>{{t('resetApp')}}</button>
+          <p class="text-[11px] mt-1 px-2 text-slate-300">{{t('resetHint')}}</p>
+        </div>
+        <div class="scroll-end-spacer"></div>
+      </div>
+    </section>
+
     </main>
 
-    <nav class="fixed bottom-3 left-4 right-4 max-w-sm mx-auto bg-white/90 backdrop-blur rounded-full h-14 shadow-xl border border-slate-100 flex justify-around items-center z-40 nav-bottom p-1">
-      <button @click="activeTab = 'habit'" class="flex-1 h-full rounded-full flex items-center justify-center gap-1.5 text-xs font-black transition-all" :class="activeTab === 'habit' ? 'bg-amber-100 text-amber-700' : 'text-slate-400'"><span class="icon-line" v-html="icon('target')"></span><span>今日打卡</span></button>
-      <button @click="activeTab = 'store'" class="flex-1 h-full rounded-full flex items-center justify-center gap-1.5 text-xs font-black transition-all" :class="activeTab === 'store' ? 'bg-amber-100 text-amber-700' : 'text-slate-400'"><span class="icon-line" v-html="icon('gift')"></span><span>奖励商店</span></button>
+    <!-- 兑换日志全屏页 -->
+    <div v-if="modals.rewardHistory" class="fixed inset-0 bg-slate-50 z-[70] max-w-md mx-auto flex flex-col p-4 fade-enter">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('list')"></span><span>{{t('redeemLog')}}</span></h2>
+          <p class="text-[11px] text-slate-300 mt-0.5">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
+        </div>
+        <div class="flex gap-2">
+          <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2.5 rounded-full font-black min-h-[44px]">{{t('clear')}}</button>
+          <button @click="closeModal('rewardHistory')" class="bg-white text-slate-600 px-4 py-2.5 rounded-full text-xs font-black shadow-sm border border-slate-100 min-h-[44px]">{{t('close')}}</button>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mb-4">
+        <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('all')}}</button>
+        <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('today')}}</button>
+        <button @click="rewardHistoryFilter = 'month'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="rewardHistoryFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('month')}}</button>
+      </div>
+
+      <div class="flex-1 min-h-0 scroll-area space-y-2 text-sm text-slate-500">
+        <div v-if="filteredRewardHistory.length === 0" class="flex flex-col items-center justify-center py-20">
+          <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
+            <span class="icon-line !w-7 !h-7" v-html="icon('list')"></span>
+          </div>
+          <p class="text-slate-400 font-black">{{ rewardHistory.length === 0 ? t('noRedeemRecords') : t('noFilteredRecords') }}</p>
+          <p class="text-xs text-slate-300 mt-1">{{ rewardHistory.length === 0 ? t('noRedeemRecordsDesc') : t('noFilterRecordsDesc') }}</p>
+        </div>
+        <div v-for="log in filteredRewardHistory" :key="log.id" class="soft-card rounded-2xl p-4">
+          <div class="flex justify-between items-start gap-3">
+            <div class="min-w-0 flex-1">
+              <p class="font-black text-slate-800 truncate">{{t('redeemAction')}} <strong>{{ log.rewardName }}</strong></p>
+              <p class="text-xs text-slate-400 mt-1">{{ formatDateTime(log.timestamp) }}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-red-500 font-black whitespace-nowrap">-{{ log.costExp }} EXP</span>
+              <button @click="deleteRewardLog(log.id)" class="text-[10px] text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
+            </div>
+          </div>
+        </div>
+        <div class="scroll-end-spacer"></div>
+      </div>
+    </div>
+
+    <!-- Event Toast (level-up, achievement) -->
+    <Transition name="event-toast">
+      <div v-if="eventToast.visible" class="fixed top-14 left-1/2 -translate-x-1/2 z-[90] w-[85%] max-w-xs rounded-2xl shadow-xl p-4 flex items-start gap-3 event-toast-card" :style="{background:darkMode?'#1e1b4b':'linear-gradient(135deg,#fffbeb,#fef3c7)',border:darkMode?'1px solid #312e81':'1px solid #fde68a'}">
+        <div class="text-2xl shrink-0 mt-0.5">{{eventToast.icon}}</div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-black" :style="{color:darkMode?'#c4b5fd':'#92400e'}">{{eventToast.title}}</p>
+          <p class="text-[11px] mt-0.5 leading-relaxed" :style="{color:darkMode?'#a5b4fc':'#78716c'}">{{eventToast.message}}</p>
+        </div>
+        <button @click="eventToast.visible=false;clearTimeout(eventToast.timer)" class="shrink-0 text-[10px] mt-0.5 opacity-40 hover:opacity-70">✕</button>
+      </div>
+    </Transition>
+
+    <!-- Redeem undo toast -->
+    <div v-if="redeemToast.visible" class="fixed top-16 left-1/2 -translate-x-1/2 z-[85] flex items-center gap-2.5 px-4 py-2.5 rounded-2xl shadow-lg animate-[toastIn_.2s_ease-out]" :style="{background:darkMode?'#252540':'#fff',color:darkMode?'#e2e8f0':'#334155'}">
+      <span class="icon-line !w-4 !h-4 text-emerald-500" v-html="icon('checkCircle')"></span>
+      <span class="text-xs font-black">{{redeemToast.message}}</span>
+      <button v-if="redeemToast.undoable" @click="redeemToast.undoAction()" class="text-[11px] font-black px-3.5 py-1.5 rounded-full bg-red-50 text-red-500 border border-red-100 active:scale-95 transition-transform">{{t('undo')}}</button>
+    </div>
+
+    <!-- 底部导航 -->
+    <nav class="fixed bottom-3 left-4 right-4 max-w-sm mx-auto rounded-full h-16 shadow-xl flex justify-around items-center z-40 nav-bottom p-1" :style="{background:'var(--bg-nav)',border:'1px solid var(--border-card)'}">
+      <button @click="activeTab='habit'" class="flex-1 h-full rounded-full flex items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='habit'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-4 !h-4" v-html="icon('target')"></span><span>{{t('todayCheckin')}}</span></button>
+      <button @click="activeTab='store'" class="flex-1 h-full rounded-full flex items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='store'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-4 !h-4" v-html="icon('gift')"></span><span>{{t('rewardStore')}}</span></button>
+      <button @click="activeTab='calendar';calendarSubTab=calendarSubTab||'calendar'" class="flex-1 h-full rounded-full flex items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='calendar'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-4 !h-4" v-html="icon('calendar')"></span><span>{{t('records')}}</span></button>
+      <button @click="activeTab='settings'" class="flex-1 h-full rounded-full flex items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='settings'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-4 !h-4" v-html="icon('settings')"></span><span>{{t('settings')}}</span></button>
     </nav>
 
+    <!-- 目标管理弹窗 - 增加标题 -->
     <div v-if="modals.habitAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habitAction')">
-      <div class="bg-white w-full rounded-t-3xl p-4 max-w-md space-y-2 sheet-enter">
-        <div class="text-center text-xs text-slate-400 border-b border-slate-50 pb-2">{{ selectedHabitItem ? selectedHabitItem.name : '打卡项管理' }}</div>
-        <button @click="retroHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('calendar')"></span><span>补签</span></button>
-        <button @click="editHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('edit')"></span><span>编辑</span></button>
-        <button @click="deleteHabitFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl"><span class="icon-line" v-html="icon('trash')"></span><span>删除</span></button>
-        <button @click="closeModal('habitAction')" class="w-full text-center py-3 text-sm font-bold text-slate-400 active:bg-slate-50 rounded-2xl">取消关闭</button>
+      <div class="modal-card w-full rounded-t-3xl p-5 max-w-md sheet-enter">
+        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+          <div class="min-w-0 flex-1">
+            <p class="text-[10px] text-slate-300 font-bold">{{t('goalManage')}}</p>
+            <h3 class="text-base font-black text-slate-800 truncate">{{ selectedHabitItem ? selectedHabitItem.name : t('habitItemManage') }}</h3>
+          </div>
+          <button @click="closeModal('habitAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
+        </div>
+        <div class="space-y-1">
+          <button @click="retroHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckin')}}</span></button>
+          <button @click="editHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
+          <button @click="archiveHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-500 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('archive')"></span><span>{{t('archive')}}</span></button>
+          <button @click="deleteHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+        </div>
       </div>
     </div>
 
+    <!-- 商店管理弹窗 - 增加标题 -->
     <div v-if="modals.storeAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('storeAction')">
-      <div class="bg-white w-full rounded-t-3xl p-4 max-w-md space-y-2 sheet-enter">
-        <div class="text-center text-xs text-slate-400 border-b border-slate-50 pb-2">{{ selectedStoreItem ? selectedStoreItem.name : '心愿管理' }}</div>
-        <button @click="editStoreFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl"><span class="icon-line" v-html="icon('edit')"></span><span>编辑</span></button>
-        <button @click="deleteStoreFromAction" class="w-full flex items-center justify-center gap-2 py-3 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl"><span class="icon-line" v-html="icon('trash')"></span><span>删除</span></button>
-        <button @click="closeModal('storeAction')" class="w-full text-center py-3 text-sm font-bold text-slate-400 active:bg-slate-50 rounded-2xl">取消关闭</button>
+      <div class="modal-card w-full rounded-t-3xl p-5 max-w-md sheet-enter">
+        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+          <div class="min-w-0 flex-1">
+            <p class="text-[10px] text-slate-300 font-bold">{{t('wishManage')}}</p>
+            <h3 class="text-base font-black text-slate-800 truncate">{{ selectedStoreItem ? selectedStoreItem.name : t('wishManage') }}</h3>
+          </div>
+          <button @click="closeModal('storeAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
+        </div>
+        <div class="space-y-1">
+          <button @click="editStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
+          <button @click="deleteStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+        </div>
       </div>
     </div>
 
+    <!-- 打卡日历 -->
     <div v-if="modals.habitCalendar" class="fixed inset-0 bg-slate-50 z-[70] max-w-md mx-auto flex flex-col p-4 fade-enter">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <p class="text-xs text-slate-400 font-bold">最近 5 年</p>
-          <h2 class="text-lg font-black text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>打卡记录</span></h2>
+          <p class="text-[10px] text-slate-300 font-bold">{{t('recent5Years')}}</p>
+          <h2 class="text-lg font-black text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('checkRecords')}}</span></h2>
         </div>
-        <button @click="closeModal('habitCalendar')" class="bg-white text-slate-500 px-3 py-2 rounded-full text-xs font-black shadow-sm border border-slate-100">关闭</button>
+        <button @click="closeModal('habitCalendar')" class="bg-white text-slate-600 px-4 py-2.5 rounded-full text-xs font-black shadow-sm border border-slate-100 min-h-[44px]">{{t('close')}}</button>
       </div>
 
       <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm mb-4">
         <div class="flex items-center justify-between mb-4">
-          <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-black text-slate-500 bg-slate-50 px-3 py-2 rounded-full active:text-amber-600">◀ 上月</button>
+          <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('prevMonth')}}</button>
           <span class="text-base font-black text-slate-800">{{ habitCalendarMonthLabel }}</span>
-          <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-black text-slate-500 bg-slate-50 px-3 py-2 rounded-full active:text-amber-600">下月 ▶</button>
+          <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('nextMonth')}}</button>
         </div>
 
         <div class="grid grid-cols-3 gap-2 text-center mb-4">
           <div class="bg-slate-50 rounded-2xl py-2">
-            <p class="text-[10px] text-slate-400 font-bold">打卡天数</p>
-            <p class="text-sm font-black text-slate-800">{{ habitMonthStats.checkedDays }} 天</p>
+            <p class="text-[10px] text-slate-400 font-bold">{{t('checkDays')}}</p>
+            <p class="text-sm font-black text-slate-700">{{ habitMonthStats.checkedDays }} {{t('days')}}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl py-2">
-            <p class="text-[10px] text-slate-400 font-bold">累计完成</p>
-            <p class="text-sm font-black text-emerald-600">{{ habitMonthStats.totalChecks }} 次</p>
+            <p class="text-[10px] text-slate-400 font-bold">{{t('totalCompleted')}}</p>
+            <p class="text-sm font-black text-emerald-600">{{ habitMonthStats.totalChecks }} {{t('times')}}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl py-2">
-            <p class="text-[10px] text-slate-400 font-bold">月完成率</p>
+            <p class="text-[10px] text-slate-400 font-bold">{{t('monthRate')}}</p>
             <p class="text-sm font-black text-amber-600">{{ habitMonthStats.completionRate }}%</p>
           </div>
         </div>
 
         <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
-          <span v-for="w in ['一','二','三','四','五','六','日']" :key="w" class="text-[10px] font-black text-slate-400">{{ w }}</span>
+          <span v-for="(w, wi) in weekLabels" :key="wi" class="text-[10px] font-black text-slate-300">{{ w }}</span>
         </div>
         <div class="grid grid-cols-7 gap-1.5">
           <button
             v-for="day in habitCalendarDays"
             :key="day.key"
             @click="day.date && selectHabitCalendarDate(day.date)"
-            class="min-h-[54px] rounded-xl p-1.5 text-center border transition-colors"
+            class="min-h-[58px] rounded-xl p-1.5 text-center border transition-colors"
             :class="[
               day.date ? 'bg-slate-50 border-slate-50 active:bg-amber-50' : 'bg-transparent border-transparent',
               day.date === selectedHabitDate ? 'ring-2 ring-amber-400 bg-amber-50' : '',
@@ -417,15 +787,15 @@
 
       <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm flex-1 min-h-0 flex flex-col">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="text-sm font-black text-slate-800">{{ selectedHabitDate }} 打卡记录</h3>
-          <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} 项</span>
+          <h3 class="text-sm font-black text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
+          <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} {{t('items')}}</span>
         </div>
         <div class="flex-1 min-h-0 scroll-area space-y-2">
-          <div v-if="selectedHabitDateItems.length === 0" class="text-center py-10 text-slate-300 text-sm">这一天没有打卡记录</div>
+          <div v-if="selectedHabitDateItems.length === 0" class="text-center py-10 text-slate-300 text-sm">{{t('noRecords')}}</div>
           <div v-for="item in selectedHabitDateItems" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center">
             <div class="min-w-0">
               <p class="text-sm font-black text-slate-800 truncate">{{ item.name }}</p>
-              <p class="text-[11px] text-slate-400">{{ item.isRetro ? '补签记录' : '正常打卡' }}</p>
+              <p class="text-[11px] text-slate-400">{{ item.isRetro ? t('retroRecord') : t('normalCheckin') }}</p>
             </div>
             <span class="text-xs font-black text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
           </div>
@@ -434,93 +804,193 @@
       </div>
     </div>
 
+    <!-- 新增/编辑目标 -->
     <div v-if="modals.habit" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habit')">
-      <div class="bg-white w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
-        <h3 class="font-black text-base text-slate-800 mb-4">{{ habitForm.id ? '修改自律目标' : '新增自律目标' }}</h3>
+      <div class="modal-card w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
+        <h3 class="font-black text-base text-slate-800 mb-4">{{ habitForm.id ? t('editGoal') : t('newGoal') }}</h3>
         <div class="space-y-3">
           <label class="block">
-            <span class="block text-slate-500 mb-1">目标名称</span>
-            <input type="text" v-model.trim="habitForm.name" placeholder="例如：背单词 30 个" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none" />
+            <span class="block text-slate-500 mb-1">{{t('goalName')}}</span>
+            <input type="text" v-model.trim="habitForm.name" maxlength="30" :placeholder="t('goalNamePlaceholder')" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
-              <span class="block text-slate-500 mb-1">考核周期</span>
-              <select v-model="habitForm.frequencyType" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm focus:outline-none">
-                <option value="daily">每日要求</option>
-                <option value="weekly">每周累计要求</option>
+              <span class="block text-slate-500 mb-1">{{t('frequency')}}</span>
+              <select v-model="habitForm.frequencyType" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+                <option value="daily">{{t('daily')}}</option>
+                <option value="weekly">{{t('weeklyCumulative')}}</option>
+                <option value="monthly">{{t('monthlyCumulative')}}</option>
               </select>
             </label>
             <label class="block">
-              <span class="block text-slate-500 mb-1">每次奖励</span>
-              <input type="number" min="1" v-model.number="habitForm.expReward" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none" />
+              <span class="block text-slate-500 mb-1">{{t('expPerCheckin')}}</span>
+              <input type="number" inputmode="numeric" min="1" max="999" v-model.number="habitForm.expReward" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </label>
           </div>
           <label v-if="habitForm.frequencyType === 'weekly'" class="block">
-            <span class="block text-slate-500 mb-1">每周累计要求次数</span>
-            <input type="number" min="1" max="7" v-model.number="habitForm.weeklyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none" />
+            <span class="block text-slate-500 mb-1">{{t('weeklyTarget')}}</span>
+            <input type="number" inputmode="numeric" min="1" max="7" v-model.number="habitForm.weeklyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </label>
+          <label v-if="habitForm.frequencyType === 'monthly'" class="block">
+            <span class="block text-slate-500 mb-1">{{t('monthlyTarget')}}</span>
+            <input type="number" inputmode="numeric" min="1" max="31" v-model.number="habitForm.monthlyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+          </label>
+          <div class="bg-amber-50 text-amber-700 rounded-2xl p-3 leading-relaxed">
+            {{t('streakBonusDesc')}}
+          </div>
         </div>
         <div class="mt-6 flex gap-3">
-          <button @click="closeModal('habit')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black">取消</button>
-          <button @click="saveHabit" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm">保存目标</button>
+          <button @click="closeModal('habit')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="saveHabit" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('saveGoal')}}</button>
         </div>
       </div>
     </div>
 
+    <!-- 补签弹窗 -->
     <div v-if="modals.retroactive" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('retroactive')">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-4 text-xs">
-        <h3 class="font-black text-sm text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>历史补签</span></h3>
-        <p class="text-slate-400 mb-3">可补签今天及过去日期；补签后会重新计算连续天数。</p>
-        <input type="date" v-model="retroDate" :max="todayStr" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-center mb-4 text-sm font-black focus:outline-none" />
+      <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs">
+        <h3 class="font-black text-sm text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckinTitle')}}</span></h3>
+        <p class="text-slate-400 mb-3">{{t('retroDesc')}}</p>
+        <input type="date" v-model="retroDate" :max="todayStr" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center mb-4 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
         <div class="flex gap-2">
-          <button @click="closeModal('retroactive')" class="flex-1 bg-slate-100 text-slate-500 py-2.5 rounded-xl font-black">取消</button>
-          <button @click="submitRetroCheckIn" class="flex-1 bg-amber-400 text-slate-950 py-2.5 rounded-xl font-black shadow-sm">提交补签</button>
+          <button @click="closeModal('retroactive')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="submitRetroCheckIn" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('submitRetro')}}</button>
         </div>
       </div>
     </div>
 
+    <!-- 新增/编辑心愿 -->
     <div v-if="modals.store" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('store')">
-      <div class="bg-white w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
-        <h3 class="font-black text-base text-slate-800 mb-4">{{ storeForm.id ? '修改心愿属性' : '上架心愿商品' }}</h3>
+      <div class="modal-card w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
+        <h3 class="font-black text-base text-slate-800 mb-4">{{ storeForm.id ? t('editWish') : t('addWish') }}</h3>
         <div class="space-y-3">
           <label class="block">
-            <span class="block text-slate-500 mb-1">心愿商品名称</span>
-            <input type="text" v-model.trim="storeForm.name" placeholder="例如：喝一杯奶茶 / 玩 1 小时游戏" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none" />
+            <span class="block text-slate-500 mb-1">{{t('wishName')}}</span>
+            <input type="text" v-model.trim="storeForm.name" maxlength="30" :placeholder="t('wishNamePlaceholder')" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
-              <span class="block text-slate-500 mb-1">兑换价格</span>
-              <input type="number" min="1" v-model.number="storeForm.expCost" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none" />
+              <span class="block text-slate-500 mb-1">{{t('redeemPrice')}}</span>
+              <input type="number" inputmode="numeric" min="1" max="99999" v-model.number="storeForm.expCost" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </label>
             <label class="block">
-              <span class="block text-slate-500 mb-1">库存（-1 无限）</span>
-              <input type="number" min="-1" v-model.number="storeForm.stock" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none" />
+              <span class="block text-slate-500 mb-1">{{t('stockLabel')}}</span>
+              <input type="number" inputmode="numeric" min="-1" v-model.number="storeForm.stock" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </label>
           </div>
         </div>
         <div class="mt-6 flex gap-3">
-          <button @click="closeModal('store')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black">取消</button>
-          <button @click="saveStoreItem" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm">确认保存</button>
+          <button @click="closeModal('store')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="saveStoreItem" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('confirmSave')}}</button>
         </div>
       </div>
     </div>
 
+    <!-- 打卡备注底部 Sheet -->
+    <div v-if="modals.checkInNote" class="fixed inset-0 bg-black/40 z-50 flex items-end justify-center fade-enter" @click.self="submitCheckInNote">
+      <div class="modal-card w-full rounded-t-3xl p-5 max-w-md sheet-enter">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-black text-sm flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('edit')"></span>{{t('addNote')}}</h3>
+          <button @click="checkInNoteText='';submitCheckInNote()" class="text-[11px] text-slate-400 font-bold px-2 py-1 rounded-lg active:bg-slate-100">{{t('skip')}}</button>
+        </div>
+        <p class="text-[11px] text-slate-400 mb-2">{{t('noteHint')}}</p>
+        <textarea v-model="checkInNoteText" maxlength="200" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none" :placeholder="t('notePlaceholder')"></textarea>
+        <div class="mt-3 flex gap-2">
+          <button @click="submitCheckInNote" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[44px]">{{t('save')}}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 导入选择弹窗 -->
+    <div v-if="modals.importChoice" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('importChoice')">
+      <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs">
+        <h3 class="font-black text-sm mb-2">{{t('importChoice')}}</h3>
+        <p class="text-slate-400 mb-4 leading-relaxed">{{t('importChoiceDesc')}}</p>
+        <div class="space-y-2">
+          <button @click="executeImport('overwrite')" class="w-full bg-amber-400 text-slate-950 py-3 rounded-2xl text-sm font-black min-h-[48px]">{{t('overwriteImport')}}</button>
+          <button @click="executeImport('merge')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl text-sm font-black min-h-[48px]">{{t('mergeImport')}}</button>
+          <button @click="closeModal('importChoice')" class="w-full text-slate-500 py-2 text-sm">{{t('cancel')}}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 引导弹窗 -->
+    <div v-if="modals.onboarding" class="fixed inset-0 z-[75] flex flex-col items-center justify-center p-6 fade-enter bg-black/55">
+      <div class="w-full max-w-xs bg-white rounded-3xl overflow-hidden">
+        <div class="p-6 text-center">
+          <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center text-3xl mb-4">{{onboardingSteps[onboardingStep].icon}}</div>
+          <h3 class="text-lg font-black text-slate-900 mb-2">{{onboardingSteps[onboardingStep].title}}</h3>
+          <p class="text-sm leading-relaxed text-slate-500">{{onboardingSteps[onboardingStep].desc}}</p>
+        </div>
+        <div class="flex items-center justify-center gap-2 mb-4">
+          <span v-for="i in onboardingSteps.length" :key="i" class="w-2 h-2 rounded-full" :class="i-1===onboardingStep?'bg-amber-400':'bg-slate-200'"></span>
+        </div>
+        <div class="flex gap-3 px-4 pb-6">
+          <button v-if="onboardingStep>0" @click="onboardingStep--" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('prev')}}</button>
+          <button v-if="onboardingStep<onboardingSteps.length-1" @click="onboardingStep++" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('next')}}</button>
+          <button v-else @click="closeOnboarding" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('start')}}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 确认对话框 -->
     <div v-if="dialog.visible" class="fixed inset-0 bg-black/55 z-[80] flex items-center justify-center p-6 fade-enter">
-      <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl">
+      <div class="modal-card w-full max-w-xs rounded-3xl p-5 shadow-2xl">
         <h3 class="text-base font-black text-slate-900 mb-2">{{ dialog.title }}</h3>
         <p class="text-sm leading-6 text-slate-600 whitespace-pre-line">{{ dialog.message }}</p>
         <div class="mt-5 flex justify-end gap-2">
-          <button v-if="dialog.type === 'confirm'" @click="closeDialog(false)" class="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-500 text-sm font-black active:scale-95">取消</button>
-          <button @click="closeDialog(true)" class="px-4 py-2.5 rounded-2xl bg-amber-400 text-slate-950 text-sm font-black shadow-sm active:scale-95">
-            {{ dialog.type === 'confirm' ? '确定' : '我知道了' }}
+          <button v-if="dialog.type === 'confirm'" @click="closeDialog(false)" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-500 text-sm font-black active:scale-95 min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="closeDialog(true)" class="px-4 py-3 rounded-2xl bg-amber-400 text-slate-950 text-sm font-black shadow-sm active:scale-95 min-h-[48px]">
+            {{ dialog.type === 'confirm' ? t('confirm') : t('gotIt') }}
           </button>
         </div>
       </div>
     </div>
+
+    <!-- 打卡成功 Toast -->
+    <Transition name="toast">
+      <div v-if="toast.visible" class="fixed top-16 left-1/2 -translate-x-1/2 z-[85] bg-slate-900 text-white text-xs font-black px-4 py-2.5 rounded-full shadow-lg">
+        {{ toast.message }}
+      </div>
+    </Transition>
   </div>
 
   <script>
-    const { createApp, ref, computed, onMounted, nextTick } = Vue;
+    const { createApp, ref, computed, reactive, onMounted, nextTick, watch } = Vue;
+
+    // ===== 常量 =====
+    const APP_VERSION = '2.0.0';
+    const DATA_VERSION = 2;
+    const STREAK_BONUS_DAYS = 7;
+    const STREAK_BONUS_EXP = 10;
+    const LONG_PRESS_MS = 550;
+    const TOAST_DURATION = 1500;
+    const HABIT_NAME_MAX = 30;
+    const STORE_NAME_MAX = 30;
+    const EXP_REWARD_MAX = 999;
+    const EXP_COST_MAX = 99999;
+    const SAVE_DEBOUNCE_MS = 300;
+    const UNDO_TIMEOUT_MS = 5000;
+    const BACKUP_REMINDER_DAYS = 7;
+    const ACHIEVEMENT_REWARD = 20;
+    const HEATMAP_WEEKS = 12;
+    const LEVEL_THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 4000, 8000, 15000];
+    function calcLevel(totalExp) {
+      for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) { if (totalExp >= LEVEL_THRESHOLDS[i]) return i + 1; }
+      return 1;
+    }
+    const ACHIEVEMENTS_DEF = [
+      { id: 'first_checkin', icon: '🎯', reward: 20 },
+      { id: 'streak_7', icon: '🔥', reward: 20 },
+      { id: 'streak_30', icon: '⚡', reward: 20 },
+      { id: 'streak_100', icon: '🌟', reward: 20 },
+      { id: 'total_10', icon: '📝', reward: 20 },
+      { id: 'total_50', icon: '📚', reward: 20 },
+      { id: 'total_100', icon: '💎', reward: 20 },
+      { id: 'total_365', icon: '👑', reward: 20 },
+      { id: 'first_redeem', icon: '🎁', reward: 20 },
+      { id: 'redeem_10', icon: '🏆', reward: 20 }
+    ];
 
     createApp({
       setup() {
@@ -536,8 +1006,11 @@
         const DB_STORE = 'app_data';
         let dbPromise = null;
 
+        // ===== 状态 =====
+        const appLoading = ref(true);
+        const showArchived = ref(false);
         const activeTab = ref('habit');
-        const userProfile = ref({ currentExp: 0, totalExp: 0 });
+        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: null, themeColor: 'amber', lastBackupReminderDate: '', reminderEnabled: false, reminderTime: '09:00', tutorialDone: false });
         const habits = ref([]);
         const checkIns = ref([]);
         const storeItems = ref([
@@ -547,9 +1020,13 @@
         ]);
         const rewardHistory = ref([]);
         const storeFilter = ref('all');
+        const calendarSubTab = ref('calendar');
         const storeSort = ref('asc');
+        const rewardHistoryFilter = ref('all');
+        const expLogs = ref([]);
+        const achievements = ref([]);
 
-        const modals = ref({ habit: false, habitAction: false, habitCalendar: false, retroactive: false, store: false, storeAction: false });
+        const modals = ref({ habit: false, habitAction: false, habitCalendar: false, rewardHistory: false, retroactive: false, store: false, storeAction: false, checkInNote: false, importChoice: false, onboarding: false });
         const habitForm = ref(getBlankHabit());
         const storeForm = ref(getBlankStoreItem());
         const activeRetroHabitId = ref(null);
@@ -559,10 +1036,104 @@
         const habitCalendarMonth = ref(todayLocalDate().slice(0, 7));
         const selectedHabitDate = ref(todayLocalDate());
         const dialog = ref({ visible: false, type: 'alert', title: '提示', message: '', resolve: null });
+        const toast = reactive({ visible: false, message: '', timer: null });
+        const redeemToast = reactive({ visible: false, message: '', undoable: false, undoAction: null, timer: null });
+        const eventToast = reactive({ visible: false, icon: '', title: '', message: '', timer: null });
+        const checkInNoteText = ref('');
+        const pendingNoteHabitId = ref(null);
+        const heatmapSelectedDate = ref('');
+        const importFileInput = ref(null);
+        const pendingImportData = ref(null);
+        const onboardingStep = ref(0);
+
         let habitPressTimer = null;
         let storePressTimer = null;
         let suppressHabitTap = false;
+        let saveTimer = null;
 
+        // ===== Theme/Language computed =====
+        const lang = computed(() => userProfile.value.lang || 'zh');
+        const darkMode = computed(() => {
+          const dm = userProfile.value.darkMode;
+          if (dm === null || dm === undefined) {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          return dm;
+        });
+        const darkModeAuto = computed(() => userProfile.value.darkMode === null || userProfile.value.darkMode === undefined);
+        const themeColor = computed(() => userProfile.value.themeColor || 'amber');
+        const themeColors = [
+          { value: 'amber', color: '#f59e0b' },
+          { value: 'rose', color: '#f43f5e' },
+          { value: 'violet', color: '#8b5cf6' },
+          { value: 'emerald', color: '#10b981' },
+          { value: 'sky', color: '#0ea5e9' }
+        ];
+        const isWeekend = computed(() => { todayStr.value; const day = new Date().getDay(); return day === 0 || day === 6; });
+        const activeHabits = computed(() => habits.value.filter(h => !h.archived));
+        const archivedHabits = computed(() => habits.value.filter(h => h.archived));
+
+        function t(key) {
+          const zh = {loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',redeemLog:'兑换日志',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',allDoneDesc:'状态不错，奖励自己一下也可以。',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',dailyReminder:'每日提醒',reminderEnabled:'开启提醒',reminderTime:'提醒时间',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'};
+          const en = {loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',redeemLog:'Redeem Log',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',allDoneDesc:'Great job! You deserve a reward.',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',dailyReminder:'Reminder',reminderEnabled:'Enable',reminderTime:'Time',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'};
+          const dict = lang.value === 'en' ? en : zh;
+          return dict[key] || key;
+        }
+
+        function setDarkMode(v) { userProfile.value.darkMode = v === 'auto' ? null : Boolean(v); queueSaveData(); }
+        function setThemeColor(c) {
+          userProfile.value.themeColor = c;
+          // Override Tailwind amber colors via dynamic <style> injected into <head>
+          applyThemeOverride(c);
+          queueSaveData();
+        }
+        function setLanguage(l) { userProfile.value.lang = l; queueSaveData(); }
+
+        // ===== 保存队列 =====
+        function queueSaveData() {
+          if (saveTimer) clearTimeout(saveTimer);
+          saveTimer = setTimeout(async () => {
+            try {
+              await syncStorageData();
+            } catch (e) {
+              console.warn('自动保存失败', e);
+            }
+          }, SAVE_DEBOUNCE_MS);
+        }
+
+        // ===== Toast =====
+        function showToast(message) {
+          if (toast.timer) clearTimeout(toast.timer);
+          toast.visible = true;
+          toast.message = message;
+          toast.timer = setTimeout(() => {
+            toast.visible = false;
+            toast.timer = null;
+          }, TOAST_DURATION);
+        }
+
+        // ===== Redeem Toast =====
+        function showRedeemToast(message, undoAction) {
+          if (redeemToast.timer) clearTimeout(redeemToast.timer);
+          redeemToast.visible = true; redeemToast.message = message;
+          redeemToast.undoable = true; redeemToast.undoAction = undoAction;
+          redeemToast.timer = setTimeout(() => { redeemToast.visible = false; redeemToast.undoable = false; redeemToast.undoAction = null; redeemToast.timer = null; }, UNDO_TIMEOUT_MS);
+        }
+
+        // ===== Event Toast (level-up, achievement) =====
+        function showEventToast(icon, title, message) {
+          if (eventToast.timer) clearTimeout(eventToast.timer);
+          eventToast.visible = false;
+          requestAnimationFrame(() => {
+            eventToast.icon = icon;
+            eventToast.title = title;
+            eventToast.message = message;
+            eventToast.visible = true;
+            eventToast.timer = setTimeout(() => { eventToast.visible = false; eventToast.timer = null; }, 3500);
+          });
+        }
+
+        // ===== 工具函数 =====
         function structuredCloneSafe(data) {
           if (data === undefined || data === null) return data;
           return JSON.parse(JSON.stringify(data));
@@ -596,14 +1167,25 @@
           return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         }
 
+        function clamp(value, min, max) {
+          return Math.min(max, Math.max(min, value));
+        }
+
         function getBlankHabit() {
-          return { id: null, name: '', frequencyType: 'daily', weeklyTarget: 3, expReward: 10, currentStreak: 0, maxStreak: 0 };
+          return { id: null, name: '', frequencyType: 'daily', weeklyTarget: 3, monthlyTarget: 15, expReward: 10, currentStreak: 0, maxStreak: 0, archived: false };
         }
 
         function getBlankStoreItem() {
           return { id: null, name: '', expCost: 15, stock: -1 };
         }
 
+        function formatTime(timestamp) { const d = new Date(timestamp||Date.now()); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+        function formatDateTime(timestamp) {
+          const date = new Date(timestamp || Date.now());
+          return `${formatDate(date)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        // ===== 图标 =====
         function icon(name) {
           const icons = {
             target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>',
@@ -612,11 +1194,29 @@
             checkCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>',
             edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"></path></svg>',
             trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 15H6L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>',
-            list: '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>'
+            list: '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>',
+            archive: '<svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>',
+            bell: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+            trophy: '<svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>',
+            download: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+            upload: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
+            moon: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+            sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+            palette: '<svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="17.5" cy="10.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="8.5" cy="7.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="6.5" cy="12.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>',
+            globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
+            helpCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            flame: '<svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>',
+            chevronDown: '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>',
+            barChart: '<svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>',
+            trendingUp: '<svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>',
+            settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+            database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
+            info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
           };
           return icons[name] || '';
         }
 
+        // ===== IndexedDB =====
         function openDatabase() {
           if (dbPromise) return dbPromise;
           dbPromise = new Promise((resolve, reject) => {
@@ -686,7 +1286,9 @@
             writeDBValue(STORAGE.habits, habits.value),
             writeDBValue(STORAGE.checkIns, checkIns.value),
             writeDBValue(STORAGE.store, storeItems.value),
-            writeDBValue(STORAGE.rewardHistory, rewardHistory.value)
+            writeDBValue(STORAGE.rewardHistory, rewardHistory.value),
+            writeDBValue('my_checkin_explogs_v2', expLogs.value),
+            writeDBValue('my_checkin_achievements_v2', achievements.value)
           ]);
         }
 
@@ -726,72 +1328,76 @@
           checkIns.value = await readDBValue(STORAGE.checkIns, []);
           storeItems.value = await readDBValue(STORAGE.store, storeItems.value);
           rewardHistory.value = await readDBValue(STORAGE.rewardHistory, []);
+          expLogs.value = await readDBValue('my_checkin_explogs_v2', []);
+          achievements.value = await readDBValue('my_checkin_achievements_v2', []);
           normalizeData();
         }
 
+        // ===== 数据校验 =====
         function normalizeData() {
           userProfile.value.currentExp = Math.max(0, Number(userProfile.value.currentExp) || 0);
           userProfile.value.totalExp = Math.max(0, Number(userProfile.value.totalExp) || 0);
           habits.value = habits.value.map(habit => ({
             ...getBlankHabit(),
             ...habit,
+            name: String(habit.name || '').slice(0, HABIT_NAME_MAX),
             weeklyTarget: clamp(Number(habit.weeklyTarget) || 3, 1, 7),
-            expReward: Math.max(1, Number(habit.expReward) || 10),
-            currentStreak: Number(habit.currentStreak) || 0,
-            maxStreak: Number(habit.maxStreak) || 0
+            monthlyTarget: clamp(Number(habit.monthlyTarget) || 15, 1, 31),
+            expReward: clamp(Number(habit.expReward) || 10, 1, EXP_REWARD_MAX),
+            currentStreak: Math.max(0, Number(habit.currentStreak) || 0),
+            maxStreak: Math.max(0, Number(habit.maxStreak) || 0)
           }));
           checkIns.value = checkIns.value.filter(item => item && item.habitId && item.date);
-          storeItems.value = storeItems.value.map(item => ({ ...item, expCost: Math.max(1, Number(item.expCost) || 1), stock: Number(item.stock) }));
-          habits.value.forEach(habit => recalculateHabitStreak(habit.id));
-        }
-
-        const todayStr = computed(() => todayLocalDate());
-
-        function clamp(value, min, max) {
-          return Math.min(max, Math.max(min, value));
-        }
-
-        function formatDateTime(timestamp) {
-          const date = new Date(timestamp || Date.now());
-          return `${formatDate(date)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-        }
-
-        function closeModal(name) {
-          modals.value[name] = false;
-        }
-
-        function showAlert(message, title = '提示') {
-          return new Promise(resolve => {
-            dialog.value = { visible: true, type: 'alert', title, message, resolve };
+          storeItems.value = storeItems.value.map(item => {
+            const stock = Number(item.stock);
+            return {
+              ...item,
+              name: String(item.name || '').slice(0, STORE_NAME_MAX),
+              expCost: clamp(Number(item.expCost) || 1, 1, EXP_COST_MAX),
+              stock: Number.isInteger(stock) && stock >= -1 ? stock : -1
+            };
           });
+          habits.value.forEach(habit => { habit.archived = Boolean(habit.archived); recalculateHabitStreak(habit.id); });
+          // Init new arrays if missing
+          if (!Array.isArray(expLogs.value)) expLogs.value = [];
+          if (!Array.isArray(achievements.value)) achievements.value = [];
+          // Calculate level
+          userProfile.value.level = calcLevel(userProfile.value.totalExp);
         }
 
-        function showConfirm(message, title = '确认操作') {
-          return new Promise(resolve => {
-            dialog.value = { visible: true, type: 'confirm', title, message, resolve };
-          });
-        }
-
-        function closeDialog(result) {
-          const resolver = dialog.value.resolve;
-          dialog.value.visible = false;
-          dialog.value.resolve = null;
-          if (resolver) resolver(result);
-        }
-
-        function translateFreq(type) {
-          return type === 'weekly' ? '每周累计' : '每日要求';
-        }
+        // ===== 计算属性 =====
+        const todayStr = ref(todayLocalDate());
+        setInterval(() => { const d = todayLocalDate(); if (d !== todayStr.value) todayStr.value = d; }, 60_000);
 
         function isHabitDoneToday(habitId) {
           return checkIns.value.some(item => item.habitId === habitId && item.date === todayStr.value);
         }
 
-        const pendingHabits = computed(() => habits.value.filter(h => !isHabitDoneToday(h.id)));
-        const doneHabits = computed(() => habits.value.filter(h => isHabitDoneToday(h.id)));
-        const todayCompletedCount = computed(() => doneHabits.value.length);
-        const todayProgressPercent = computed(() => habits.value.length ? Math.round((todayCompletedCount.value / habits.value.length) * 100) : 0);
-        const isAllDoneToday = computed(() => habits.value.length > 0 && pendingHabits.value.length === 0);
+        function isHabitGoalMet(habit) {
+          if (habit.frequencyType === 'weekly') return getHabitWeekStats(habit).isMet;
+          if (habit.frequencyType === 'monthly') return getHabitMonthStats(habit).isMet;
+          return false;
+        }
+
+        function isHabitCompleted(habit) {
+          return isHabitDoneToday(habit.id) || isHabitGoalMet(habit);
+        }
+
+        const pendingHabits = computed(() => activeHabits.value.filter(h => !isHabitCompleted(h)));
+        const doneHabits = computed(() => activeHabits.value.filter(h => isHabitCompleted(h)));
+        const todayCompletedCount = computed(() => activeHabits.value.length ? doneHabits.value.length : 0);
+        const todayProgressPercent = computed(() => activeHabits.value.length ? Math.round((todayCompletedCount.value / activeHabits.value.length) * 100) : 0);
+        const levelProgress = computed(() => {
+          const lv = userProfile.value.level;
+          const curr = LEVEL_THRESHOLDS[lv - 1] || 0;
+          const next = LEVEL_THRESHOLDS[lv] || null;
+          if (next === null) return { percent: 100, current: curr, next: null, remaining: 0 };
+          const total = next - curr;
+          const done = userProfile.value.totalExp - curr;
+          const pct = Math.min(100, Math.round((done / total) * 100));
+          return { percent: pct, current: curr, next, remaining: next - userProfile.value.totalExp };
+        });
+        const isAllDoneToday = computed(() => activeHabits.value.length > 0 && pendingHabits.value.length === 0);
         const todayRedeemCount = computed(() => rewardHistory.value.filter(log => formatDate(new Date(log.timestamp)) === todayStr.value).length);
         const filteredStoreItems = computed(() => {
           const filtered = storeItems.value.filter(item => {
@@ -802,7 +1408,17 @@
           });
           return [...filtered].sort((a, b) => storeSort.value === 'asc' ? a.expCost - b.expCost : b.expCost - a.expCost);
         });
+        const filteredRewardHistory = computed(() => {
+          const currentMonth = todayStr.value.slice(0, 7);
+          return rewardHistory.value.filter(log => {
+            const date = formatDate(new Date(log.timestamp));
+            if (rewardHistoryFilter.value === 'today') return date === todayStr.value;
+            if (rewardHistoryFilter.value === 'month') return date.slice(0, 7) === currentMonth;
+            return true;
+          });
+        });
 
+        // ===== 周统计 =====
         function getWeekRange(dateStr = todayStr.value) {
           const date = parseDate(dateStr);
           const day = date.getDay() || 7;
@@ -822,16 +1438,33 @@
           return { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
         }
 
+        function getHabitMonthStats(habit) {
+          const now = new Date();
+          const y = now.getFullYear(), m = String(now.getMonth() + 1).padStart(2, '0');
+          const prefix = `${y}-${m}`;
+          const count = new Set(checkIns.value
+            .filter(item => item.habitId === habit.id && item.date.startsWith(prefix))
+            .map(item => item.date)).size;
+          const target = clamp(Number(habit.monthlyTarget) || 15, 1, 31);
+          return { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
+        }
+
         function getHabitItemsByDate(dateStr) {
           return checkIns.value
             .filter(item => item.date === dateStr)
             .map(item => {
               const habit = habits.value.find(h => h.id === item.habitId);
-              return habit ? { id: habit.id, logId: item.id, name: habit.name, expGained: item.expGained, isRetro: item.isRetro } : null;
+              return habit ? { id: habit.id, logId: item.id, name: habit.name, expGained: item.expGained, isRetro: item.isRetro, time: item.timestamp ? formatTime(item.timestamp) : '', note: item.note || '' } : null;
             })
             .filter(Boolean);
         }
 
+        function getTodayNote(habitId) {
+          const ci = checkIns.value.find(c => c.habitId === habitId && c.date === todayStr.value);
+          return ci && ci.note ? ci.note : '';
+        }
+
+        // ===== 日历 =====
         function monthDiffFromCurrent(ym) {
           const now = parseDate(todayStr.value);
           const [year, month] = ym.split('-').map(Number);
@@ -889,10 +1522,16 @@
           };
         });
 
+        // ===== 弹窗 =====
         function openHabitCalendar() {
           habitCalendarMonth.value = todayStr.value.slice(0, 7);
           selectedHabitDate.value = todayStr.value;
           modals.value.habitCalendar = true;
+        }
+
+        function openRewardHistory() {
+          rewardHistoryFilter.value = 'all';
+          modals.value.rewardHistory = true;
         }
 
         function shiftHabitCalendarMonth(direction) {
@@ -911,6 +1550,34 @@
           selectedHabitDate.value = date;
         }
 
+        function closeModal(name) {
+          modals.value[name] = false;
+        }
+
+        function showAlert(message, title) { title = title || t('alertTitle');
+          return new Promise(resolve => {
+            dialog.value = { visible: true, type: 'alert', title, message, resolve };
+          });
+        }
+
+        function showConfirm(message, title) { title = title || t('confirmTitle');
+          return new Promise(resolve => {
+            dialog.value = { visible: true, type: 'confirm', title, message, resolve };
+          });
+        }
+
+        function closeDialog(result) {
+          const resolver = dialog.value.resolve;
+          dialog.value.visible = false;
+          dialog.value.resolve = null;
+          if (resolver) resolver(result);
+        }
+
+        function translateFreq(type) {
+          return type === 'weekly' ? t('weekTotal') : type === 'monthly' ? t('monthTotal') : t('daily');
+        }
+
+        // ===== 震动 =====
         function vibrateOnCheckIn() {
           try {
             if (window.plus && plus.device && typeof plus.device.vibrate === 'function') {
@@ -939,18 +1606,20 @@
           }
         }
 
+        // ===== 目标操作 =====
         function openHabitModal(habit = null) {
           habitForm.value = habit ? { ...habit, weeklyTarget: habit.weeklyTarget || 3 } : getBlankHabit();
           modals.value.habit = true;
         }
 
-        function saveHabit() {
+        async function saveHabit() {
           const data = { ...habitForm.value };
-          data.name = data.name.trim();
-          data.expReward = Math.max(1, Number(data.expReward) || 0);
+          data.name = data.name.trim().slice(0, HABIT_NAME_MAX);
+          data.expReward = clamp(Number(data.expReward) || 10, 1, EXP_REWARD_MAX);
           data.weeklyTarget = clamp(Number(data.weeklyTarget) || 3, 1, 7);
-          if (!data.name) return showAlert('请填写目标名称');
-          if (data.expReward <= 0) return showAlert('经验值奖励需大于 0');
+          data.monthlyTarget = clamp(Number(data.monthlyTarget) || 15, 1, 31);
+          if (!data.name) return showAlert(t('needGoalName'));
+          if (data.expReward <= 0) return showAlert(t('needPositiveEXP'));
 
           if (data.id) {
             const index = habits.value.findIndex(item => item.id === data.id);
@@ -961,15 +1630,15 @@
             habits.value.push({ ...data, id, currentStreak: 0, maxStreak: 0 });
           }
           modals.value.habit = false;
-          syncStorageData();
+          queueSaveData();
         }
 
         async function deleteHabitDirectly(id) {
-          const ok = await showConfirm('删除此目标会同时清理相关打卡和补签记录，确认删除吗？');
+          const ok = await showConfirm(t('deleteHabitConfirm'));
           if (!ok) return;
           habits.value = habits.value.filter(item => item.id !== id);
           checkIns.value = checkIns.value.filter(item => item.habitId !== id);
-          syncStorageData();
+          await syncStorageData();
         }
 
         function showHabitAction(habit) {
@@ -981,8 +1650,9 @@
 
         function startHabitLongPress(habit) {
           cancelHabitLongPress();
+          if (modals.value.habitAction) return;
           suppressHabitTap = false;
-          habitPressTimer = setTimeout(() => showHabitAction(habit), 550);
+          habitPressTimer = setTimeout(() => showHabitAction(habit), LONG_PRESS_MS);
         }
 
         function cancelHabitLongPress() {
@@ -992,16 +1662,42 @@
           }
         }
 
-        function toggleHabitToday(habitId) {
-          if (suppressHabitTap) {
-            suppressHabitTap = false;
-            return;
-          }
+        async function toggleHabitToday(habitId) {
+          if (suppressHabitTap) { suppressHabitTap = false; return; }
+          const habit = habits.value.find(h => h.id === habitId);
           if (isHabitDoneToday(habitId)) {
+            const ok = await showConfirm(t('undoCheckinConfirm').replace('%s', habit ? habit.name : ''));
+            if (!ok) return;
             undoCheckIn(habitId);
+            showToast(t('undoCheckin'));
+          } else if (habit && isHabitGoalMet(habit)) {
+            // Weekly/monthly goal already met, no more check-ins this period
+            return;
           } else {
-            triggerCheckIn(habitId, false);
+            // Show note modal after check-in (feature 3)
+            pendingNoteHabitId.value = habitId;
+            checkInNoteText.value = '';
+            const ciResult = triggerCheckIn(habitId, false);
+            if (ciResult && ciResult.ok) {
+              if (ciResult.streakBonus > 0) {
+                showAlert(t('streakReward').replace('%d', ciResult.streakDays).replace('%s', String(ciResult.streakBonus)), t('streak'))
+                  .then(() => { modals.value.checkInNote = true; });
+              } else {
+                modals.value.checkInNote = true;
+              }
+            }
           }
+        }
+
+        function submitCheckInNote() {
+          const habitId = pendingNoteHabitId.value;
+          if (habitId) {
+            const ci = checkIns.value.find(c => c.habitId === habitId && c.date === todayStr.value);
+            if (ci) { ci.note = String(checkInNoteText.value || '').slice(0, 200); queueSaveData(); }
+          }
+          pendingNoteHabitId.value = null;
+          checkInNoteText.value = '';
+          modals.value.checkInNote = false;
         }
 
         function editHabitFromAction() {
@@ -1024,6 +1720,7 @@
           selectedHabitItem.value = null;
         }
 
+        // ===== 连击计算 =====
         function recalculateHabitStreak(habitId) {
           const habit = habits.value.find(item => item.id === habitId);
           if (!habit) return { currentStreak: 0, maxStreak: 0 };
@@ -1052,33 +1749,69 @@
                 break;
               }
             }
+            // Streak liveness check: if the last check-in is too old, the streak is broken
+            const lastDate = dates[dates.length - 1];
+            const daysSinceLast = diffDays(todayStr.value, lastDate);
+            const maxGap = habit.frequencyType === 'weekly' ? 7 : 1;
+            if (daysSinceLast > maxGap) {
+              currentStreak = 0;
+            }
           }
           habit.currentStreak = currentStreak;
           habit.maxStreak = maxStreak;
           return { currentStreak, maxStreak };
         }
 
-        function triggerCheckIn(habitId, isRetro = false, specifiedDate = '') {
+        // ===== 打卡 =====
+        function triggerCheckIn(habitId, isRetro = false, specifiedDate = '', note = '') {
           const targetDate = isRetro ? specifiedDate : todayStr.value;
-          if (!targetDate) return showAlert('请选择有效日期');
-          if (targetDate > todayStr.value) return showAlert('不能选择未来日期');
-          if (checkIns.value.some(item => item.habitId === habitId && item.date === targetDate)) return showAlert('该日期已经打过卡了');
+          if (!targetDate) { showAlert(t('selectDate')); return { ok: false }; }
+          if (targetDate > todayStr.value) { showAlert(t('futureDate')); return { ok: false }; }
+          if (checkIns.value.some(item => item.habitId === habitId && item.date === targetDate)) { showAlert(t('alreadyChecked')); return { ok: false }; }
 
           const habit = habits.value.find(item => item.id === habitId);
-          if (!habit) return;
-          const checkIn = { id: getId('c'), habitId, date: targetDate, isRetro, expGained: 0, timestamp: Date.now() };
+          if (!habit) return { ok: false };
+          // Weekend double EXP (feature 11)
+          const weekend = isRetro ? false : isWeekend.value;
+          let baseExp = Number(habit.expReward) || 0;
+          let expMultiplier = weekend ? 2 : 1;
+          let expGained = baseExp * expMultiplier;
+
+          const checkIn = { id: getId('c'), habitId, date: targetDate, isRetro, expGained: 0, timestamp: Date.now(), note: String(note || '').slice(0, 200) };
           checkIns.value.push(checkIn);
           const result = recalculateHabitStreak(habitId);
-          let expGained = Number(habit.expReward) || 0;
-          if (result.currentStreak > 0 && result.currentStreak % 7 === 0 && isDateInLatestRun(habitId, targetDate)) {
-            expGained += 10;
-            showAlert(`连续 ${result.currentStreak} 天达成，额外奖励 10 EXP！`, '连击奖励');
+
+          // Streak bonus (also doubled on weekend)
+          let streakBonus = 0;
+          if (result.currentStreak > 0 && result.currentStreak % STREAK_BONUS_DAYS === 0 && isDateInLatestRun(habitId, targetDate)) {
+            streakBonus = STREAK_BONUS_EXP * expMultiplier;
+            expGained += streakBonus;
           }
           checkIn.expGained = expGained;
           userProfile.value.currentExp += expGained;
           userProfile.value.totalExp += expGained;
+
+          // EXP Log (feature 10)
+          expLogs.value.unshift({ id: getId('e'), type: 'checkin', amount: expGained, habitName: habit.name, timestamp: Date.now(), note: note || '' });
+
+          // Level up check (feature 13)
+          const oldLevel = userProfile.value.level;
+          userProfile.value.level = calcLevel(userProfile.value.totalExp);
+          if (userProfile.value.level > oldLevel) {
+            const LEVEL_UP_BONUS = 10;
+            userProfile.value.currentExp += LEVEL_UP_BONUS;
+            userProfile.value.totalExp += LEVEL_UP_BONUS;
+            expLogs.value.unshift({ id: getId('e'), type: 'levelup', amount: LEVEL_UP_BONUS, habitName: '', timestamp: Date.now(), note: 'Lv' + userProfile.value.level });
+            setTimeout(() => showEventToast('🎉', t('levelUpTitle'), t('levelUpMsg').replace('%d', userProfile.value.level) + ' | ' + t('levelUpBonus')), 600);
+          }
+
+          // Achievement check (feature 12)
+          checkAchievements();
+
           vibrateOnCheckIn();
-          syncStorageData();
+          showToast(t('expGainedToast').replace('%d', expGained));
+          queueSaveData();
+          return { ok: true, streakBonus, streakDays: result.currentStreak };
         }
 
         function isDateInLatestRun(habitId, date) {
@@ -1106,9 +1839,10 @@
           userProfile.value.totalExp = Math.max(0, userProfile.value.totalExp - (Number(log.expGained) || 0));
           checkIns.value.splice(index, 1);
           recalculateHabitStreak(habitId);
-          syncStorageData();
+          queueSaveData();
         }
 
+        // ===== 补签 =====
         function openRetroactiveModal(id) {
           activeRetroHabitId.value = id;
           retroDate.value = todayStr.value;
@@ -1116,11 +1850,17 @@
         }
 
         function submitRetroCheckIn() {
-          if (!retroDate.value) return showAlert('请选择补签日期');
-          triggerCheckIn(activeRetroHabitId.value, true, retroDate.value);
-          modals.value.retroactive = false;
+          if (!retroDate.value) return showAlert(t('selectRetroDate'));
+          const ciResult = triggerCheckIn(activeRetroHabitId.value, true, retroDate.value);
+          if (ciResult && ciResult.ok) {
+            modals.value.retroactive = false;
+            if (ciResult.streakBonus > 0) {
+              showAlert(t('streakReward').replace('%d', ciResult.streakDays).replace('%s', String(ciResult.streakBonus)), t('streak'));
+            }
+          }
         }
 
+        // ===== 商店操作 =====
         function openStoreModal(item = null) {
           storeForm.value = item ? { ...item } : getBlankStoreItem();
           modals.value.store = true;
@@ -1134,7 +1874,7 @@
 
         function startStoreLongPress(item) {
           cancelStoreLongPress();
-          storePressTimer = setTimeout(() => showStoreAction(item), 550);
+          storePressTimer = setTimeout(() => showStoreAction(item), LONG_PRESS_MS);
         }
 
         function cancelStoreLongPress() {
@@ -1158,11 +1898,11 @@
           selectedStoreItem.value = null;
         }
 
-        function saveStoreItem() {
-          const data = { ...storeForm.value, name: storeForm.value.name.trim(), expCost: Number(storeForm.value.expCost), stock: Number(storeForm.value.stock) };
-          if (!data.name) return showAlert('请填写商品名称');
-          if (!data.expCost || data.expCost <= 0) return showAlert('商品定价必须大于 0');
-          if (!Number.isInteger(data.stock) || data.stock < -1) return showAlert('库存只能填写 -1 或大于等于 0 的整数');
+        async function saveStoreItem() {
+          const data = { ...storeForm.value, name: storeForm.value.name.trim().slice(0, STORE_NAME_MAX), expCost: clamp(Number(storeForm.value.expCost), 1, EXP_COST_MAX), stock: Number(storeForm.value.stock) };
+          if (!data.name) return showAlert(t('needWishName'));
+          if (!data.expCost || data.expCost <= 0) return showAlert(t('needPositivePrice'));
+          if (!Number.isInteger(data.stock) || data.stock < -1) return showAlert(t('invalidStock'));
           if (data.id) {
             const index = storeItems.value.findIndex(item => item.id === data.id);
             if (index !== -1) storeItems.value[index] = data;
@@ -1170,36 +1910,65 @@
             storeItems.value.push({ ...data, id: getId('s') });
           }
           modals.value.store = false;
-          syncStorageData();
+          queueSaveData();
         }
 
         async function deleteStoreItem(id) {
-          const ok = await showConfirm('确认下架删除这个心愿商品吗？');
+          const ok = await showConfirm(t('deleteWishConfirm'));
           if (!ok) return;
           storeItems.value = storeItems.value.filter(item => item.id !== id);
-          syncStorageData();
+          await syncStorageData();
         }
 
         async function redeemReward(item) {
-          if (item.stock === 0) return showAlert('该心愿商品已售罄');
-          if (userProfile.value.currentExp < item.expCost) return showAlert('EXP 余额不足，先去打卡攒经验吧');
-          const ok = await showConfirm(`确认消耗 ${item.expCost} EXP 兑换「${item.name}」吗？`);
+          if (item.stock === 0) return showAlert(t('soldoutMsg'));
+          if (userProfile.value.currentExp < item.expCost) return showAlert(t('redeemInsufficient'));
+          const ok = await showConfirm(t('redeemConfirm').replace('%d', item.expCost).replace('%s', item.name));
           if (!ok) return;
           userProfile.value.currentExp -= item.expCost;
-          if (item.stock > 0) item.stock -= 1;
-          rewardHistory.value.unshift({ id: getId('r'), rewardName: item.name, costExp: item.expCost, timestamp: Date.now() });
+          const stockDecremented = item.stock > 0;
+          if (stockDecremented) item.stock -= 1;
+          const log = { id: getId('r'), rewardName: item.name, costExp: item.expCost, timestamp: Date.now(), revoked: false };
+          rewardHistory.value.unshift(log);
+          // EXP Log
+          expLogs.value.unshift({ id: getId('e'), type: 'redeem', amount: -item.expCost, rewardName: item.name, timestamp: Date.now(), note: '' });
           vibrateShort();
-          syncStorageData();
-          showAlert(`已成功兑换「${item.name}」`, '兑换成功');
+          await syncStorageData();
+          // Undo toast (feature 9)
+          let undone = false;
+          showRedeemToast(t('redeemSuccess').replace('%s', item.name), () => {
+            if (undone) return;
+            undone = true;
+            // Immediately hide toast to prevent double-click
+            redeemToast.visible = false;
+            redeemToast.undoable = false;
+            // Undo redeem
+            userProfile.value.currentExp += item.expCost;
+            if (stockDecremented) item.stock += 1;
+            log.revoked = true;
+            expLogs.value.unshift({ id: getId('e'), type: 'redeem_undo', amount: item.expCost, rewardName: item.name, timestamp: Date.now(), note: t('redeemRevokedMsg') });
+            showToast(t('redeemRevokedMsg'));
+            checkAchievements();
+            queueSaveData();
+          });
         }
 
         async function deleteRewardLog(id) {
-          const ok = await showConfirm('确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。');
+          const ok = await showConfirm(t('deleteRewardLogConfirm'));
           if (!ok) return;
           rewardHistory.value = rewardHistory.value.filter(log => log.id !== id);
-          syncStorageData();
+          queueSaveData();
         }
 
+        async function clearRewardHistory() {
+          const ok = await showConfirm(t('clearRewardHistoryConfirm'));
+          if (!ok) return;
+          rewardHistory.value = [];
+          rewardHistoryFilter.value = 'all';
+          await syncStorageData();
+        }
+
+        // ===== 滚动守卫 =====
         function installTouchScrollGuard() {
           let startY = 0;
 
@@ -1238,36 +2007,428 @@
             }
 
             const atTop = scrollable.scrollTop <= 0;
-            // 【修改点】：将原先的 -1 改为 -4，留出 4 像素的动态缓冲区，防止手机端因为小数像素判定失败
             const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 4;
 
             if (atTop && deltaY > 0) {
-              // 到达顶端且继续向下划（下拉），阻止默认行为（防止触发橡皮筋外层刷新）
               event.preventDefault();
             } else if (atBottom && deltaY < 0) {
-              // 到达底端且继续向上划（上拉），阻止默认行为
               event.preventDefault();
             }
           }, { passive: false });
+        }
+
+        // ===== 全局错误捕获 =====
+        window.addEventListener('error', event => {
+          console.error('全局错误:', event.error);
+        });
+        window.addEventListener('unhandledrejection', event => {
+          console.warn('未处理的 Promise 异常:', event.reason);
+        });
+
+        // ===== Export/Import (feature 1) =====
+        const appVersion = APP_VERSION;
+          async function exportData() {
+          const data = {
+            appVersion: APP_VERSION,
+            dataVersion: DATA_VERSION,
+            exportedAt: new Date().toISOString(),
+            profile: userProfile.value,
+            habits: habits.value,
+            checkIns: checkIns.value,
+            storeItems: storeItems.value,
+            rewardHistory: rewardHistory.value,
+            expLogs: expLogs.value,
+            achievements: achievements.value
+          };
+          const json = JSON.stringify(data, null, 2);
+          const filename = 'my_checkin_backup_' + todayStr.value + '.json';
+          const blob = new Blob([json], { type: 'application/json' });
+          // Mobile-friendly: try Web Share API first, then download, then clipboard
+          if (navigator.share && navigator.canShare) {
+            try {
+              const file = new File([json], filename, { type: 'application/json' });
+              if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: filename });
+              } else { throw 0; }
+            } catch (e) { if (e.name === 'AbortError') return; }
           }
+          // Fallback: blob download
+          try {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          } catch (e) {
+            // Last resort: copy to clipboard
+            try {
+              await navigator.clipboard.writeText(json);
+              showToast('✓ Clipboard');
+            } catch (e2) { console.warn('Export failed', e2); return; }
+          }
+          userProfile.value.lastBackupReminderDate = todayStr.value;
+          queueSaveData();
+          showToast(t('exportData') + ' ✓');
+        }
+
+        function triggerImportData() {
+          const input = importFileInput.value;
+          if (input) input.click();
+        }
+
+        function importData(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const data = JSON.parse(ev.target.result);
+              if (!data.profile || !Array.isArray(data.habits)) return showAlert('Invalid format');
+              pendingImportData.value = data;
+              modals.value.importChoice = true;
+            } catch (err) { showAlert('Invalid JSON'); }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
+        }
+
+        async function executeImport(mode) {
+          const data = pendingImportData.value;
+          if (!data) return;
+          closeModal('importChoice');
+          if (mode === 'overwrite') {
+            userProfile.value = { ...userProfile.value, ...data.profile, level: calcLevel(data.profile.totalExp || 0) };
+            habits.value = data.habits || [];
+            checkIns.value = data.checkIns || [];
+            storeItems.value = data.storeItems || [];
+            rewardHistory.value = data.rewardHistory || [];
+            expLogs.value = data.expLogs || [];
+            achievements.value = data.achievements || [];
+          } else {
+            // Merge: add habits that don't exist, merge checkins etc
+            const existingIds = new Set(habits.value.map(h => h.id));
+            (data.habits || []).forEach(h => { if (!existingIds.has(h.id)) habits.value.push(h); });
+            const existingCI = new Set(checkIns.value.map(c => c.id));
+            (data.checkIns || []).forEach(c => { if (!existingCI.has(c.id)) checkIns.value.push(c); });
+            const existingSI = new Set(storeItems.value.map(s => s.id));
+            (data.storeItems || []).forEach(s => { if (!existingSI.has(s.id)) storeItems.value.push(s); });
+            const existingRH = new Set(rewardHistory.value.map(r => r.id));
+            (data.rewardHistory || []).forEach(r => { if (!existingRH.has(r.id)) rewardHistory.value.unshift(r); });
+            if (data.profile) {
+              userProfile.value.totalExp = Math.max(userProfile.value.totalExp, data.profile.totalExp || 0);
+              userProfile.value.currentExp = Math.max(userProfile.value.currentExp, data.profile.currentExp || 0);
+              userProfile.value.level = calcLevel(userProfile.value.totalExp);
+            }
+          }
+          normalizeData();
+          await syncStorageData();
+          pendingImportData.value = null;
+          showToast(t('importData') + ' ✓');
+        }
+
+        // ===== Archive (feature 5) =====
+        function archiveHabit(habitId) {
+          const h = habits.value.find(x => x.id === habitId);
+          if (h) { h.archived = true; queueSaveData(); }
+        }
+
+        function unarchiveHabit(habitId) {
+          const h = habits.value.find(x => x.id === habitId);
+          if (h) { h.archived = false; queueSaveData(); }
+        }
+
+        function archiveHabitFromAction() {
+          if (!selectedHabitItem.value) return;
+          archiveHabit(selectedHabitItem.value.id);
+          closeModal('habitAction');
+          showToast(t('archive') + ' ✓');
+        }
+
+        // ===== Backup Reminder (feature 2) =====
+        const lastBackupDate = computed(() => userProfile.value.lastBackupReminderDate || '');
+        async function checkBackupReminder() {
+          const last = userProfile.value.lastBackupReminderDate || '';
+          if (!last) {
+            userProfile.value.lastBackupReminderDate = todayStr.value;
+            queueSaveData();
+            return;
+          }
+          const daysSince = diffDays(todayStr.value, last);
+          if (daysSince >= BACKUP_REMINDER_DAYS) {
+            await showAlert(t('backupReminderMsg'), t('backupReminderTitle'));
+            userProfile.value.lastBackupReminderDate = todayStr.value;
+            queueSaveData();
+          }
+        }
+
+        // ===== Reminder (feature 6) =====
+        function toggleReminder() {
+          userProfile.value.reminderEnabled = !userProfile.value.reminderEnabled;
+          queueSaveData();
+        }
+
+        // ===== Heatmap (feature 7) =====
+        const heatmapData = computed(() => {
+          const weeks = [];
+          const today = parseDate(todayStr.value);
+          const startDay = new Date(today);
+          startDay.setDate(today.getDate() - (HEATMAP_WEEKS * 7 - 1));
+          // Align to Monday
+          const startDow = startDay.getDay();
+          const aligned = new Date(startDay);
+          aligned.setDate(startDay.getDate() - ((startDow + 6) % 7));
+
+          for (let w = 0; w < HEATMAP_WEEKS; w++) {
+            const week = [];
+            for (let d = 0; d < 7; d++) {
+              const date = new Date(aligned);
+              date.setDate(aligned.getDate() + w * 7 + d);
+              const ds = formatDate(date);
+              if (ds > todayStr.value) {
+                week.push({ date: '', count: 0 });
+              } else {
+                const count = checkIns.value.filter(c => c.date === ds).length;
+                week.push({ date: ds, count });
+              }
+            }
+            weeks.push(week);
+          }
+          return weeks;
+        });
+
+        function getHeatLevel(count) {
+          if (count === 0) return 0;
+          if (count === 1) return 1;
+          if (count <= 3) return 2;
+          if (count <= 5) return 3;
+          return 4;
+        }
+
+        // ===== Weekly/Monthly Stats (feature 8) =====
+        const weeklyStats = computed(() => {
+          const range = getWeekRange();
+          const logs = checkIns.value.filter(c => c.date >= range.start && c.date <= range.end);
+          const weekExpLogs = expLogs.value.filter(e => {
+            const d = formatDate(new Date(e.timestamp));
+            return d >= range.start && d <= range.end && e.amount > 0 && (e.type === 'checkin' || e.type === 'streak_bonus' || e.type === 'achievement');
+          });
+          const totalActiveDays = habits.value.filter(h => !h.archived).length;
+          const effectiveDays = 7;
+          const habitDays = {};
+          logs.forEach(l => { habitDays[l.habitId] = (habitDays[l.habitId] || 0) + 1; });
+          let bestStreak = 0;
+          habits.value.filter(h => !h.archived).forEach(h => { bestStreak = Math.max(bestStreak, h.currentStreak || 0); });
+          return {
+            checkins: logs.length,
+            rate: totalActiveDays > 0 ? Math.round((new Set(logs.map(l => l.date)).size / effectiveDays) * 100) : 0,
+            expGained: weekExpLogs.reduce((s, e) => s + e.amount, 0),
+            bestStreak
+          };
+        });
+
+        const monthlyStats = computed(() => {
+          const ym = todayStr.value.slice(0, 7);
+          const logs = checkIns.value.filter(c => c.date.slice(0, 7) === ym);
+          const expEarnedLogs = expLogs.value.filter(e => e.amount > 0 && formatDate(new Date(e.timestamp)).slice(0, 7) === ym);
+          const expSpentLogs = expLogs.value.filter(e => e.amount < 0 && formatDate(new Date(e.timestamp)).slice(0, 7) === ym);
+          const habitCounts = {};
+          logs.forEach(l => { habitCounts[l.habitId] = (habitCounts[l.habitId] || 0) + 1; });
+          let topHabit = '';
+          let topCount = 0;
+          Object.entries(habitCounts).forEach(([hid, cnt]) => {
+            const h = habits.value.find(x => x.id === hid);
+            if (cnt > topCount && h) { topCount = cnt; topHabit = h.name; }
+          });
+          const now = new Date();
+          const dayOfMonth = now.getDate();
+          return {
+            checkDays: new Set(logs.map(l => l.date)).size,
+            rate: dayOfMonth > 0 ? Math.round((new Set(logs.map(l => l.date)).size / dayOfMonth) * 100) : 0,
+            expEarned: expEarnedLogs.reduce((s, e) => s + e.amount, 0),
+            expSpent: Math.abs(expSpentLogs.reduce((s, e) => s + e.amount, 0)),
+            topHabit
+          };
+        });
+
+        // ===== Achievements (feature 12) =====
+        const allAchievements = computed(() => {
+          const totalCheckins = checkIns.value.length;
+          let maxStreak = 0;
+          habits.value.forEach(h => { maxStreak = Math.max(maxStreak, h.maxStreak || 0); });
+          const totalRedeems = rewardHistory.value.filter(r => !r.revoked).length;
+          return ACHIEVEMENTS_DEF.map(a => {
+            const ach = achievements.value.find(x => x.id === a.id);
+            let name = a.id, desc = a.id;
+            if (lang.value === 'en') {
+              const nameMap = {first_checkin:'First Check-in',streak_7:'7-Day Streak',streak_30:'30-Day Streak',streak_100:'100-Day Streak',total_10:'10 Check-ins',total_50:'50 Check-ins',total_100:'100 Check-ins',total_365:'365 Check-ins',first_redeem:'First Redeem',redeem_10:'10 Redemptions'};
+              const descMap = {first_checkin:'Complete your first check-in',streak_7:'Reach a 7-day streak',streak_30:'Reach a 30-day streak',streak_100:'Reach a 100-day streak',total_10:'10 total check-ins',total_50:'50 total check-ins',total_100:'100 total check-ins',total_365:'365 total check-ins',first_redeem:'First redemption',redeem_10:'10 total redemptions'};
+              name = nameMap[a.id] || a.id; desc = descMap[a.id] || a.id;
+            } else {
+              name = t(a.id); desc = t(a.id + 'Desc');
+            }
+            return { ...a, name, desc, unlockedAt: ach ? ach.unlockedAt : null };
+          });
+        });
+
+        const unlockedAchievements = computed(() => allAchievements.value.filter(a => a.unlockedAt));
+
+        function isAchievementUnlocked(id) {
+          return achievements.value.some(a => a.id === id);
+        }
+
+        function checkAchievements() {
+          const ctx = {
+            totalCheckins: checkIns.value.length,
+            maxStreak: Math.max(0, ...habits.value.map(h => h.maxStreak || 0)),
+            totalRedeems: rewardHistory.value.filter(r => !r.revoked).length
+          };
+          const conditions = {
+            first_checkin: () => ctx.totalCheckins >= 1,
+            streak_7: () => ctx.maxStreak >= 7,
+            streak_30: () => ctx.maxStreak >= 30,
+            streak_100: () => ctx.maxStreak >= 100,
+            total_10: () => ctx.totalCheckins >= 10,
+            total_50: () => ctx.totalCheckins >= 50,
+            total_100: () => ctx.totalCheckins >= 100,
+            total_365: () => ctx.totalCheckins >= 365,
+            first_redeem: () => ctx.totalRedeems >= 1,
+            redeem_10: () => ctx.totalRedeems >= 10
+          };
+          ACHIEVEMENTS_DEF.forEach(ach => {
+            if (isAchievementUnlocked(ach.id)) return;
+            if (conditions[ach.id] && conditions[ach.id]()) {
+              achievements.value.push({ id: ach.id, unlockedAt: Date.now() });
+              userProfile.value.currentExp += ACHIEVEMENT_REWARD;
+              userProfile.value.totalExp += ACHIEVEMENT_REWARD;
+              userProfile.value.level = calcLevel(userProfile.value.totalExp);
+              expLogs.value.unshift({ id: getId('e'), type: 'achievement', amount: ACHIEVEMENT_REWARD, habitName: t(ach.id), timestamp: Date.now(), note: '' });
+              const achDef = allAchievements.value.find(a => a.id === ach.id);
+              setTimeout(() => showEventToast(achDef ? achDef.icon : '🏆', t('achievementTitle'), t('achievementMsg').replace('%s', achDef ? achDef.name : ach.id).replace('%d', ACHIEVEMENT_REWARD)), 300);
+              queueSaveData();
+            }
+          });
+        }
+
+        // ===== Onboarding (feature 17) =====
+        const onboardingSteps = computed(() => [
+          { icon: '🎯', title: t('addGoal'), desc: t('firstGoalDesc') },
+          { icon: '✨', title: 'EXP', desc: t('streakBonusDesc') },
+          { icon: '🎁', title: t('rewardStore'), desc: t('firstRewardDesc') }
+        ]);
+
+        function showOnboarding() { onboardingStep.value = 0; modals.value.onboarding = true; }
+        function closeOnboarding() { modals.value.onboarding = false; userProfile.value.tutorialDone = true; queueSaveData(); }
+
+        // ===== Reset App (feature 18) =====
+        async function resetApp() {
+          const ok = await showConfirm(t('resetMsg'), t('resetConfirm'));
+          if (!ok) return;
+          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: null, themeColor: 'amber', lastBackupReminderDate: '', reminderEnabled: false, reminderTime: '09:00', tutorialDone: false };
+          habits.value = [];
+          checkIns.value = [];
+          storeItems.value = [
+            { id: 's1', name: t('defaultWish1'), expCost: 20, stock: -1 },
+            { id: 's2', name: t('defaultWish2'), expCost: 35, stock: 5 },
+            { id: 's3', name: t('defaultWish3'), expCost: 15, stock: -1 }
+          ];
+          rewardHistory.value = [];
+          expLogs.value = [];
+          achievements.value = [];
+          await syncStorageData();
+          showToast(t('resetApp') + ' ✓');
+        }
+
+        // ===== weekLabels computed =====
+        const weekLabels = computed(() => lang.value === 'en' ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['一','二','三','四','五','六','日']);
+
+        // ===== 初始化 =====
+        // --- Theme color override ---
+        function applyThemeOverride(c) {
+          const colorMap = {
+            amber:   { 50:'#fffbeb', 100:'#fef3c7', 400:'#fbbf24', 500:'#f59e0b', 600:'#d97706', 700:'#b45309' },
+            rose:    { 50:'#fff1f2', 100:'#ffe4e6', 400:'#fb7185', 500:'#f43f5e', 600:'#e11d48', 700:'#be123c' },
+            violet:  { 50:'#f5f3ff', 100:'#ede9fe', 400:'#a78bfa', 500:'#8b5cf6', 600:'#7c3aed', 700:'#6d28d9' },
+            emerald: { 50:'#ecfdf5', 100:'#d1fae5', 400:'#34d399', 500:'#10b981', 600:'#059669', 700:'#047857' },
+            sky:     { 50:'#f0f9ff', 100:'#e0f2fe', 400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1' }
+          };
+          const cm = colorMap[c] || colorMap.amber;
+          const css = `
+            #app[data-theme="${c}"] .bg-amber-50{background-color:${cm[50]} !important}
+            #app[data-theme="${c}"] .bg-amber-400{background-color:${cm[400]} !important}
+            #app[data-theme="${c}"] .bg-amber-500{background-color:${cm[500]} !important}
+            #app[data-theme="${c}"] .text-amber-500{color:${cm[500]} !important}
+            #app[data-theme="${c}"] .text-amber-600{color:${cm[600]} !important}
+            #app[data-theme="${c}"] .text-amber-700{color:${cm[700]} !important}
+            #app[data-theme="${c}"] .border-amber-100{border-color:${cm[100]} !important}
+            #app[data-theme="${c}"] .ring-amber-300{--tw-ring-color:${cm[100]} !important}
+            #app[data-theme="${c}"] .ring-amber-400{--tw-ring-color:${cm[400]} !important}
+            #app[data-theme="${c}"] .active\\:text-amber-600:active{color:${cm[600]} !important}
+            #app[data-theme="${c}"] .active\\:bg-amber-50:active{background-color:${cm[50]} !important}
+          `;
+          let el = document.getElementById('theme-override');
+          if (!el) {
+            el = document.createElement('style');
+            el.id = 'theme-override';
+            document.head.appendChild(el);
+          }
+          el.textContent = css;
+        }
 
         onMounted(async () => {
           installTouchScrollGuard();
-          await loadLocalStorage();
+          try {
+            await loadLocalStorage();
+          } catch (error) {
+            console.error('数据加载失败，使用默认数据。', error);
+          }
+          appLoading.value = false;
+          // Apply initial theme color override
+          applyThemeOverride(userProfile.value.themeColor || 'amber');
+          // Sync #app attributes (Vue 3 cannot bind attrs on mount element)
+          const appEl = document.getElementById('app');
+          function syncAppAttrs() {
+            const cls = [];
+            if (darkMode.value) cls.push('dark');
+            cls.push('theme-' + themeColor.value);
+            appEl.className = 'app-root max-w-md mx-auto relative overflow-hidden ' + cls.join(' ');
+            appEl.setAttribute('data-theme', themeColor.value);
+          }
+          syncAppAttrs();
+          watch([darkMode, themeColor], syncAppAttrs);
+          // Backup reminder (feature 2)
+          setTimeout(() => checkBackupReminder(), 1000);
+          // Onboarding for first-time users (feature 17)
+          if (habits.value.length === 0 && checkIns.value.length === 0 && !userProfile.value.tutorialDone) {
+            setTimeout(() => { onboardingStep.value = 0; modals.value.onboarding = true; }, 800);
+          }
         });
 
         return {
-          activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, storeFilter, storeSort, filteredStoreItems, todayRedeemCount,
-          dialog, closeDialog,
+          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeFilter, storeSort, rewardHistoryFilter, filteredStoreItems, filteredRewardHistory, todayRedeemCount,
+          calendarSubTab, toast, dialog, closeDialog, redeemToast, eventToast, showEventToast,
           modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, selectedStoreItem, habitCalendarMonth, selectedHabitDate,
           todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
-          pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, isAllDoneToday,
-          icon, formatDateTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, openHabitModal, saveHabit,
-          deleteHabitDirectly, showHabitAction, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, openHabitCalendar, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
-          openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, deleteRewardLog
+          pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, levelProgress, isAllDoneToday,
+          lang, darkMode, darkModeAuto, themeColor, themeColors, isWeekend, activeHabits, archivedHabits,
+          t, setDarkMode, setThemeColor, setLanguage,
+          checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep,
+          weekLabels, allAchievements, unlockedAchievements, isAchievementUnlocked,
+          weeklyStats, monthlyStats, heatmapData, getHeatLevel, lastBackupDate, onboardingSteps, appVersion,
+          showArchived, icon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getTodayNote, getHabitItemsByDate, openHabitModal, saveHabit,
+          deleteHabitDirectly, showHabitAction, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, submitCheckInNote, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, archiveHabitFromAction, openHabitCalendar, openRewardHistory, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
+          openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, deleteRewardLog, clearRewardHistory,
+          exportData, triggerImportData, importData, executeImport, unarchiveHabit, toggleReminder, showOnboarding, closeOnboarding, resetApp, openHabitCalendarDetail: selectHabitCalendarDate
         };
       }
     }).mount('#app');
   </script>
+
+  <!-- Toast 过渡样式 -->
+  <style>
+    .toast-enter-active { transition: all .2s ease-out; }
+    .toast-leave-active { transition: all .2s ease-in; }
+    .toast-enter-from { opacity: 0; transform: translate(-50%, -8px); }
+    .toast-leave-to { opacity: 0; transform: translate(-50%, -8px); }
+  </style>
 </body>
 </html>
