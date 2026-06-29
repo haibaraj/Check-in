@@ -142,7 +142,7 @@
         <span class="icon-line !w-8 !h-8 text-slate-950" v-html="icon('target')"></span>
       </div>
       <div class="text-center">
-        <p class="text-sm font-black" :style="{color: darkMode ? '#e2e8f0' : '#1e293b'}">呱呱呱呱呱呱</p>
+        <p class="text-sm font-bold" :style="{color: darkMode ? '#e2e8f0' : '#1e293b'}">呱呱呱呱呱呱</p>
         <p class="text-xs mt-1" :style="{color: darkMode ? '#6366f1' : '#94a3b8'}">{{t('loading')}}</p>
       </div>
     </div>
@@ -150,79 +150,74 @@
     <main class="app-main overflow-hidden">
       <!-- 今日打卡 Tab -->
       <section v-show="activeTab === 'habit'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
+        <!-- 轻量统计栏 -->
         <div class="mb-3">
-          <div class="soft-card rounded-3xl p-3">
-            <div class="grid grid-cols-3 gap-2 text-center mb-3">
-              <div class="bg-gradient-to-b from-amber-100/70 to-amber-50 rounded-2xl py-2.5 px-1">
-                <p class="text-[11px] font-bold text-amber-500 mb-0.5">Lv{{ userProfile.level }}</p>
-                <p class="text-xl font-black text-amber-600 tracking-tight leading-none">{{ userProfile.currentExp }}</p>
-                <div class="mt-1.5 px-2">
-                  <div class="h-1.5 rounded-full bg-white/80 overflow-hidden shadow-inner">
-                    <div class="h-full bg-gradient-to-r from-amber-300 to-amber-500 rounded-full transition-all duration-300" :style="{ width: levelProgress.percent + '%' }"></div>
+          <div class="soft-card rounded-2xl p-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <div class="shrink-0">
+                  <p class="text-[11px] font-medium text-slate-400">Lv{{ userProfile.level }}</p>
+                  <p class="text-lg font-bold text-amber-600 leading-tight">{{ userProfile.currentExp }} <span class="text-xs font-medium text-slate-300">EXP</span></p>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                    <div class="h-full bg-amber-400 rounded-full transition-all duration-300" :style="{ width: levelProgress.percent + '%' }"></div>
                   </div>
-                  <p v-if="levelProgress.next" class="text-[8px] text-amber-400 mt-1 font-bold">{{ levelProgress.remaining }} → Lv{{ userProfile.level + 1 }}</p>
-                  <p v-else class="text-[8px] text-amber-400 mt-1 font-bold">MAX</p>
+                  <p v-if="levelProgress.next" class="text-xs text-slate-400 mt-0.5">{{ levelProgress.remaining }} → Lv{{ userProfile.level + 1 }}</p>
                 </div>
               </div>
-              <div class="bg-slate-50 rounded-2xl py-2.5 px-1">
-                <p class="text-[11px] font-bold text-slate-400 mb-0.5">{{t('totalEarned')}}</p>
-                <p class="text-xl font-black text-slate-600 tracking-tight leading-none">{{ userProfile.totalExp }}</p>
+              <div class="shrink-0 flex items-center gap-3 pl-4 border-l border-slate-100 ml-3">
+                <div class="text-right">
+                  <p class="text-[11px] font-medium text-slate-400">{{t('todayDone')}}</p>
+                  <p class="text-lg font-bold text-emerald-600 leading-tight">{{ todayCompletedCount }}<span class="text-xs font-medium text-slate-300">/{{ activeHabits.length }}</span></p>
+                </div>
               </div>
-              <div class="bg-gradient-to-b from-emerald-100/60 to-emerald-50 rounded-2xl py-2.5 px-1">
-                <p class="text-[11px] font-bold text-emerald-500 mb-0.5">{{t('todayDone')}}</p>
-                <p class="text-xl font-black text-emerald-600 tracking-tight leading-none">{{ todayCompletedCount }}<span class="text-sm font-black text-emerald-400">/{{ activeHabits.length }}</span></p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2.5 px-1">
-              <span class="text-[10px] text-slate-400 font-bold">{{t('todayProgress')}}</span>
-              <div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-amber-300 to-amber-500 rounded-full transition-all duration-500" :style="{ width: todayProgressPercent + '%' }"></div>
-              </div>
-              <span class="text-xs text-amber-600 font-black min-w-[2.2rem]">{{ todayProgressPercent }}%</span>
             </div>
           </div>
         </div>
 
-        <!-- Header row: normal mode -->
+        <!-- Header row -->
         <div class="flex items-center justify-between mb-3 px-1">
-          <div class="flex items-center gap-1.5">
-            <span class="icon-line !w-4 !h-4 text-slate-400" v-html="icon('target')"></span>
-            <span class="text-base font-black text-slate-800">{{t('checkGoals')}}</span>
+          <div class="flex items-center gap-2">
+            <span class="icon-line !w-5 !h-5 text-slate-400" v-html="icon('target')"></span>
+            <span class="text-lg font-bold text-slate-800">{{t('checkGoals')}}</span>
           </div>
           <div class="flex items-center gap-2">
-            <button @click="habitSort = habitSort === 'created' ? 'streak' : habitSort === 'streak' ? 'category' : 'created'" class="flex items-center gap-1 text-[10px] font-black px-2.5 py-1.5 rounded-full min-h-[32px]" :style="{background:darkMode?'#1e1b4b':'#fff',color:darkMode?'#c4b5fd':'#94a3b8'}">
-              <span class="icon-line !w-3 !h-3" v-html="icon('sort')"></span>
+            <button @click="habitSort = habitSort === 'created' ? 'streak' : habitSort === 'streak' ? 'category' : 'created'" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full min-h-[36px]" :style="{background:darkMode?'#1e1b4b':'#fff',color:darkMode?'#c4b5fd':'#94a3b8'}">
+              <span class="icon-line !w-3.5 !h-3.5" v-html="icon('sort')"></span>
               <span>{{ t('sortBy' + (habitSort === 'created' ? 'Created' : habitSort === 'streak' ? 'Streak' : 'Category')) }}</span>
             </button>
-            <button @click="openHabitModal(null)" class="text-[12px] bg-amber-400 text-slate-950 px-4 py-2 rounded-full font-black shadow-md shadow-amber-400/25 min-h-[40px]">{{t('addGoal')}}</button>
+            <button @click="openHabitModal(null)" class="text-sm bg-amber-400 text-slate-950 px-4 py-2 rounded-full font-bold shadow-md shadow-amber-400/25 min-h-[44px] active:scale-95 transition-transform duration-150">{{t('addGoal')}}</button>
           </div>
         </div>
 
         <div class="flex-1 min-h-0 scroll-area">
+          <!-- 空状态 -->
           <div v-if="activeHabits.length === 0" class="soft-card rounded-[1.75rem] p-8 text-center text-sm relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-amber-100/40 via-transparent to-indigo-100/30 pointer-events-none"></div>
             <div class="relative">
               <div class="w-20 h-20 mx-auto rounded-[1.5rem] bg-gradient-to-br from-amber-100 to-amber-50 text-amber-500 flex items-center justify-center mb-4 shadow-inner">
                 <span class="icon-line !w-9 !h-9" v-html="icon('target')"></span>
               </div>
-              <p class="font-black text-slate-800 text-base">{{t('createFirstGoal')}}</p>
-              <p class="text-xs text-slate-400 mt-2 leading-relaxed max-w-[85%] mx-auto">{{t('firstGoalDesc')}}</p>
-              <button @click="openHabitModal(null)" class="mt-5 bg-amber-400 text-slate-950 px-6 py-3 rounded-full text-sm font-black shadow-md shadow-amber-400/25 min-h-[48px]">{{t('addGoal')}}</button>
+              <p class="font-bold text-slate-800 text-base">{{t('createFirstGoal')}}</p>
+              <p class="text-sm text-slate-400 mt-2 leading-relaxed max-w-[85%] mx-auto">{{t('firstGoalDesc')}}</p>
+              <button @click="openHabitModal(null)" class="mt-5 bg-amber-400 text-slate-950 px-6 py-3 rounded-full text-sm font-bold shadow-md shadow-amber-400/25 min-h-[48px] active:scale-95 transition-transform duration-150">{{t('addGoal')}}</button>
             </div>
           </div>
 
           <div v-else>
-            <div v-if="isAllDoneToday" class="mb-3 bg-gradient-to-r from-emerald-50 to-amber-50 border border-emerald-100 rounded-2xl p-2.5">
-              <p class="text-xs font-black text-emerald-700 flex items-center gap-1.5">
-                <span class="icon-line !w-3.5 !h-3.5" v-html="icon('checkCircle')"></span>
+            <!-- 全部完成提示 -->
+            <div v-if="isAllDoneToday" class="mb-3 bg-gradient-to-r from-emerald-50 to-amber-50 border border-emerald-100 rounded-2xl p-3">
+              <p class="text-sm font-bold text-emerald-700 flex items-center gap-2">
+                <span class="icon-line !w-4 !h-4" v-html="icon('checkCircle')"></span>
                 <span>{{t('allDoneToday')}}</span>
               </p>
             </div>
 
             <!-- 待打卡 -->
             <div v-if="pendingHabits.length > 0" class="mb-3">
-              <h3 class="text-[11px] font-black text-slate-300 mb-1.5 px-1">{{t('pending')}} ({{ pendingHabits.length }})</h3>
-              <transition-group name="habit" tag="div" class="space-y-1.5 relative">
+              <h3 class="text-xs font-semibold text-slate-400 mb-2 px-1">{{t('pending')}} ({{ pendingHabits.length }})</h3>
+              <transition-group name="habit" tag="div" class="space-y-2 relative">
                 <article
                   v-for="habit in pendingHabits"
                   :key="habit.id"
@@ -234,49 +229,44 @@
                   @mouseup="cancelHabitLongPress"
                   @mouseleave="cancelHabitLongPress"
                   @contextmenu.prevent="showHabitAction(habit)"
-                  class="soft-card rounded-2xl p-3 active:scale-[0.99] transition-all select-none"
+                  class="soft-card rounded-2xl p-4 active:scale-[0.99] transition-all select-none"
                 >
-                  <div class="flex items-center gap-2.5">
-                     <div class="min-w-0 flex-1">
-                       <div class="flex flex-wrap items-center gap-1 mb-0.5">
-                        <h3 class="font-black text-sm truncate text-slate-800 max-w-[60%]">{{ habit.name }}</h3>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 bg-indigo-50 text-indigo-600">{{ translateFreq(habit.frequencyType) }}</span>
-                        <span v-if="isWeekend" class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 font-black bg-amber-50 text-amber-600">{{t('doubleEXP')}}</span>
+                  <div class="flex items-center gap-3">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-bold text-base text-slate-800 truncate">{{ habit.name }}</h3>
+                        <span class="text-xs px-2 py-0.5 rounded-lg shrink-0 bg-indigo-50 text-indigo-600 font-medium">{{ translateFreq(habit.frequencyType) }}</span>
+                        <span v-if="isWeekend" class="text-xs px-2 py-0.5 rounded-lg shrink-0 font-semibold bg-amber-50 text-amber-600">{{t('doubleEXP')}}</span>
                       </div>
-                      <div class="flex items-center gap-x-2 text-xs">
-                        <span class="font-bold text-orange-500 flex items-center gap-0.5">
-                          <span v-if="habit.currentStreak >= 30" class="icon-line !w-3.5 !h-3.5 text-red-500" v-html="icon('flame')"></span>
-                          <span v-else-if="habit.currentStreak >= 7" class="icon-line !w-3 !h-3 text-orange-500" v-html="icon('flame')"></span>
-                          <span v-else-if="habit.currentStreak > 0" class="icon-line !w-2.5 !h-2.5 text-amber-400" v-html="icon('flame')"></span>
-                          {{t('streak')}} {{ habit.currentStreak || 0 }} {{t('days')}}
+                      <div class="flex items-center gap-3 text-sm text-slate-500">
+                        <span class="font-semibold text-orange-500 flex items-center gap-1">
+                          <span v-if="habit.currentStreak >= 30" class="icon-line !w-4 !h-4 text-red-500" v-html="icon('flame')"></span>
+                          <span v-else-if="habit.currentStreak >= 7" class="icon-line !w-3.5 !h-3.5 text-orange-500" v-html="icon('flame')"></span>
+                          <span v-else-if="habit.currentStreak > 0" class="icon-line !w-3 !h-3 text-amber-400" v-html="icon('flame')"></span>
+                          <span v-else class="icon-line !w-3 !h-3 text-slate-300" v-html="icon('flame')"></span>
+                          {{ habit.currentStreak || 0 }} {{t('days')}}
                         </span>
-                        <span class="text-slate-300">·</span>
-                        <span class="text-slate-400">{{t('best')}} {{ habit.maxStreak || 0 }} {{t('days')}}</span>
-                      </div>
-                      <div class="mt-1.5 flex items-center gap-2">
-                        <div class="flex gap-1">
-                          <span v-for="n in 7" :key="n" class="w-1.5 h-1.5 rounded-full" :class="n <= Math.min(habit.currentStreak || 0, 7) ? 'bg-amber-400' : 'bg-slate-100'"></span>
-                        </div>
-                        <span class="text-[10px] text-slate-300">+{{ habit.expReward }} EXP</span>
+                        <span class="text-slate-300">|</span>
+                        <span class="text-slate-400">+{{ habit.expReward }} EXP</span>
                       </div>
                     </div>
-                    <div class="shrink-0 bg-amber-400 text-slate-950 text-xs font-black px-3.5 py-2 rounded-full shadow-sm min-h-[36px] flex items-center">
+                    <div class="shrink-0 bg-amber-400 text-slate-950 text-sm font-bold px-5 py-2.5 rounded-full shadow-sm min-h-[40px] flex items-center">
                       {{t('checkin')}}
                     </div>
                   </div>
 
                   <div v-if="habit.frequencyType === 'weekly'" class="mt-3">
-                    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                      <span>{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
+                    <div class="flex justify-between text-xs text-slate-400 mb-1">
+                      <span class="font-medium">{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
                       <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">{{t('weekMet')}}</span>
                     </div>
                     <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
                       <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
                     </div>
                   </div>
-                  <div v-if="habit.frequencyType === 'monthly'" class="mt-2">
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                      <span>{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
+                  <div v-if="habit.frequencyType === 'monthly'" class="mt-3">
+                    <div class="flex justify-between text-xs text-slate-400 mb-1">
+                      <span class="font-medium">{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
                       <span v-if="getHabitMonthStats(habit).isMet" class="text-emerald-600 font-bold">{{t('monthMet')}}</span>
                     </div>
                     <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -289,8 +279,8 @@
 
             <!-- 已完成 -->
             <div v-if="doneHabits.length > 0" class="mb-3">
-              <h3 class="text-[11px] font-black text-slate-300 mb-1.5 px-1">{{t('completed')}} ({{ doneHabits.length }})</h3>
-              <transition-group name="habit" tag="div" class="space-y-1.5 relative">
+              <h3 class="text-xs font-semibold text-slate-400 mb-2 px-1">{{t('completed')}} ({{ doneHabits.length }})</h3>
+              <transition-group name="habit" tag="div" class="space-y-2 relative">
                 <article
                   v-for="habit in doneHabits"
                   :key="habit.id"
@@ -302,47 +292,46 @@
                   @mouseup="cancelHabitLongPress"
                   @mouseleave="cancelHabitLongPress"
                   @contextmenu.prevent="showHabitAction(habit)"
-                  class="rounded-2xl border p-3 active:scale-[0.99] transition-all select-none bg-white/70 border-emerald-100"
+                  class="rounded-2xl border p-4 active:scale-[0.99] transition-all select-none bg-white/70 border-emerald-100"
                 >
-                  <div class="flex items-center gap-2.5">
+                  <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1">
-                      <div class="flex flex-wrap items-center gap-1 mb-0.5">
-                        <h3 class="font-black text-sm truncate text-slate-500 max-w-[60%]">{{ habit.name }}</h3>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded-md shrink-0 bg-emerald-50 text-emerald-600">{{ translateFreq(habit.frequencyType) }}</span>
+                      <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-bold text-base text-slate-500 truncate">{{ habit.name }}</h3>
+                        <span class="text-xs px-2 py-0.5 rounded-lg shrink-0 bg-emerald-50 text-emerald-600 font-medium">{{ translateFreq(habit.frequencyType) }}</span>
                       </div>
-                      <div class="flex items-center gap-x-2 text-xs text-slate-400">
-                        <span class="flex items-center gap-0.5">
-                          <span v-if="habit.currentStreak >= 30" class="icon-line !w-3 !h-3 text-red-400" v-html="icon('flame')"></span>
-                          <span v-else-if="habit.currentStreak >= 7" class="icon-line !w-2.5 !h-2.5 text-orange-400" v-html="icon('flame')"></span>
-                          <span v-else-if="habit.currentStreak > 0" class="icon-line !w-2 !h-2 text-amber-400" v-html="icon('flame')"></span>
-                          {{t('streak')}} {{ habit.currentStreak || 0 }} {{t('days')}}
+                      <div class="flex items-center gap-3 text-sm text-slate-400">
+                        <span class="flex items-center gap-1">
+                          <span v-if="habit.currentStreak >= 30" class="icon-line !w-3.5 !h-3.5 text-red-400" v-html="icon('flame')"></span>
+                          <span v-else-if="habit.currentStreak >= 7" class="icon-line !w-3 !h-3 text-orange-400" v-html="icon('flame')"></span>
+                          <span v-else-if="habit.currentStreak > 0" class="icon-line !w-3 !h-3 text-amber-400" v-html="icon('flame')"></span>
+                          <span v-else class="icon-line !w-3 !h-3 text-slate-300" v-html="icon('flame')"></span>
+                          {{ habit.currentStreak || 0 }} {{t('days')}}
                         </span>
-                        <span class="text-slate-300">·</span>
-                        <span>{{t('best')}} {{ habit.maxStreak || 0 }} {{t('days')}}</span>
-                        <span class="text-slate-300">·</span>
+                        <span class="text-slate-300">|</span>
                         <span>+{{ habit.expReward }} EXP</span>
                       </div>
                     </div>
-                    <div class="shrink-0 bg-emerald-50 text-emerald-600 text-xs font-black px-3 py-2 rounded-full border border-emerald-100 min-h-[36px] flex items-center">
+                    <div class="shrink-0 bg-emerald-50 text-emerald-600 text-sm font-bold px-4 py-2.5 rounded-full border border-emerald-100 min-h-[40px] flex items-center">
                       {{t('done')}}
                     </div>
                   </div>
 
                   <div v-if="habit.frequencyType === 'weekly'" class="mt-2">
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-                      <span>{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
+                    <div class="flex justify-between text-xs text-slate-400 mb-1">
+                      <span class="font-medium">{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
                       <span v-if="getHabitWeekStats(habit).isMet" class="text-emerald-600 font-bold">{{t('weekMet')}}</span>
                     </div>
-                    <div class="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                    <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
                       <div class="h-full bg-emerald-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
                     </div>
                   </div>
-                  <div v-if="habit.frequencyType === 'monthly'" class="mt-3">
-                    <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                      <span>{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
+                  <div v-if="habit.frequencyType === 'monthly'" class="mt-2">
+                    <div class="flex justify-between text-xs text-slate-400 mb-1">
+                      <span class="font-medium">{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
                       <span v-if="getHabitMonthStats(habit).isMet" class="text-emerald-600 font-bold">{{t('monthMet')}}</span>
                     </div>
-                    <div class="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                    <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
                       <div class="h-full bg-emerald-400 transition-all" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div>
                     </div>
                   </div>
@@ -351,133 +340,128 @@
             </div>
           </div>
 
-          <!-- 批量操作栏 -->
-          
-
           <div class="scroll-end-spacer"></div>
         </div>
       </section>
-
       <!-- 奖励商店 Tab -->
       <section v-show="activeTab === 'store'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="flex-1 min-h-0 scroll-area space-y-3">
-        <div class="soft-card rounded-3xl p-4 flex justify-between items-center">
-          <div>
-            <p class="text-xs text-slate-300 font-bold">{{t('rewardStore')}}</p>
-            <p class="text-3xl font-black tracking-tight mt-1 text-amber-500">{{ userProfile.currentExp }} <span class="text-xs text-slate-400 font-normal">EXP</span></p>
-            <p class="text-[11px] text-slate-300 mt-1">{{t('todayRedeemed')}} {{ todayRedeemCount }} {{t('times')}}</p>
+        <div class="flex-1 min-h-0 scroll-area space-y-4">
+          <!-- 轻量EXP栏 -->
+          <div class="soft-card rounded-2xl p-3 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-slate-800">{{t('rewardStore')}}</p>
+              <p class="text-lg font-bold text-amber-600 leading-tight">{{ userProfile.currentExp }} <span class="text-xs font-medium text-slate-400">EXP</span></p>
+            </div>
+            <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
           </div>
-          <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-xs font-black px-4 py-2.5 rounded-full shadow-sm min-h-[44px]">{{t('addWish')}}</button>
-        </div>
 
-        <h2 class="text-base font-black text-slate-800 flex items-center gap-1.5">
-          <span class="icon-line text-amber-500" v-html="icon('gift')"></span>
-          <span>{{t('wishStore')}}</span>
-        </h2>
-        <div class="space-y-2">
+          <!-- 筛选栏 -->
           <div class="flex gap-2 overflow-x-auto pb-1">
-            <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('all')}}</button>
-            <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('available')}}</button>
-            <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('expNotEnough')}}</button>
-            <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('soldout')}}</button>
+            <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('all')}}</button>
+            <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('available')}}</button>
+            <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('expNotEnough')}}</button>
+            <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('soldout')}}</button>
           </div>
-          <div class="flex justify-between items-center text-xs text-slate-400">
-            <span>{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
-            <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-white border border-slate-100 text-slate-500 font-black px-3 py-2 rounded-full min-h-[38px]">
-              {{t('price')}} {{ storeSort==='asc' ? t('lowToHigh') : t('highToLow') }}
-            </button>
-          </div>
-        </div>
-        <div class="space-y-3 mb-3">
-          <div v-if="filteredStoreItems.length === 0" class="soft-card rounded-3xl p-6 text-center text-sm">
-            <div class="w-16 h-16 mx-auto rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
-              <span class="icon-line !w-7 !h-7" v-html="icon('gift')"></span>
-            </div>
-            <p class="font-black text-slate-800">{{ storeItems.length === 0 ? t('createFirstReward') : t('noWishesFiltered') }}</p>
-            <p class="text-xs text-slate-400 mt-2 leading-relaxed">{{ storeItems.length === 0 ? t('firstRewardDesc') : t('switchFilter') }}</p>
-            <button @click="openStoreModal(null)" class="mt-4 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-black shadow-sm min-h-[44px]">{{t('addWish')}}</button>
-          </div>
-          <article
-            v-for="item in filteredStoreItems"
-            :key="item.id"
-            @touchstart="startStoreLongPress(item)"
-            @touchmove="cancelStoreLongPress"
-            @touchend="cancelStoreLongPress"
-            @mousedown="startStoreLongPress(item)"
-            @mouseup="cancelStoreLongPress"
-            @mouseleave="cancelStoreLongPress"
-            @contextmenu.prevent="showStoreAction(item)"
-            class="soft-card p-4 rounded-3xl flex items-center gap-3 relative min-h-[108px] active:scale-[0.99] transition-all select-none"
-            :class="item.stock === 0 ? 'opacity-50 grayscale' : ''"
-          >
-            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
-              <span class="icon-line !w-5 !h-5" v-html="icon('gift')"></span>
-            </div>
-            <div class="min-w-0 flex-1 pr-1">
-              <h3 class="font-black text-sm text-slate-800 truncate">{{ item.name }}</h3>
-              <div class="mt-1 flex flex-wrap gap-1.5">
-                <span class="text-[10px] bg-slate-50 text-slate-400 px-2 py-1 rounded-full">{{t('stock')}} {{ item.stock===-1 ? t('unlimited') : item.stock + ' ' + t('times') }}</span>
-                <span class="text-[10px] bg-amber-50 text-amber-600 px-2 py-1 rounded-full">{{ item.expCost }} EXP</span>
-              </div>
-              <p class="text-[10px] text-slate-300 mt-2">{{t('longPressManage')}}</p>
-            </div>
-            <div class="shrink-0">
-              <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-black px-4 py-3 rounded-full transition-colors shadow-sm whitespace-nowrap min-h-[44px]" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
-                {{ item.stock===0 ? t('soldout') : userProfile.currentExp < item.expCost ? t('notEnough') : t('redeem') }}
+
+          <!-- 商品列表 -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-xs text-slate-400 px-1">
+              <span class="font-medium">{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
+              <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-white border border-slate-100 text-slate-500 font-semibold px-3 py-1.5 rounded-full min-h-[32px]">
+                {{t('price')}} {{ storeSort==='asc' ? t('lowToHigh') : t('highToLow') }}
               </button>
             </div>
-          </article>
-        </div>
 
-        <div @click="openRewardHistory" class="soft-card rounded-3xl p-4 flex items-center justify-between active:scale-[0.99] transition-all select-none cursor-pointer mb-2">
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
-              <span class="icon-line !w-5 !h-5" v-html="icon('list')"></span>
+            <div v-if="filteredStoreItems.length === 0" class="soft-card rounded-2xl p-6 text-center">
+              <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+                <span class="icon-line !w-6 !h-6" v-html="icon('gift')"></span>
+              </div>
+              <p class="font-bold text-slate-800 text-sm">{{ storeItems.length === 0 ? t('createFirstReward') : t('noWishesFiltered') }}</p>
+              <p class="text-sm text-slate-400 mt-1 leading-relaxed">{{ storeItems.length === 0 ? t('firstRewardDesc') : t('switchFilter') }}</p>
+              <button @click="openStoreModal(null)" class="mt-4 bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
             </div>
-            <div>
-              <h3 class="text-sm font-black text-slate-700">{{t('redeemLog')}}</h3>
-              <p class="text-[11px] text-slate-300 mt-0.5">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
+
+            <article
+              v-for="item in filteredStoreItems"
+              :key="item.id"
+              @touchstart="startStoreLongPress(item)"
+              @touchmove="cancelStoreLongPress"
+              @touchend="cancelStoreLongPress"
+              @mousedown="startStoreLongPress(item)"
+              @mouseup="cancelStoreLongPress"
+              @mouseleave="cancelStoreLongPress"
+              @contextmenu.prevent="showStoreAction(item)"
+              class="soft-card p-4 rounded-2xl flex items-center gap-3 active:scale-[0.99] transition-all select-none"
+              :class="item.stock === 0 ? 'opacity-50 grayscale' : ''"
+            >
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+                <span class="icon-line !w-5 !h-5" v-html="icon('gift')"></span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="font-bold text-sm text-slate-800 truncate">{{ item.name }}</h3>
+                <div class="mt-1 flex items-center gap-2 text-xs text-slate-400">
+                  <span>{{ item.expCost }} EXP</span>
+                  <span class="text-slate-200">|</span>
+                  <span>{{t('stock')}} {{ item.stock===-1 ? t('unlimited') : item.stock + ' ' + t('times') }}</span>
+                </div>
+              </div>
+              <div class="shrink-0">
+                <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-bold px-4 py-2 rounded-full transition-colors shadow-sm whitespace-nowrap min-h-[36px]" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
+                  {{ item.stock===0 ? t('soldout') : userProfile.currentExp < item.expCost ? t('notEnough') : t('redeem') }}
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <!-- 兑换日志入口 -->
+          <div @click="openRewardHistory" class="soft-card rounded-2xl p-3 flex items-center justify-between active:scale-[0.99] transition-all select-none cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0">
+                <span class="icon-line !w-4 !h-4" v-html="icon('list')"></span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-700">{{t('redeemLog')}}</h3>
+                <p class="text-xs text-slate-400 mt-0.5">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-slate-300">
+              <span class="text-xs">{{t('view')}}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
             </div>
           </div>
-          <div class="flex items-center gap-1.5 text-slate-300">
-            <span class="text-xs">{{t('view')}}</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
-          </div>
-        </div>
         </div>
       </section>
-
     <!-- 打卡记录 Tab (Calendar/Heatmap/Stats) -->
     <section v-show="activeTab==='calendar'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
       <div class="flex gap-2 mb-4">
-        <button @click="calendarSubTab='calendar'" class="flex-1 text-xs font-black py-2.5 rounded-full min-h-[44px]" :class="calendarSubTab==='calendar'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('calendar')}}</button>
-        <button @click="calendarSubTab='heatmap'" class="flex-1 text-xs font-black py-2.5 rounded-full min-h-[44px]" :class="calendarSubTab==='heatmap'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('heatmap')}}</button>
-        <button @click="calendarSubTab='stats'" class="flex-1 text-xs font-black py-2.5 rounded-full min-h-[44px]" :class="calendarSubTab==='stats'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('stats')}}</button>
+        <button @click="calendarSubTab='calendar'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='calendar'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('calendar')}}</button>
+        <button @click="calendarSubTab='heatmap'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='heatmap'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('heatmap')}}</button>
+        <button @click="calendarSubTab='stats'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='stats'?'bg-slate-900 text-white':'bg-white text-slate-500 border border-slate-100'">{{t('stats')}}</button>
       </div>
       <!-- Calendar -->
       <div v-show="calendarSubTab==='calendar'" class="flex-1 min-h-0 scroll-area">
         <div class="soft-card rounded-3xl p-4 mb-4">
           <div class="flex items-center justify-between mb-4">
-            <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('prevMonth')}}</button>
-            <span class="text-base font-black text-slate-800">{{ habitCalendarMonthLabel }}</span>
-            <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('nextMonth')}}</button>
+            <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-semibold text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[40px]">{{t('prevMonth')}}</button>
+            <span class="text-base font-bold text-slate-800">{{ habitCalendarMonthLabel }}</span>
+            <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-semibold text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[40px]">{{t('nextMonth')}}</button>
           </div>
           <div class="grid grid-cols-3 gap-2 text-center mb-4">
             <div class="bg-slate-50 rounded-2xl py-2">
-              <p class="text-[10px] text-slate-400 font-bold">{{t('checkDays')}}</p>
-              <p class="text-sm font-black text-slate-700">{{ habitMonthStats.checkedDays }} {{t('days')}}</p>
+              <p class="text-xs text-slate-400 font-semibold">{{t('checkDays')}}</p>
+              <p class="text-sm font-bold text-slate-700">{{ habitMonthStats.checkedDays }} {{t('days')}}</p>
             </div>
             <div class="bg-slate-50 rounded-2xl py-2">
-              <p class="text-[10px] text-slate-400 font-bold">{{t('totalCompleted')}}</p>
-              <p class="text-sm font-black text-emerald-600">{{ habitMonthStats.totalChecks }}</p>
+              <p class="text-xs text-slate-400 font-semibold">{{t('totalCompleted')}}</p>
+              <p class="text-sm font-bold text-emerald-600">{{ habitMonthStats.totalChecks }}</p>
             </div>
             <div class="bg-slate-50 rounded-2xl py-2">
-              <p class="text-[10px] text-slate-400 font-bold">{{t('monthRate')}}</p>
-              <p class="text-sm font-black text-amber-600">{{ habitMonthStats.completionRate }}%</p>
+              <p class="text-xs text-slate-400 font-semibold">{{t('monthRate')}}</p>
+              <p class="text-sm font-bold text-amber-600">{{ habitMonthStats.completionRate }}%</p>
             </div>
           </div>
           <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
-            <span v-for="(w, wi) in weekLabels" :key="wi" class="text-[10px] font-black text-slate-300">{{ w }}</span>
+            <span v-for="(w, wi) in weekLabels" :key="wi" class="text-xs font-semibold text-slate-300">{{ w }}</span>
           </div>
           <div class="grid grid-cols-7 gap-1.5">
             <button
@@ -492,10 +476,10 @@
               ]"
             >
               <template v-if="day.date">
-                <p class="text-xs font-black">{{ day.day }}</p>
+                <p class="text-xs font-semibold">{{ day.day }}</p>
                 <div class="mt-1 flex flex-wrap justify-center gap-0.5">
                   <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                  <span v-if="day.items.length > 4" class="text-[8px] text-emerald-500 leading-none">+</span>
+                  <span v-if="day.items.length > 4" class="text-[10px] text-emerald-500 leading-none">+</span>
                 </div>
               </template>
             </button>
@@ -503,17 +487,17 @@
         </div>
         <div class="soft-card rounded-3xl p-4 mb-4">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="text-sm font-black text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
+            <h3 class="text-sm font-bold text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
             <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} {{t('items')}}</span>
           </div>
           <div class="space-y-2">
             <div v-if="selectedHabitDateItems.length === 0" class="text-center py-6 text-slate-300 text-sm">{{t('noRecords')}}</div>
             <div v-for="item in selectedHabitDateItems" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center">
               <div class="min-w-0">
-                <p class="text-sm font-black text-slate-800 truncate">{{ item.name }}</p>
-                <p class="text-[11px] text-slate-400">{{ item.isRetro ? t('retroRecord') : t('normalCheckin') }} <span v-if="item.time">{{item.time}}</span> <span v-if="item.note">· {{item.note}}</span></p>
+                <p class="text-sm font-bold text-slate-800 truncate">{{ item.name }}</p>
+                <p class="text-xs text-slate-400">{{ item.isRetro ? t('retroRecord') : t('normalCheckin') }} <span v-if="item.time">{{item.time}}</span> <span v-if="item.note">· {{item.note}}</span></p>
               </div>
-              <span class="text-xs font-black text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
+              <span class="text-xs font-semibold text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
             </div>
           </div>
         </div>
@@ -522,54 +506,54 @@
       <!-- Heatmap -->
       <div v-show="calendarSubTab==='heatmap'" class="flex-1 min-h-0 scroll-area">
         <div class="soft-card rounded-3xl p-4 mb-4">
-          <h3 class="text-sm font-black text-slate-800 mb-3">{{t('heatmapTitle')}}</h3>
+          <h3 class="text-sm font-bold text-slate-800 mb-3">{{t('heatmapTitle')}}</h3>
           <div class="overflow-x-auto pb-2"><div class="inline-flex gap-1" style="min-width:100%">
             <div v-for="(week,wi) in heatmapData" :key="wi" class="flex flex-col gap-1">
               <div v-for="(day,di) in week" :key="di" class="heat-cell" :class="'heat-'+getHeatLevel(day.count)" @click="day.date&&(heatmapSelectedDate=day.date)"></div>
             </div>
           </div></div>
-          <div class="flex items-center justify-end gap-1 mt-3 text-[10px] text-slate-400"><span>{{t('less')}}</span><div class="w-3 h-3 rounded-sm heat-0"></div><div class="w-3 h-3 rounded-sm heat-1"></div><div class="w-3 h-3 rounded-sm heat-2"></div><div class="w-3 h-3 rounded-sm heat-3"></div><div class="w-3 h-3 rounded-sm heat-4"></div><span>{{t('more')}}</span></div>
+          <div class="flex items-center justify-end gap-1 mt-3 text-xs text-slate-400"><span>{{t('less')}}</span><div class="w-3 h-3 rounded-sm heat-0"></div><div class="w-3 h-3 rounded-sm heat-1"></div><div class="w-3 h-3 rounded-sm heat-2"></div><div class="w-3 h-3 rounded-sm heat-3"></div><div class="w-3 h-3 rounded-sm heat-4"></div><span>{{t('more')}}</span></div>
         </div>
         <div v-if="heatmapSelectedDate" class="soft-card rounded-3xl p-4 mb-4">
-          <div class="flex justify-between items-center mb-3"><h3 class="text-sm font-black text-slate-800">{{heatmapSelectedDate}} {{t('checkRecords')}}</h3><button @click="heatmapSelectedDate=''" class="text-xs text-slate-400">✕</button></div>
+          <div class="flex justify-between items-center mb-3"><h3 class="text-sm font-bold text-slate-800">{{heatmapSelectedDate}} {{t('checkRecords')}}</h3><button @click="heatmapSelectedDate=''" class="text-xs text-slate-400">✕</button></div>
           <div class="space-y-2">
             <div v-if="getHabitItemsByDate(heatmapSelectedDate).length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noRecords')}}</div>
-            <div v-for="item in getHabitItemsByDate(heatmapSelectedDate)" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0"><p class="text-sm font-black text-slate-800 truncate">{{item.name}}</p><p class="text-[11px] text-slate-400">{{item.time||'--:--'}} <span v-if="item.note">· {{item.note}}</span></p></div><span class="text-xs font-black text-emerald-600">+{{item.expGained||0}} EXP</span></div>
+            <div v-for="item in getHabitItemsByDate(heatmapSelectedDate)" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">{{item.name}}</p><p class="text-xs text-slate-400">{{item.time||'--:--'}} <span v-if="item.note">· {{item.note}}</span></p></div><span class="text-xs font-semibold text-emerald-600">+{{item.expGained||0}} EXP</span></div>
           </div>
         </div>
         <div class="scroll-end-spacer"></div>
       </div>
       <!-- Stats -->
       <div v-show="calendarSubTab==='stats'" class="flex-1 min-h-0 scroll-area space-y-4">
-        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('weeklyReport')}}</h3>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('weeklyReport')}}</h3>
           <div class="grid grid-cols-2 gap-2">
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekCheckins')}}</p><p class="text-lg font-black text-amber-600">{{weeklyStats.checkins}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekRate')}}</p><p class="text-lg font-black text-amber-600">{{weeklyStats.rate}}%</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekEXP')}}</p><p class="text-lg font-black text-emerald-600">+{{weeklyStats.expGained}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('weekBestStreak')}}</p><p class="text-lg font-black text-orange-500">{{weeklyStats.bestStreak}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekCheckins')}}</p><p class="text-lg font-bold text-amber-600">{{weeklyStats.checkins}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekRate')}}</p><p class="text-lg font-bold text-amber-600">{{weeklyStats.rate}}%</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekEXP')}}</p><p class="text-lg font-bold text-emerald-600">+{{weeklyStats.expGained}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekBestStreak')}}</p><p class="text-lg font-bold text-orange-500">{{weeklyStats.bestStreak}}</p></div>
           </div>
         </div>
-        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('monthlyReport')}}</h3>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('monthlyReport')}}</h3>
           <div class="grid grid-cols-2 gap-2">
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthCheckDays')}}</p><p class="text-lg font-black text-amber-600">{{monthlyStats.checkDays}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthRate2')}}</p><p class="text-lg font-black text-amber-600">{{monthlyStats.rate}}%</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthExpEarned')}}</p><p class="text-lg font-black text-emerald-600">+{{monthlyStats.expEarned}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-[10px] text-slate-400 font-bold">{{t('monthExpSpent')}}</p><p class="text-lg font-black text-red-500">-{{monthlyStats.expSpent}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthCheckDays')}}</p><p class="text-lg font-bold text-amber-600">{{monthlyStats.checkDays}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthRate2')}}</p><p class="text-lg font-bold text-amber-600">{{monthlyStats.rate}}%</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthExpEarned')}}</p><p class="text-lg font-bold text-emerald-600">+{{monthlyStats.expEarned}}</p></div>
+            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthExpSpent')}}</p><p class="text-lg font-bold text-red-500">-{{monthlyStats.expSpent}}</p></div>
           </div>
-          <div class="mt-2 bg-slate-50 rounded-2xl p-3"><p class="text-[10px] text-slate-400 font-bold">{{t('mostChecked')}}</p><p class="text-sm font-black text-slate-800 mt-1">{{monthlyStats.topHabit||t('none')}}</p></div>
+          <div class="mt-2 bg-slate-50 rounded-2xl p-3"><p class="text-xs text-slate-400 font-semibold">{{t('mostChecked')}}</p><p class="text-sm font-bold text-slate-800 mt-1">{{monthlyStats.topHabit||t('none')}}</p></div>
         </div>
-        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('expLogTitle')}}</h3>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('expLogTitle')}}</h3>
           <div v-if="expLogs.length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noExpLogs')}}</div>
           <div v-else class="space-y-2 max-h-64 overflow-y-auto">
-            <div v-for="log in expLogs.slice(0,50)" :key="log.id" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0 flex-1"><p class="text-xs font-black text-slate-800 truncate">{{log.habitName||log.rewardName||''}}</p><p class="text-[10px] text-slate-400">{{formatDateTime(log.timestamp)}}</p></div><span class="text-xs font-black whitespace-nowrap" :class="log.amount>=0?'text-emerald-600':'text-red-500'">{{log.amount>=0?'+':''}}{{log.amount}} EXP</span></div>
+            <div v-for="log in expLogs.slice(0,50)" :key="log.id" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800 truncate">{{log.habitName||log.rewardName||''}}</p><p class="text-xs text-slate-400">{{formatDateTime(log.timestamp)}}</p></div><span class="text-xs font-semibold whitespace-nowrap" :class="log.amount>=0?'text-emerald-600':'text-red-500'">{{log.amount>=0?'+':''}}{{log.amount}} EXP</span></div>
           </div>
         </div>
-        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-black text-slate-800 mb-3">{{t('achievements')}} ({{unlockedAchievements.length}}/{{allAchievements.length}})</h3>
+        <div class="soft-card rounded-3xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('achievements')}} ({{unlockedAchievements.length}}/{{allAchievements.length}})</h3>
           <div class="space-y-2">
             <div v-for="ach in allAchievements" :key="ach.id" class="bg-slate-50 rounded-2xl p-3 flex items-center gap-3" :class="isAchievementUnlocked(ach.id)?'':'opacity-40'">
               <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" :class="isAchievementUnlocked(ach.id)?'bg-amber-50':'bg-slate-100'">{{ach.icon}}</div>
-              <div class="min-w-0 flex-1"><p class="text-xs font-black text-slate-800">{{ach.name}}</p><p class="text-[10px] text-slate-400">{{ach.desc}}</p></div>
-              <div v-if="isAchievementUnlocked(ach.id)" class="text-[10px] font-black px-2 py-1 rounded-full bg-amber-50 text-amber-600">+{{ach.reward}} EXP</div>
+              <div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800">{{ach.name}}</p><p class="text-xs text-slate-400">{{ach.desc}}</p></div>
+              <div v-if="isAchievementUnlocked(ach.id)" class="text-xs font-semibold px-2 py-1 rounded-full bg-amber-50 text-amber-600">+{{ach.reward}} EXP</div>
             </div>
           </div>
         </div>
@@ -580,49 +564,53 @@
     <!-- 设置 Tab -->
     <section v-show="activeTab==='settings'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
       <div class="flex-1 min-h-0 scroll-area space-y-3">
-        <div class="mb-2"><p class="text-[10px] text-slate-300 font-bold">呱呱呱呱呱呱</p><h1 class="text-2xl font-black text-slate-900 tracking-tight mt-0.5">{{t('settings')}}</h1></div>
+        <div class="mb-2"><p class="text-xs text-slate-400 font-medium">呱呱呱呱呱呱</p><h1 class="text-2xl font-bold text-slate-900 tracking-tight mt-0.5">{{t('settings')}}</h1></div>
         <div class="soft-card rounded-3xl p-4 space-y-1">
-          <h3 class="text-xs font-black text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('database')"></span>{{t('dataManagement')}}</h3>
-          <button @click="exportData" class="w-full flex items-center gap-3 py-4 px-3 text-sm font-black text-slate-700 min-h-[48px]"><span class="icon-line text-emerald-500" v-html="icon('download')"></span>{{t('exportData')}}</button>
-          <button @click="triggerImportData" class="w-full flex items-center gap-3 py-4 px-3 text-sm font-black text-slate-700 min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('upload')"></span>{{t('importData')}}</button>
+          <h3 class="text-xs font-semibold text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('database')"></span>{{t('dataManagement')}}</h3>
+          <button @click="exportData" class="w-full flex items-center gap-3 py-4 px-3 text-sm font-bold text-slate-700 min-h-[44px]"><span class="icon-line text-emerald-500" v-html="icon('download')"></span>{{t('exportData')}}</button>
+          <button @click="triggerImportData" class="w-full flex items-center gap-3 py-4 px-3 text-sm font-bold text-slate-700 min-h-[44px]"><span class="icon-line text-blue-500" v-html="icon('upload')"></span>{{t('importData')}}</button>
           <input type="file" ref="importFileInput" accept=".json" @change="importData" class="hidden" />
-          <div class="text-[11px] px-2 text-slate-300">{{t('lastBackup')}}: {{lastBackupDate||t('never')}}</div>
+          <div class="text-xs px-2 text-slate-400">{{t('lastBackup')}}: {{lastBackupDate||t('never')}}</div>
         </div>
         <div class="soft-card rounded-3xl p-4">
           <button @click="showArchived=!showArchived" class="w-full flex items-center justify-between mb-2">
-            <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('archive')"></span>{{t('archivedGoals')}} ({{archivedHabits.length}})</h3>
+            <h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('archive')"></span>{{t('archivedGoals')}} ({{archivedHabits.length}})</h3>
             <span class="icon-line text-slate-400 transition-transform" :class="showArchived?'rotate-180':''" v-html="icon('chevronDown')"></span>
           </button>
           <div v-show="showArchived">
-            <div v-if="archivedHabits.length===0" class="text-[11px] px-2 py-2 text-slate-300">{{t('noArchived')}}</div>
-            <div v-for="habit in archivedHabits" :key="habit.id" class="bg-slate-50 rounded-xl p-3 flex items-center justify-between mt-2"><div class="min-w-0"><p class="text-sm font-black text-slate-800 truncate">{{habit.name}}</p><p class="text-[10px] text-slate-400">{{t('best')}} {{habit.maxStreak||0}} {{t('days')}}</p></div><button @click="unarchiveHabit(habit.id)" class="text-[10px] font-black px-3 py-2 rounded-lg bg-amber-50 text-amber-600">{{t('restore')}}</button></div>
+            <div v-if="archivedHabits.length===0" class="text-xs px-2 py-2 text-slate-400">{{t('noArchived')}}</div>
+            <div v-for="habit in archivedHabits" :key="habit.id" class="bg-slate-50 rounded-xl p-3 flex items-center justify-between mt-2"><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">{{habit.name}}</p><p class="text-xs text-slate-400">{{t('best')}} {{habit.maxStreak||0}} {{t('days')}}</p></div><button @click="unarchiveHabit(habit.id)" class="text-xs font-semibold px-3 py-2 rounded-lg bg-amber-50 text-amber-600">{{t('restore')}}</button></div>
           </div>
         </div>
         <div class="soft-card rounded-3xl p-4 space-y-3">
-          <h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('palette')"></span>{{t('appearance')}}</h3>
-          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line" :style="{color:darkMode?'#fbbf24':'#64748b'}" v-html="icon(darkMode?'moon':'sun')"></span><span class="text-sm font-black text-slate-800">{{t('darkMode')}}</span></div>
-            <div class="flex items-center gap-1 rounded-full p-1 bg-slate-100">
-              <button @click="setDarkMode(false)" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="!darkMode&&!darkModeAuto?'bg-amber-400 text-slate-950':'text-slate-400'">{{t('light')}}</button>
-              <button @click="setDarkMode(true)" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="darkMode&&!darkModeAuto?'bg-amber-400 text-slate-950':'text-slate-400'">{{t('dark')}}</button>
-              <button @click="setDarkMode('auto')" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="darkModeAuto?'bg-amber-400 text-slate-950':'text-slate-400'">{{t('followSystem')}}</button>
+          <h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('palette')"></span>{{t('appearance')}}</h3>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line" :style="{color:darkMode?'#fbbf24':'#64748b'}" v-html="icon(darkMode?'moon':'sun')"></span><span class="text-sm font-bold text-slate-800">{{t('darkMode')}}</span></div>
+            <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
+              <!-- 滑动背景指示器 -->
+              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(33.333% - 2px)',left:'calc(' + (darkModeAuto ? 2 : darkMode ? 1 : 0) * 33.333 + '% + 1px)'}"></div>
+              <button @click="setDarkMode(false)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="!darkMode&&!darkModeAuto?'text-slate-950':'text-slate-400'">{{t('light')}}</button>
+              <button @click="setDarkMode(true)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkMode&&!darkModeAuto?'text-slate-950':'text-slate-400'">{{t('dark')}}</button>
+              <button @click="setDarkMode('auto')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkModeAuto?'text-slate-950':'text-slate-400'">{{t('followSystem')}}</button>
             </div>
           </div>
-          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-amber-500" v-html="icon('palette')"></span><span class="text-sm font-black text-slate-800">{{t('themeColor')}}</span></div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-amber-500" v-html="icon('palette')"></span><span class="text-sm font-bold text-slate-800">{{t('themeColor')}}</span></div>
             <div class="flex gap-2">
-              <button v-for="c in themeColors" :key="c.value" @click="setThemeColor(c.value)" class="w-7 h-7 rounded-full flex items-center justify-center" :style="{background:c.color,boxShadow:themeColor===c.value?'0 0 0 2px white, 0 0 0 4px '+c.color:'none'}"><span v-if="themeColor===c.value" class="text-white text-xs font-black">✓</span></button>
+              <button v-for="c in themeColors" :key="c.value" @click="setThemeColor(c.value)" class="w-7 h-7 rounded-full flex items-center justify-center" :style="{background:c.color,boxShadow:themeColor===c.value?'0 0 0 2px white, 0 0 0 4px '+c.color:'none'}"><span v-if="themeColor===c.value" class="text-white text-xs font-semibold">✓</span></button>
             </div>
           </div>
-          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-slate-400" v-html="icon('globe')"></span><span class="text-sm font-black text-slate-800">{{t('language')}}</span></div>
-            <div class="flex items-center gap-1 rounded-full p-1 bg-slate-100">
-              <button @click="setLanguage('zh')" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="lang==='zh'?'bg-amber-400 text-slate-950':'text-slate-400'">中文</button>
-              <button @click="setLanguage('en')" class="text-[10px] font-black px-3 py-1.5 rounded-full min-h-[32px]" :class="lang==='en'?'bg-amber-400 text-slate-950':'text-slate-400'">EN</button>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-slate-400" v-html="icon('globe')"></span><span class="text-sm font-bold text-slate-800">{{t('language')}}</span></div>
+            <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
+              <!-- 滑动背景指示器 -->
+              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 2px)',left:'calc(' + (lang==='en' ? 1 : 0) * 50 + '% + 1px)'}"></div>
+              <button @click="setLanguage('zh')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="lang==='zh'?'text-slate-950':'text-slate-400'">中文</button>
+              <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
             </div>
           </div>
-        <div class="soft-card rounded-3xl p-4 space-y-2"><h3 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-[11px] text-slate-300">{{t('aboutDesc')}}</p></div>
-        <button @click="showOnboarding" class="w-full soft-card rounded-3xl p-4 flex items-center gap-3 active:scale-[0.99] transition-all min-h-[52px]"><span class="icon-line text-amber-500" v-html="icon('helpCircle')"></span><span class="text-sm font-black text-slate-800">{{t('viewTutorial')}}</span></button>
+        <div class="soft-card rounded-3xl p-4 space-y-2"><h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-xs text-slate-400">{{t('aboutDesc')}}</p></div>
+        <button @click="showOnboarding" class="w-full soft-card rounded-3xl p-4 flex items-center gap-3 active:scale-[0.99] transition-all min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('helpCircle')"></span><span class="text-sm font-bold text-slate-800">{{t('viewTutorial')}}</span></button>
         <div class="soft-card rounded-3xl p-4">
-          <button @click="resetApp" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span>{{t('resetApp')}}</button>
-          <p class="text-[11px] mt-1 px-2 text-slate-300">{{t('resetHint')}}</p>
+          <button @click="resetApp" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[44px]"><span class="icon-line" v-html="icon('trash')"></span>{{t('resetApp')}}</button>
+          <p class="text-xs mt-1 px-2 text-slate-400">{{t('resetHint')}}</p>
         </div>
         <div class="scroll-end-spacer"></div>
       </div>
@@ -631,22 +619,22 @@
     </main>
 
     <!-- 兑换日志全屏页 -->
-    <div v-if="modals.rewardHistory" class="fixed inset-0 bg-slate-50 z-[70] max-w-md mx-auto flex flex-col p-4 fade-enter">
+    <div v-if="modals.rewardHistory" class="fixed inset-0 z-[70] max-w-md mx-auto flex flex-col p-4 fade-enter" :style="{background: darkMode ? '#1a1a2e' : '#f8fafc'}">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h2 class="text-lg font-black text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('list')"></span><span>{{t('redeemLog')}}</span></h2>
-          <p class="text-[11px] text-slate-300 mt-0.5">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('list')"></span><span>{{t('redeemLog')}}</span></h2>
+          <p class="text-xs text-slate-400 mt-0.5">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
         </div>
         <div class="flex gap-2">
-          <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2.5 rounded-full font-black min-h-[44px]">{{t('clear')}}</button>
-          <button @click="closeModal('rewardHistory')" class="bg-white text-slate-600 px-4 py-2.5 rounded-full text-xs font-black shadow-sm border border-slate-100 min-h-[44px]">{{t('close')}}</button>
+          <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2.5 rounded-full font-bold min-h-[40px]">{{t('clear')}}</button>
+          <button @click="closeModal('rewardHistory')" class="bg-white text-slate-600 px-4 py-2.5 rounded-full text-xs font-semibold shadow-sm border border-slate-100 min-h-[40px]">{{t('close')}}</button>
         </div>
       </div>
 
       <div class="flex gap-2 mb-4">
-        <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('all')}}</button>
-        <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('today')}}</button>
-        <button @click="rewardHistoryFilter = 'month'" class="shrink-0 text-xs font-black px-4 py-2.5 rounded-full min-h-[44px]" :class="rewardHistoryFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('month')}}</button>
+        <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2.5 rounded-full min-h-[40px]" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('all')}}</button>
+        <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-semibold px-4 py-2.5 rounded-full min-h-[40px]" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('today')}}</button>
+        <button @click="rewardHistoryFilter = 'month'" class="shrink-0 text-xs font-semibold px-4 py-2.5 rounded-full min-h-[40px]" :class="rewardHistoryFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-white text-slate-500 border border-slate-100'">{{t('month')}}</button>
       </div>
 
       <div class="flex-1 min-h-0 scroll-area space-y-2 text-sm text-slate-500">
@@ -654,19 +642,19 @@
           <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
             <span class="icon-line !w-7 !h-7" v-html="icon('list')"></span>
           </div>
-          <p class="text-slate-400 font-black">{{ rewardHistory.length === 0 ? t('noRedeemRecords') : t('noFilteredRecords') }}</p>
+          <p class="text-slate-400 font-bold">{{ rewardHistory.length === 0 ? t('noRedeemRecords') : t('noFilteredRecords') }}</p>
           <p class="text-xs text-slate-300 mt-1">{{ rewardHistory.length === 0 ? t('noRedeemRecordsDesc') : t('noFilterRecordsDesc') }}</p>
         </div>
         <div v-for="(log, index) in filteredRewardHistory" :key="log.id" class="soft-card rounded-2xl p-4">
           <div class="flex justify-between items-start gap-3">
             <div class="min-w-0 flex-1">
-              <p class="font-black text-slate-800 truncate">{{t('redeemAction')}} <strong>{{ log.rewardName }}</strong></p>
+              <p class="font-bold text-slate-800 truncate">{{t('redeemAction')}} <strong>{{ log.rewardName }}</strong></p>
               <p class="text-xs text-slate-400 mt-1">{{ formatDateTime(log.timestamp) }}</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span class="text-red-500 font-black whitespace-nowrap">-{{ log.costExp }} EXP</span>
-              <button v-if="index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="text-[10px] text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
-              <button v-else @click="deleteRewardLog(log.id)" class="text-[10px] text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
+              <span class="text-red-500 font-bold whitespace-nowrap">-{{ log.costExp }} EXP</span>
+              <button v-if="index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="text-xs text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
+              <button v-else @click="deleteRewardLog(log.id)" class="text-xs text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
             </div>
           </div>
         </div>
@@ -679,32 +667,30 @@
       <div v-if="eventToast.visible" class="fixed top-14 left-1/2 -translate-x-1/2 z-[90] w-[85%] max-w-xs rounded-2xl shadow-xl p-4 flex items-start gap-3 event-toast-card" :style="{background:darkMode?'#1e1b4b':'linear-gradient(135deg,#fffbeb,#fef3c7)',border:darkMode?'1px solid #312e81':'1px solid #fde68a'}">
         <div class="text-2xl shrink-0 mt-0.5">{{eventToast.icon}}</div>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-black" :style="{color:darkMode?'#c4b5fd':'#92400e'}">{{eventToast.title}}</p>
+          <p class="text-sm font-bold" :style="{color:darkMode?'#c4b5fd':'#92400e'}">{{eventToast.title}}</p>
           <p class="text-[11px] mt-0.5 leading-relaxed" :style="{color:darkMode?'#a5b4fc':'#78716c'}">{{eventToast.message}}</p>
         </div>
         <button @click="eventToast.visible=false;clearTimeout(eventToast.timer)" class="shrink-0 text-[10px] mt-0.5 opacity-40 hover:opacity-70">✕</button>
       </div>
     </Transition>
 
-    <!-- Redeem success overlay -->
-    <div v-if="redeemToast.visible" class="fixed inset-0 z-[85] flex items-center justify-center pointer-events-none">
-      <div class="flex flex-col items-center gap-4 animate-[successPop_.55s_ease-out]">
-        <div class="w-24 h-24 rounded-[1.75rem] bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shadow-2xl shadow-amber-400/30">
-          <span class="icon-line !w-12 !h-12 text-white" v-html="icon('gift')"></span>
-        </div>
-        <div class="bg-white/95 px-5 py-3 rounded-2xl shadow-xl flex flex-col items-center gap-0.5">
-          <p class="text-base font-black text-slate-800">{{redeemToast.message}}</p>
-          <p class="text-xs font-bold text-amber-500">兑换成功</p>
-        </div>
+    <!-- Redeem success toast -->
+    <Transition name="event-toast">
+      <div v-if="redeemToast.visible" class="fixed top-14 left-1/2 -translate-x-1/2 z-[90] bg-slate-800 text-white text-sm font-bold px-5 py-3 rounded-full shadow-xl flex items-center gap-2 whitespace-nowrap">
+        <span class="icon-line !w-4 !h-4 text-emerald-400" v-html="icon('checkCircle')"></span>
+        <span>{{redeemToast.message}}</span>
       </div>
-    </div>
+    </Transition>
 
     <!-- 底部导航 -->
-    <nav class="fixed bottom-4 left-5 right-5 max-w-sm mx-auto rounded-[1.5rem] h-14 shadow-2xl shadow-black/8 flex justify-around items-center z-40 nav-bottom p-1" :style="{background:'var(--bg-nav)',border:'1px solid var(--border-card)'}">
-      <button @click="activeTab='habit'" class="relative flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='habit'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-[18px] !h-[18px]" v-html="icon('target')"></span><span>{{t('todayCheckin')}}</span></button>
-      <button @click="activeTab='store'" class="relative flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='store'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-[18px] !h-[18px]" v-html="icon('gift')"></span><span>{{t('rewardStore')}}</span></button>
-      <button @click="activeTab='calendar';calendarSubTab=calendarSubTab||'calendar'" class="relative flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='calendar'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-[18px] !h-[18px]" v-html="icon('calendar')"></span><span>{{t('records')}}</span></button>
-      <button @click="activeTab='settings'" class="relative flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-black transition-all" :style="activeTab==='settings'?{background:'var(--theme-100)',color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line !w-[18px] !h-[18px]" v-html="icon('settings')"></span><span>{{t('settings')}}</span></button>
+    <nav class="fixed w-[calc(100%-40px)] max-w-sm rounded-[1.5rem] h-14 shadow-2xl shadow-black/10 flex justify-around items-center z-40 p-1 relative" :style="{left:'50%',transform:'translateX(-50%)',bottom:safeBottom + 'px',background:'var(--bg-nav)',border:'1px solid var(--border-card)'}">
+      <!-- 滑动背景指示器 -->
+      <div class="absolute top-1 bottom-1 rounded-[1.25rem] transition-all duration-300 ease-out pointer-events-none" :style="{width:'calc(25% - 4px)',left:'calc(' + (['habit','store','calendar','settings'].indexOf(activeTab) * 25) + '% + 2px)',background:'var(--theme-100)'}"></div>
+
+      <button @click="activeTab='habit'" class="relative z-10 flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='habit'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='habit'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('target')"></span><span>{{t('todayCheckin')}}</span></button>
+      <button @click="activeTab='store'" class="relative z-10 flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='store'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='store'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('gift')"></span><span>{{t('rewardStore')}}</span></button>
+      <button @click="activeTab='calendar';calendarSubTab=calendarSubTab||'calendar'" class="relative z-10 flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='calendar'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='calendar'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('calendar')"></span><span>{{t('records')}}</span></button>
+      <button @click="activeTab='settings'" class="relative z-10 flex-1 h-full rounded-[1.25rem] flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='settings'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='settings'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('settings')"></span><span>{{t('settings')}}</span></button>
     </nav>
 
     <!-- 目标管理弹窗 - 增加标题 -->
@@ -712,17 +698,17 @@
       <div class="modal-card w-full rounded-t-3xl p-5 max-w-md sheet-enter">
         <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
           <div class="min-w-0 flex-1">
-            <p class="text-[10px] text-slate-300 font-bold">{{t('goalManage')}}</p>
-            <h3 class="text-base font-black text-slate-800 truncate">{{ selectedHabitItem ? selectedHabitItem.name : t('habitItemManage') }}</h3>
+            <p class="text-xs text-slate-400 font-bold">{{t('goalManage')}}</p>
+            <h3 class="text-base font-bold text-slate-800 truncate">{{ selectedHabitItem ? selectedHabitItem.name : t('habitItemManage') }}</h3>
           </div>
           <button @click="closeModal('habitAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
         </div>
         <div class="space-y-1">
-          <button @click="showHabitTrend" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-emerald-500" v-html="icon('barChart')"></span><span>{{t('viewTrend')}}</span></button>
-          <button @click="retroHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckin')}}</span></button>
-          <button @click="editHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
-          <button @click="archiveHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-500 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('archive')"></span><span>{{t('archive')}}</span></button>
-          <button @click="deleteHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+          <button @click="showHabitTrend" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-emerald-500" v-html="icon('barChart')"></span><span>{{t('viewTrend')}}</span></button>
+          <button @click="retroHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckin')}}</span></button>
+          <button @click="editHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
+          <button @click="archiveHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-500 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('archive')"></span><span>{{t('archive')}}</span></button>
+          <button @click="deleteHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
         </div>
       </div>
     </div>
@@ -732,14 +718,14 @@
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs sheet-enter">
         <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-100">
           <div class="min-w-0 flex-1">
-            <p class="text-[10px] text-slate-300 font-bold">{{t('trendTitle')}}</p>
-            <h3 class="text-base font-black text-slate-800 truncate">{{ selectedHabitItem ? selectedHabitItem.name : '' }}</h3>
+            <p class="text-xs text-slate-400 font-bold">{{t('trendTitle')}}</p>
+            <h3 class="text-base font-bold text-slate-800 truncate">{{ selectedHabitItem ? selectedHabitItem.name : '' }}</h3>
           </div>
           <button @click="closeModal('habitTrend')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
         </div>
         <div class="mb-3 flex justify-between items-center">
-          <span class="text-[10px] text-slate-400">{{t('last30Days')}}</span>
-          <span class="text-[10px] font-black" :class="habitTrendRate >= 80 ? 'text-emerald-500' : habitTrendRate >= 50 ? 'text-amber-500' : 'text-red-400'">{{ habitTrendData.filter(d=>d.checked).length }}/30 ({{ habitTrendRate }}%)</span>
+          <span class="text-xs text-slate-400">{{t('last30Days')}}</span>
+          <span class="text-[10px] font-semibold" :class="habitTrendRate >= 80 ? 'text-emerald-500' : habitTrendRate >= 50 ? 'text-amber-500' : 'text-red-400'">{{ habitTrendData.filter(d=>d.checked).length }}/30 ({{ habitTrendRate }}%)</span>
         </div>
         <!-- 热力图日历 -->
         <div class="grid grid-cols-7 gap-1 mb-2">
@@ -765,14 +751,14 @@
       <div class="modal-card w-full rounded-t-3xl p-5 max-w-md sheet-enter">
         <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
           <div class="min-w-0 flex-1">
-            <p class="text-[10px] text-slate-300 font-bold">{{t('wishManage')}}</p>
-            <h3 class="text-base font-black text-slate-800 truncate">{{ selectedStoreItem ? selectedStoreItem.name : t('wishManage') }}</h3>
+            <p class="text-xs text-slate-400 font-bold">{{t('wishManage')}}</p>
+            <h3 class="text-base font-bold text-slate-800 truncate">{{ selectedStoreItem ? selectedStoreItem.name : t('wishManage') }}</h3>
           </div>
           <button @click="closeModal('storeAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
         </div>
         <div class="space-y-1">
-          <button @click="editStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
-          <button @click="deleteStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-black text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+          <button @click="editStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
+          <button @click="deleteStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
         </div>
       </div>
     </div>
@@ -781,36 +767,36 @@
     <div v-if="modals.habitCalendar" class="fixed inset-0 bg-slate-50 z-[70] max-w-md mx-auto flex flex-col p-4 fade-enter">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <p class="text-[10px] text-slate-300 font-bold">{{t('recent5Years')}}</p>
-          <h2 class="text-lg font-black text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('checkRecords')}}</span></h2>
+          <p class="text-xs text-slate-400 font-bold">{{t('recent5Years')}}</p>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('checkRecords')}}</span></h2>
         </div>
-        <button @click="closeModal('habitCalendar')" class="bg-white text-slate-600 px-4 py-2.5 rounded-full text-xs font-black shadow-sm border border-slate-100 min-h-[44px]">{{t('close')}}</button>
+        <button @click="closeModal('habitCalendar')" class="bg-white text-slate-600 px-4 py-2 rounded-full text-xs font-semibold shadow-sm border border-slate-100 min-h-[40px]">{{t('close')}}</button>
       </div>
 
       <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm mb-4">
         <div class="flex items-center justify-between mb-4">
-          <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('prevMonth')}}</button>
-          <span class="text-base font-black text-slate-800">{{ habitCalendarMonthLabel }}</span>
-          <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-black text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[44px]">{{t('nextMonth')}}</button>
+          <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-semibold text-slate-600 bg-slate-50 px-4 py-2 rounded-full active:text-amber-600 min-h-[36px]">{{t('prevMonth')}}</button>
+          <span class="text-base font-bold text-slate-800">{{ habitCalendarMonthLabel }}</span>
+          <button @click="shiftHabitCalendarMonth(1)" class="text-xs font-semibold text-slate-600 bg-slate-50 px-4 py-2 rounded-full active:text-amber-600 min-h-[36px]">{{t('nextMonth')}}</button>
         </div>
 
         <div class="grid grid-cols-3 gap-2 text-center mb-4">
           <div class="bg-slate-50 rounded-2xl py-2">
-            <p class="text-[10px] text-slate-400 font-bold">{{t('checkDays')}}</p>
-            <p class="text-sm font-black text-slate-700">{{ habitMonthStats.checkedDays }} {{t('days')}}</p>
+            <p class="text-xs text-slate-400 font-bold">{{t('checkDays')}}</p>
+            <p class="text-sm font-bold text-slate-700">{{ habitMonthStats.checkedDays }} {{t('days')}}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl py-2">
-            <p class="text-[10px] text-slate-400 font-bold">{{t('totalCompleted')}}</p>
-            <p class="text-sm font-black text-emerald-600">{{ habitMonthStats.totalChecks }} {{t('times')}}</p>
+            <p class="text-xs text-slate-400 font-bold">{{t('totalCompleted')}}</p>
+            <p class="text-sm font-bold text-emerald-600">{{ habitMonthStats.totalChecks }} {{t('times')}}</p>
           </div>
           <div class="bg-slate-50 rounded-2xl py-2">
-            <p class="text-[10px] text-slate-400 font-bold">{{t('monthRate')}}</p>
-            <p class="text-sm font-black text-amber-600">{{ habitMonthStats.completionRate }}%</p>
+            <p class="text-xs text-slate-400 font-bold">{{t('monthRate')}}</p>
+            <p class="text-sm font-bold text-amber-600">{{ habitMonthStats.completionRate }}%</p>
           </div>
         </div>
 
         <div class="grid grid-cols-7 gap-1.5 text-center mb-2">
-          <span v-for="(w, wi) in weekLabels" :key="wi" class="text-[10px] font-black text-slate-300">{{ w }}</span>
+          <span v-for="(w, wi) in weekLabels" :key="wi" class="text-xs font-semibold text-slate-400">{{ w }}</span>
         </div>
         <div class="grid grid-cols-7 gap-1.5">
           <button
@@ -825,10 +811,10 @@
             ]"
           >
             <template v-if="day.date">
-              <p class="text-xs font-black">{{ day.day }}</p>
+              <p class="text-xs font-semibold">{{ day.day }}</p>
               <div class="mt-1 flex flex-wrap justify-center gap-0.5">
                 <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span v-if="day.items.length > 4" class="text-[8px] text-emerald-500 leading-none">+</span>
+                <span v-if="day.items.length > 4" class="text-[10px] text-emerald-500 leading-none">+</span>
               </div>
             </template>
           </button>
@@ -837,17 +823,17 @@
 
       <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm flex-1 min-h-0 flex flex-col">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="text-sm font-black text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
+          <h3 class="text-sm font-bold text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
           <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} {{t('items')}}</span>
         </div>
         <div class="flex-1 min-h-0 scroll-area space-y-2">
           <div v-if="selectedHabitDateItems.length === 0" class="text-center py-10 text-slate-300 text-sm">{{t('noRecords')}}</div>
           <div v-for="item in selectedHabitDateItems" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center">
             <div class="min-w-0">
-              <p class="text-sm font-black text-slate-800 truncate">{{ item.name }}</p>
-              <p class="text-[11px] text-slate-400">{{ item.isRetro ? t('retroRecord') : t('normalCheckin') }}</p>
+              <p class="text-sm font-bold text-slate-800 truncate">{{ item.name }}</p>
+              <p class="text-xs text-slate-400">{{ item.isRetro ? t('retroRecord') : t('normalCheckin') }}</p>
             </div>
-            <span class="text-xs font-black text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
+            <span class="text-xs font-semibold text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
           </div>
           <div class="scroll-end-spacer"></div>
         </div>
@@ -857,7 +843,7 @@
     <!-- 新增/编辑目标 -->
     <div v-if="modals.habit" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habit')">
       <div class="modal-card w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
-        <h3 class="font-black text-base text-slate-800 mb-4">{{ habitForm.id ? t('editGoal') : t('newGoal') }}</h3>
+        <h3 class="font-bold text-base text-slate-800 mb-4">{{ habitForm.id ? t('editGoal') : t('newGoal') }}</h3>
         <div class="space-y-3">
           <label class="block">
             <span class="block text-slate-500 mb-1">{{t('goalName')}}</span>
@@ -877,24 +863,24 @@
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('expPerCheckin')}}</span>
-              <input type="number" inputmode="numeric" min="1" max="999" v-model.number="habitForm.expReward" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input type="number" inputmode="numeric" min="1" max="999" v-model.number="habitForm.expReward" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </label>
           </div>
           <label v-if="habitForm.frequencyType === 'weekly'" class="block">
             <span class="block text-slate-500 mb-1">{{t('weeklyTarget')}}</span>
-            <input type="number" inputmode="numeric" min="1" max="7" v-model.number="habitForm.weeklyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input type="number" inputmode="numeric" min="1" max="7" v-model.number="habitForm.weeklyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </label>
           <label v-if="habitForm.frequencyType === 'monthly'" class="block">
             <span class="block text-slate-500 mb-1">{{t('monthlyTarget')}}</span>
-            <input type="number" inputmode="numeric" min="1" max="31" v-model.number="habitForm.monthlyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input type="number" inputmode="numeric" min="1" max="31" v-model.number="habitForm.monthlyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </label>
           <div class="bg-amber-50 text-amber-700 rounded-2xl p-3 leading-relaxed">
             {{t('streakBonusDesc')}}
           </div>
         </div>
         <div class="mt-6 flex gap-3">
-          <button @click="closeModal('habit')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="saveHabit" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('saveGoal')}}</button>
+          <button @click="closeModal('habit')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="saveHabit" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm min-h-[48px]">{{t('saveGoal')}}</button>
         </div>
       </div>
     </div>
@@ -902,12 +888,12 @@
     <!-- 补签弹窗 -->
     <div v-if="modals.retroactive" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('retroactive')">
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs">
-        <h3 class="font-black text-sm text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckinTitle')}}</span></h3>
+        <h3 class="font-bold text-sm text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckinTitle')}}</span></h3>
         <p class="text-slate-400 mb-3">{{t('retroDesc')}}</p>
-        <input type="date" v-model="retroDate" :max="todayStr" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center mb-4 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+        <input type="date" v-model="retroDate" :max="todayStr" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center mb-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
         <div class="flex gap-2">
-          <button @click="closeModal('retroactive')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="submitRetroCheckIn" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('submitRetro')}}</button>
+          <button @click="closeModal('retroactive')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="submitRetroCheckIn" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm min-h-[48px]">{{t('submitRetro')}}</button>
         </div>
       </div>
     </div>
@@ -915,7 +901,7 @@
     <!-- 新增/编辑心愿 -->
     <div v-if="modals.store" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('store')">
       <div class="modal-card w-full rounded-t-3xl p-5 max-w-md text-xs sheet-enter">
-        <h3 class="font-black text-base text-slate-800 mb-4">{{ storeForm.id ? t('editWish') : t('addWish') }}</h3>
+        <h3 class="font-bold text-base text-slate-800 mb-4">{{ storeForm.id ? t('editWish') : t('addWish') }}</h3>
         <div class="space-y-3">
           <label class="block">
             <span class="block text-slate-500 mb-1">{{t('wishName')}}</span>
@@ -924,17 +910,17 @@
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('redeemPrice')}}</span>
-              <input type="number" inputmode="numeric" min="1" max="99999" v-model.number="storeForm.expCost" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input type="number" inputmode="numeric" min="1" max="99999" v-model.number="storeForm.expCost" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </label>
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('stockLabel')}}</span>
-              <input type="number" inputmode="numeric" min="-1" v-model.number="storeForm.stock" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input type="number" inputmode="numeric" min="-1" v-model.number="storeForm.stock" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
             </label>
           </div>
         </div>
         <div class="mt-6 flex gap-3">
-          <button @click="closeModal('store')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="saveStoreItem" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('confirmSave')}}</button>
+          <button @click="closeModal('store')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="saveStoreItem" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm min-h-[48px]">{{t('confirmSave')}}</button>
         </div>
       </div>
     </div>
@@ -943,13 +929,13 @@
     <div v-if="modals.checkInNote" class="fixed inset-0 bg-black/40 z-50 flex items-end justify-center fade-enter" @click.self="submitCheckInNote">
       <div class="modal-card w-full rounded-t-3xl p-5 max-w-md sheet-enter">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="font-black text-sm flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('edit')"></span>{{t('addNote')}}</h3>
-          <button @click="checkInNoteText='';submitCheckInNote()" class="text-[11px] text-slate-400 font-bold px-2 py-1 rounded-lg active:bg-slate-100">{{t('skip')}}</button>
+          <h3 class="font-bold text-sm flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('edit')"></span>{{t('addNote')}}</h3>
+          <button @click="checkInNoteText='';submitCheckInNote()" class="text-xs text-slate-400 font-bold px-2 py-1 rounded-lg active:bg-slate-100">{{t('skip')}}</button>
         </div>
-        <p class="text-[11px] text-slate-400 mb-2">{{t('noteHint')}}</p>
+        <p class="text-xs text-slate-400 mb-2">{{t('noteHint')}}</p>
         <textarea v-model="checkInNoteText" maxlength="200" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none" :placeholder="t('notePlaceholder')"></textarea>
         <div class="mt-3 flex gap-2">
-          <button @click="submitCheckInNote" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[44px]">{{t('save')}}</button>
+          <button @click="submitCheckInNote" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm min-h-[44px]">{{t('save')}}</button>
         </div>
       </div>
     </div>
@@ -957,11 +943,11 @@
     <!-- 导入选择弹窗 -->
     <div v-if="modals.importChoice" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('importChoice')">
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs">
-        <h3 class="font-black text-sm mb-2">{{t('importChoice')}}</h3>
+        <h3 class="font-bold text-sm mb-2">{{t('importChoice')}}</h3>
         <p class="text-slate-400 mb-4 leading-relaxed">{{t('importChoiceDesc')}}</p>
         <div class="space-y-2">
-          <button @click="executeImport('overwrite')" class="w-full bg-amber-400 text-slate-950 py-3 rounded-2xl text-sm font-black min-h-[48px]">{{t('overwriteImport')}}</button>
-          <button @click="executeImport('merge')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl text-sm font-black min-h-[48px]">{{t('mergeImport')}}</button>
+          <button @click="executeImport('overwrite')" class="w-full bg-amber-400 text-slate-950 py-3 rounded-2xl text-sm font-bold min-h-[48px]">{{t('overwriteImport')}}</button>
+          <button @click="executeImport('merge')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl text-sm font-bold min-h-[48px]">{{t('mergeImport')}}</button>
           <button @click="closeModal('importChoice')" class="w-full text-slate-500 py-2 text-sm">{{t('cancel')}}</button>
         </div>
       </div>
@@ -972,16 +958,16 @@
       <div class="w-full max-w-xs bg-white rounded-3xl overflow-hidden">
         <div class="p-6 text-center">
           <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center text-3xl mb-4">{{onboardingSteps[onboardingStep].icon}}</div>
-          <h3 class="text-lg font-black text-slate-900 mb-2">{{onboardingSteps[onboardingStep].title}}</h3>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">{{onboardingSteps[onboardingStep].title}}</h3>
           <p class="text-sm leading-relaxed text-slate-500">{{onboardingSteps[onboardingStep].desc}}</p>
         </div>
         <div class="flex items-center justify-center gap-2 mb-4">
           <span v-for="i in onboardingSteps.length" :key="i" class="w-2 h-2 rounded-full" :class="i-1===onboardingStep?'bg-amber-400':'bg-slate-200'"></span>
         </div>
         <div class="flex gap-3 px-4 pb-6">
-          <button v-if="onboardingStep>0" @click="onboardingStep--" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black min-h-[48px]">{{t('prev')}}</button>
-          <button v-if="onboardingStep<onboardingSteps.length-1" @click="onboardingStep++" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('next')}}</button>
-          <button v-else @click="closeOnboarding" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-black shadow-sm min-h-[48px]">{{t('start')}}</button>
+          <button v-if="onboardingStep>0" @click="onboardingStep--" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('prev')}}</button>
+          <button v-if="onboardingStep<onboardingSteps.length-1" @click="onboardingStep++" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm min-h-[48px]">{{t('next')}}</button>
+          <button v-else @click="closeOnboarding" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm min-h-[48px]">{{t('start')}}</button>
         </div>
       </div>
     </div>
@@ -989,11 +975,11 @@
     <!-- 确认对话框 -->
     <div v-if="dialog.visible" class="fixed inset-0 bg-black/55 z-[80] flex items-center justify-center p-6 fade-enter">
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 shadow-2xl">
-        <h3 class="text-base font-black text-slate-900 mb-2">{{ dialog.title }}</h3>
+        <h3 class="text-base font-bold text-slate-900 mb-2">{{ dialog.title }}</h3>
         <p class="text-sm leading-6 text-slate-600 whitespace-pre-line">{{ dialog.message }}</p>
         <div class="mt-5 flex justify-end gap-2">
-          <button v-if="dialog.type === 'confirm'" @click="closeDialog(false)" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-500 text-sm font-black active:scale-95 min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="closeDialog(true)" class="px-4 py-3 rounded-2xl bg-amber-400 text-slate-950 text-sm font-black shadow-sm active:scale-95 min-h-[48px]">
+          <button v-if="dialog.type === 'confirm'" @click="closeDialog(false)" class="px-4 py-3 rounded-2xl bg-slate-100 text-slate-500 text-sm font-bold active:scale-95 min-h-[48px]">{{t('cancel')}}</button>
+          <button @click="closeDialog(true)" class="px-4 py-3 rounded-2xl bg-amber-400 text-slate-950 text-sm font-bold shadow-sm active:scale-95 min-h-[48px]">
             {{ dialog.type === 'confirm' ? t('confirm') : t('gotIt') }}
           </button>
         </div>
@@ -1002,7 +988,7 @@
 
     <!-- 打卡成功 Toast -->
     <Transition name="toast">
-      <div v-if="toast.visible" class="fixed top-16 left-1/2 -translate-x-1/2 z-[85] bg-slate-900 text-white text-xs font-black px-4 py-2.5 rounded-full shadow-lg">
+      <div v-if="toast.visible" class="fixed top-16 left-1/2 -translate-x-1/2 z-[85] bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg">
         {{ toast.message }}
       </div>
     </Transition>
@@ -1099,6 +1085,7 @@
         const importFileInput = ref(null);
         const pendingImportData = ref(null);
         const onboardingStep = ref(0);
+        const safeBottom = ref(48);
 
         let habitPressTimer = null;
         let storePressTimer = null;
@@ -2612,6 +2599,23 @@
             console.error('数据加载失败，使用默认数据。', error);
           }
           appLoading.value = false;
+          // Detect safe area bottom for HBuilderX / mobile
+          if (typeof plus !== 'undefined' && plus.navigator && plus.navigator.getSafeAreaInsets) {
+            try {
+              const insets = plus.navigator.getSafeAreaInsets();
+              if (insets && insets.bottom > 0) {
+                safeBottom.value = insets.bottom + 16;
+              }
+            } catch (e) {}
+          } else if (window.visualViewport) {
+            const vv = window.visualViewport;
+            const checkInset = () => {
+              const inset = window.innerHeight - vv.height - vv.offsetTop;
+              if (inset > 20) safeBottom.value = inset + 16;
+            };
+            vv.addEventListener('resize', checkInset);
+            checkInset();
+          }
           // Apply initial theme color override
           applyThemeOverride(userProfile.value.themeColor || 'amber');
           // Sync #app attributes (Vue 3 cannot bind attrs on mount element)
@@ -2641,7 +2645,7 @@
           pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, levelProgress, isAllDoneToday,
           lang, darkMode, darkModeAuto, themeColor, themeColors, isWeekend, activeHabits, archivedHabits,
           t, setDarkMode, setThemeColor, setLanguage,
-          checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep,
+          checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep, safeBottom,
           weekLabels, allAchievements, unlockedAchievements, isAchievementUnlocked,
           weeklyStats, monthlyStats, heatmapData, getHeatLevel, lastBackupDate, onboardingSteps, appVersion,
           showArchived, habitSort, icon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getTodayNote, getHabitItemsByDate, checkInsByDate, openHabitModal, saveHabit,
