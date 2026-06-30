@@ -587,10 +587,9 @@
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line" :style="{color:darkMode?'#fbbf24':'#64748b'}" v-html="icon(darkMode?'moon':'sun')"></span><span class="text-sm font-bold text-slate-800">{{t('darkMode')}}</span></div>
             <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
               <!-- 滑动背景指示器 -->
-              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(33.333% - 2px)',left:'calc(' + (darkModeAuto ? 2 : darkMode ? 1 : 0) * 33.333 + '% + 1px)'}"></div>
-              <button @click="setDarkMode(false)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="!darkMode&&!darkModeAuto?'text-slate-950':'text-slate-400'">{{t('light')}}</button>
-              <button @click="setDarkMode(true)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkMode&&!darkModeAuto?'text-slate-950':'text-slate-400'">{{t('dark')}}</button>
-              <button @click="setDarkMode('auto')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkModeAuto?'text-slate-950':'text-slate-400'">{{t('followSystem')}}</button>
+              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 2px)',left:'calc(' + (darkMode ? 1 : 0) * 50 + '% + 1px)'}"></div>
+              <button @click="setDarkMode(false)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="!darkMode?'text-slate-950':'text-slate-400'">{{t('light')}}</button>
+              <button @click="setDarkMode(true)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkMode?'text-slate-950':'text-slate-400'">{{t('dark')}}</button>
             </div>
           </div>
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-amber-500" v-html="icon('palette')"></span><span class="text-sm font-bold text-slate-800">{{t('themeColor')}}</span></div>
@@ -601,9 +600,9 @@
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-slate-400" v-html="icon('globe')"></span><span class="text-sm font-bold text-slate-800">{{t('language')}}</span></div>
             <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
               <!-- 滑动背景指示器 -->
-              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 2px)',left:'calc(' + (lang==='en' ? 1 : 0) * 50 + '% + 1px)'}"></div>
-              <button @click="setLanguage('zh')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="lang==='zh'?'text-slate-950':'text-slate-400'">中文</button>
-              <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
+              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 4px)',left: lang==='en' ? 'calc(50%)' : '4px'}"></div>
+              <button @click="setLanguage('zh')" class="relative z-10 flex-1 text-xs font-semibold px-3 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='zh'?'text-slate-950':'text-slate-400'">中文</button>
+              <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-3 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
             </div>
           </div>
         <div class="soft-card rounded-3xl p-4 space-y-2"><h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-xs text-slate-400">{{t('aboutDesc')}}</p></div>
@@ -1050,7 +1049,7 @@
         const showArchived = ref(false);
         const habitSort = ref('created'); // 'created' | 'streak' | 'category'
         const activeTab = ref('habit');
-        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: null, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false });
+        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false });
         const habits = ref([]);
         const checkIns = ref([]);
         const storeItems = ref([
@@ -1085,7 +1084,7 @@
         const importFileInput = ref(null);
         const pendingImportData = ref(null);
         const onboardingStep = ref(0);
-        const safeBottom = ref(48);
+        const safeBottom = ref(84);
 
         let habitPressTimer = null;
         let storePressTimer = null;
@@ -1094,14 +1093,7 @@
 
         // ===== Theme/Language computed =====
         const lang = computed(() => userProfile.value.lang || 'zh');
-        const darkMode = computed(() => {
-          const dm = userProfile.value.darkMode;
-          if (dm === null || dm === undefined) {
-            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          }
-          return dm;
-        });
-        const darkModeAuto = computed(() => userProfile.value.darkMode === null || userProfile.value.darkMode === undefined);
+        const darkMode = computed(() => userProfile.value.darkMode ?? false);
         const themeColor = computed(() => userProfile.value.themeColor || 'amber');
         const themeColors = [
           { value: 'amber', color: '#f59e0b' },
@@ -1121,7 +1113,7 @@
           return dict[key] || key;
         }
 
-        function setDarkMode(v) { userProfile.value.darkMode = v === 'auto' ? null : Boolean(v); queueSaveData(); }
+        function setDarkMode(v) { userProfile.value.darkMode = Boolean(v); queueSaveData(); }
         function setThemeColor(c) {
           userProfile.value.themeColor = c;
           // Override Tailwind amber colors via dynamic <style> injected into <head>
@@ -1382,7 +1374,7 @@
           userProfile.value.currentExp = Math.max(0, Number(userProfile.value.currentExp) || 0);
           userProfile.value.totalExp = Math.max(0, Number(userProfile.value.totalExp) || 0);
           if (!userProfile.value.lang) userProfile.value.lang = 'zh';
-          if (userProfile.value.darkMode === undefined) userProfile.value.darkMode = null;
+          if (userProfile.value.darkMode === undefined) userProfile.value.darkMode = false;
           if (!userProfile.value.themeColor) userProfile.value.themeColor = 'amber';
           if (!userProfile.value.lastBackupReminderDate) userProfile.value.lastBackupReminderDate = '';
           if (userProfile.value.tutorialDone === undefined) userProfile.value.tutorialDone = false;
@@ -2540,7 +2532,7 @@
         async function resetApp() {
           const ok = await showConfirm(t('resetMsg'), t('resetConfirm'));
           if (!ok) return;
-          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: null, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false };
+          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false };
           habits.value = [];
           checkIns.value = [];
           storeItems.value = [
@@ -2607,7 +2599,8 @@
                 safeBottom.value = insets.bottom + 16;
               }
             } catch (e) {}
-          } else if (window.visualViewport) {
+          } else if (window.visualViewport && window.matchMedia('(pointer:coarse)').matches) {
+            // 仅在触摸设备上调整 safeBottom，防止桌面端弹窗时导航栏跳动
             const vv = window.visualViewport;
             const checkInset = () => {
               const inset = window.innerHeight - vv.height - vv.offsetTop;
@@ -2643,7 +2636,7 @@
           modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, selectedStoreItem, habitCalendarMonth, selectedHabitDate,
           todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
           pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, levelProgress, isAllDoneToday,
-          lang, darkMode, darkModeAuto, themeColor, themeColors, isWeekend, activeHabits, archivedHabits,
+          lang, darkMode, themeColor, themeColors, isWeekend, activeHabits, archivedHabits,
           t, setDarkMode, setThemeColor, setLanguage,
           checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep, safeBottom,
           weekLabels, allAchievements, unlockedAchievements, isAchievementUnlocked,
