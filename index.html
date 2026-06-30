@@ -183,7 +183,7 @@
             <span class="text-lg font-bold text-slate-800">{{t('checkGoals')}}</span>
           </div>
           <div class="flex items-center gap-2">
-            <button @click="habitSort = habitSort === 'created' ? 'streak' : habitSort === 'streak' ? 'category' : 'created'" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full min-h-[36px]" :style="{background:darkMode?'#1e1b4b':'#fff',color:darkMode?'#c4b5fd':'#94a3b8'}">
+            <button @click="toggleSort" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-full min-h-[36px]" :style="{background:darkMode?'#1e1b4b':'#fff',color:darkMode?'#c4b5fd':'#94a3b8'}">
               <span class="icon-line !w-3.5 !h-3.5" v-html="icon('sort')"></span>
               <span>{{ t('sortBy' + (habitSort === 'created' ? 'Created' : habitSort === 'streak' ? 'Streak' : 'Category')) }}</span>
             </button>
@@ -601,8 +601,8 @@
             <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
               <!-- 滑动背景指示器 -->
               <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 4px)',left: lang==='en' ? 'calc(50%)' : '4px'}"></div>
-              <button @click="setLanguage('zh')" class="relative z-10 flex-1 text-xs font-semibold px-3 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='zh'?'text-slate-950':'text-slate-400'">中文</button>
-              <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-3 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
+              <button @click="setLanguage('zh')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='zh'?'text-slate-950':'text-slate-400'">中文</button>
+              <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
             </div>
           </div>
         <div class="soft-card rounded-3xl p-4 space-y-2"><h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-xs text-slate-400">{{t('aboutDesc')}}</p></div>
@@ -1047,9 +1047,8 @@
         // ===== 状态 =====
         const appLoading = ref(true);
         const showArchived = ref(false);
-        const habitSort = ref('created'); // 'created' | 'streak' | 'category'
         const activeTab = ref('habit');
-        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false });
+        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created' });
         const habits = ref([]);
         const checkIns = ref([]);
         const storeItems = ref([
@@ -1095,6 +1094,14 @@
         const lang = computed(() => userProfile.value.lang || 'zh');
         const darkMode = computed(() => userProfile.value.darkMode ?? false);
         const themeColor = computed(() => userProfile.value.themeColor || 'amber');
+        const habitSort = computed({
+          get: () => userProfile.value.habitSort || 'created',
+          set: (v) => { userProfile.value.habitSort = v; queueSaveData(); }
+        });
+        function toggleSort() {
+          const current = habitSort.value;
+          habitSort.value = current === 'created' ? 'streak' : current === 'streak' ? 'category' : 'created';
+        }
         const themeColors = [
           { value: 'amber', color: '#f59e0b' },
           { value: 'rose', color: '#f43f5e' },
@@ -1359,7 +1366,7 @@
 
         async function loadLocalStorage() {
           await migrateOldDataIfNeeded();
-          userProfile.value = await readDBValue(STORAGE.profile, { currentExp: 0, totalExp: 0 });
+          userProfile.value = await readDBValue(STORAGE.profile, { currentExp: 0, totalExp: 0, habitSort: 'created' });
           habits.value = await readDBValue(STORAGE.habits, []);
           checkIns.value = await readDBValue(STORAGE.checkIns, []);
           storeItems.value = await readDBValue(STORAGE.store, storeItems.value);
@@ -1378,6 +1385,7 @@
           if (!userProfile.value.themeColor) userProfile.value.themeColor = 'amber';
           if (!userProfile.value.lastBackupReminderDate) userProfile.value.lastBackupReminderDate = '';
           if (userProfile.value.tutorialDone === undefined) userProfile.value.tutorialDone = false;
+          if (!userProfile.value.habitSort) userProfile.value.habitSort = 'created';
           habits.value = habits.value.map(habit => {
             const originalCreatedAt = habit.createdAt;
             return {
@@ -2532,7 +2540,7 @@
         async function resetApp() {
           const ok = await showConfirm(t('resetMsg'), t('resetConfirm'));
           if (!ok) return;
-          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false };
+          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created' };
           habits.value = [];
           checkIns.value = [];
           storeItems.value = [
@@ -2641,7 +2649,7 @@
           checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep, safeBottom,
           weekLabels, allAchievements, unlockedAchievements, isAchievementUnlocked,
           weeklyStats, monthlyStats, heatmapData, getHeatLevel, lastBackupDate, onboardingSteps, appVersion,
-          showArchived, habitSort, icon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getTodayNote, getHabitItemsByDate, checkInsByDate, openHabitModal, saveHabit,
+          showArchived, habitSort, toggleSort, icon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getTodayNote, getHabitItemsByDate, checkInsByDate, openHabitModal, saveHabit,
           deleteHabitDirectly, showHabitAction, showHabitTrend, habitTrendData, habitTrendRate, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, submitCheckInNote, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, archiveHabitFromAction, openHabitCalendar, openRewardHistory, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
           openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, canUndoRewardLog, undoRewardLog, deleteRewardLog, clearRewardHistory,
           exportData, triggerImportData, importData, executeImport, unarchiveHabit, showOnboarding, closeOnboarding, resetApp, openHabitCalendarDetail: selectHabitCalendarDate
