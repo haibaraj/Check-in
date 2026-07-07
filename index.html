@@ -33,7 +33,17 @@
     .safe-bottom { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
     .nav-bottom { padding-bottom: env(safe-area-inset-bottom); }
     .sheet-enter { animation: sheetUp .18s ease-out; }
+    .sheet-enter-smooth { animation: sheetUpSmooth .4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .page-enter-smooth { animation: pageInSmooth .35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    @keyframes pageInSmooth { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
     .fade-enter { animation: fadeIn .15s ease-out; }
+    .reward-history-fade-enter-active,
+    .reward-history-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+    .reward-history-fade-enter-from,
+    .reward-history-fade-leave-to { opacity: 0; transform: translateY(6px); }
+    .scrollable-content { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; touch-action: pan-y; }
+    .reward-history-segment { position: relative; display: flex; padding: 4px; border-radius: 9999px; background: #f1f5f9; }
+    .reward-history-segment .segment-slider { position: absolute; top: 4px; bottom: 4px; border-radius: 9999px; background: #0f172a; transition: left 0.25s cubic-bezier(0.22, 1, 0.36, 1), right 0.25s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
     .app-root {
       height: 100vh;
       height: 100dvh;
@@ -54,6 +64,7 @@
       padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
     }
     @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes sheetUpSmooth { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes toastSlideIn { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     @keyframes toastSlideOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -20px); opacity: 0; } }
@@ -446,86 +457,98 @@
           </div>
 
 
-          <!-- 兑换日志弹窗 -->
-          <div v-if="modals.rewardHistory" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('rewardHistory')">
-            <div class="w-full rounded-t-3xl p-5 max-w-md sheet-enter max-h-[85vh] flex flex-col" style="background: var(--bg-main);">
-              <!-- 弹窗头部 -->
-              <div class="flex items-center justify-between mb-4 pb-3 border-b" style="border-color: var(--border-card);">
-                <div>
+          <!-- 兑换日志全屏页 -->
+          <div v-if="modals.rewardHistory" class="fixed inset-0 z-50 flex items-center justify-center fade-enter" @click.self="closeModal('rewardHistory')">
+            <div class="absolute inset-0 bg-black/60" aria-hidden="true"></div>
+            <div class="relative w-full h-full max-w-none rounded-none page-enter-smooth flex flex-col" style="background: var(--bg-main);">
+              <!-- 页面头部 -->
+              <div class="flex items-center gap-3 px-5 pt-5 pb-3 border-b shrink-0" style="border-color: var(--border-card);">
+                <button @click="closeModal('rewardHistory')" class="shrink-0 w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center active:scale-95 active:bg-slate-200 transition-transform">
+                  <span class="icon-line !w-5 !h-5" v-html="icon('chevronLeft')"></span>
+                </button>
+                <div class="flex-1 min-w-0">
                   <h3 class="text-base font-bold text-slate-800">{{t('redeemLog')}}</h3>
                   <p class="text-xs text-slate-400 mt-0.5">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</p>
                 </div>
-                <button @click="closeModal('rewardHistory')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
               </div>
 
-              <!-- 弹窗内容 -->
-              <div class="overflow-y-auto flex-1 -mx-1 px-1 pb-4">
+              <!-- 页面内容 -->
+              <div class="overflow-y-auto flex-1 px-5 pb-8 scrollable-content">
                 <!-- 空状态 -->
-                <div v-if="rewardHistory.length === 0" class="flex flex-col items-center justify-center py-16">
-                  <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
-                    <span class="icon-line !w-7 !h-7" v-html="icon('fileText')"></span>
+                <div v-if="rewardHistory.length === 0" class="flex flex-col items-center justify-center py-20">
+                  <div class="w-20 h-20 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-4">
+                    <span class="icon-line !w-8 !h-8" v-html="icon('fileText')"></span>
                   </div>
-                  <p class="text-slate-400 font-bold">{{ t('noRedeemRecords') }}</p>
-                  <p class="text-xs text-slate-300 mt-1 text-center">{{ t('noRedeemRecordsDesc') }}</p>
+                  <p class="text-slate-500 font-bold text-sm">{{ t('noRedeemRecords') }}</p>
+                  <p class="text-xs text-slate-400 mt-1.5 text-center max-w-[240px]">{{ t('noRedeemRecordsDesc') }}</p>
                 </div>
 
                 <template v-else>
                   <!-- 关键指标 -->
-                  <div class="flex gap-2 mb-3">
-                    <div class="flex-1 soft-card rounded-2xl p-3 text-center">
-                      <p class="text-[10px] text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
-                      <p class="text-lg font-bold text-slate-800">{{ rewardStats.totalCount }}</p>
+                  <div class="grid grid-cols-3 gap-2 my-4">
+                    <div class="soft-card rounded-2xl p-3 text-center">
+                      <p class="text-xs text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
+                      <p class="text-xl font-bold text-slate-800 mt-1">{{ rewardStats.totalCount }}</p>
                     </div>
-                    <div class="flex-1 soft-card rounded-2xl p-3 text-center">
-                      <p class="text-[10px] text-slate-400 font-semibold">{{t('totalCost')}}</p>
-                      <p class="text-lg font-bold text-red-500">{{ rewardStats.totalExp }}</p>
+                    <div class="soft-card rounded-2xl p-3 text-center">
+                      <p class="text-xs text-slate-400 font-semibold">{{t('totalCost')}}</p>
+                      <p class="text-xl font-bold mt-1" :class="rewardStats.totalExp > 0 ? 'text-red-500' : 'text-slate-800'">{{ rewardStats.totalExp }}</p>
                     </div>
-                    <div class="flex-1 soft-card rounded-2xl p-3 text-center">
-                      <p class="text-[10px] text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
-                      <p class="text-lg font-bold text-amber-500">{{ rewardStats.monthCount }}</p>
+                    <div class="soft-card rounded-2xl p-3 text-center">
+                      <p class="text-xs text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
+                      <p class="text-xl font-bold text-amber-500 mt-1">{{ rewardStats.monthCount }}</p>
                     </div>
                   </div>
 
                   <!-- 筛选器与清空 -->
-                  <div class="flex items-center justify-between mb-3">
-                    <div class="flex gap-2">
-                      <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
-                      <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('today')}}</button>
+                  <div class="flex items-center justify-between gap-3 mb-4">
+                    <div class="reward-history-segment flex-1">
+                      <div class="segment-slider" :style="rewardHistoryFilter === 'all' ? {left:'4px',right:'50%'} : {left:'50%',right:'4px'}"></div>
+                      <button @click="rewardHistoryFilter = 'all'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300" :class="rewardHistoryFilter === 'all' ? 'text-white' : 'text-slate-600'">{{t('all')}}</button>
+                      <button @click="rewardHistoryFilter = 'today'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300" :class="rewardHistoryFilter === 'today' ? 'text-white' : 'text-slate-600'">{{t('today')}}</button>
                     </div>
-                    <button @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-full font-bold min-h-[32px]">{{t('clear')}}</button>
+                    <button @click="clearRewardHistory" class="shrink-0 w-9 h-9 rounded-xl bg-red-50 text-red-400 flex items-center justify-center active:scale-95 active:bg-red-100 transition-transform" :title="t('clear')">
+                      <span class="icon-line !w-4 !h-4" v-html="icon('trash')"></span>
+                    </button>
                   </div>
 
-                  <!-- 过滤后空状态 -->
-                  <div v-if="groupedRewardHistory.length === 0" class="flex flex-col items-center justify-center py-12">
-                    <p class="text-slate-400 font-bold">{{ t('noFilteredRecords') }}</p>
-                    <p class="text-xs text-slate-300 mt-1 text-center">{{ t('noFilterRecordsDesc') }}</p>
-                  </div>
+                  <transition name="reward-history-fade" mode="out-in">
+                    <div v-if="groupedRewardHistory.length === 0" key="empty" class="flex flex-col items-center justify-center py-16">
+                      <p class="text-slate-500 font-bold text-sm">{{ t('noFilteredRecords') }}</p>
+                      <p class="text-xs text-slate-400 mt-1.5 text-center max-w-[240px]">{{ t('noFilterRecordsDesc') }}</p>
+                    </div>
 
-                  <!-- 日志分组列表 -->
-                  <div v-else class="space-y-4">
-                    <section v-for="(group, groupIndex) in groupedRewardHistory" :key="group.key">
-                      <h4 class="text-xs font-bold text-slate-400 mb-2 px-1">{{ group.label }}</h4>
-                      <div class="space-y-2">
-                        <div v-for="(log, index) in group.logs" :key="log.id" class="soft-card rounded-2xl p-3 flex items-center gap-3" :class="log.revoked ? 'opacity-60' : ''">
-                          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-amber-50 text-amber-500'">
-                            <span class="icon-line !w-5 !h-5" v-html="icon(log.revoked ? 'fileText' : getStoreItemIcon(log.rewardName))"></span>
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-2">
-                              <p class="font-bold text-sm text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{ log.rewardName }}</p>
-                              <span v-if="log.revoked" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium shrink-0">{{t('redeemRevoked')}}</span>
+                    <div v-else key="list" class="space-y-5">
+                      <section v-for="(group, groupIndex) in groupedRewardHistory" :key="group.key">
+                        <h4 class="text-xs font-bold text-slate-400 mb-2.5 px-1">{{ group.label }}</h4>
+                        <div class="space-y-2.5">
+                          <div v-for="(log, index) in group.logs" :key="log.id" class="soft-card rounded-2xl p-3.5 flex items-center gap-3" :class="log.revoked ? 'opacity-60' : ''">
+                            <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-amber-50 text-amber-500'">
+                              <span class="icon-line !w-5 !h-5" v-html="icon(log.revoked ? 'fileText' : getStoreItemIcon(log.rewardName))"></span>
                             </div>
-                            <div class="flex items-center gap-2 mt-0.5">
-                              <span class="text-xs text-slate-400">{{ formatDateTime(log.timestamp) }}</span>
-                              <span class="text-xs font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
+                            <div class="min-w-0 flex-1">
+                              <div class="flex items-center gap-2">
+                                <p class="font-bold text-sm text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{ log.rewardName }}</p>
+                                <span v-if="log.revoked" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium shrink-0">{{t('redeemRevoked')}}</span>
+                              </div>
+                              <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs text-slate-400">{{ formatDateTime(log.timestamp) }}</span>
+                                <span class="text-xs font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
+                              </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                              <button v-if="groupIndex === 0 && index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 active:bg-amber-100 transition-transform" :title="t('undo')">
+                                <span class="icon-line !w-4 !h-4" v-html="icon('rotateCcw')"></span>
+                              </button>
+                              <button @click="deleteRewardLog(log.id)" class="w-9 h-9 rounded-xl bg-red-50 text-red-400 flex items-center justify-center active:scale-95 active:bg-red-100 transition-transform" :title="t('delete')">
+                                <span class="icon-line !w-4 !h-4" v-html="icon('trash')"></span>
+                              </button>
                             </div>
                           </div>
-                          <button v-if="groupIndex === 0 && index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="shrink-0 text-xs text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
-                          <button v-else @click="deleteRewardLog(log.id)" class="shrink-0 text-xs text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
                         </div>
-                      </div>
-                    </section>
-                  </div>
+                      </section>
+                    </div>
+                  </transition>
                 </template>
               </div>
             </div>
@@ -1465,7 +1488,9 @@
             music: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
             shopping: '<svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
             square: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect></svg>',
-            checkSquare: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="m8 12 2.5 2.5L16 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
+            checkSquare: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="m8 12 2.5 2.5L16 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+            x: '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg>',
+            rotateCcw: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
           };
           return icons[name] || '';
         }
