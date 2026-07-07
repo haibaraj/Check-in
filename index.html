@@ -29,6 +29,7 @@
     input, select, textarea { font-size: 16px; }
     button { touch-action: manipulation; }
     ::-webkit-scrollbar { display: none; }
+    .scroll-end-spacer { height: 1px; }
     .safe-bottom { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
     .nav-bottom { padding-bottom: env(safe-area-inset-bottom); }
     .sheet-enter { animation: sheetUp .18s ease-out; }
@@ -41,7 +42,7 @@
       overscroll-behavior: none;
     }
     .app-main {
-      height: 100%;
+      height: calc(100% - 4rem - env(safe-area-inset-bottom));
       min-height: 0;
     }
     .scroll-area {
@@ -50,7 +51,7 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
-      padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
     }
     @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -78,6 +79,11 @@
       0% { opacity: 0; transform: translateX(24px) scale(0.96); }
       100% { opacity: 1; transform: translateX(0) scale(1); }
     }
+    @keyframes tabFadeIn {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .tab-fade-in { animation: tabFadeIn 0.25s ease-out; }
     .check-bounce { animation: checkBounce .35s ease-out; }
     .onboarding-slide { animation: onboardingSlide .35s ease-out; }
     .float-exp {
@@ -103,8 +109,8 @@
   .theme-sky{--theme-50:#f0f9ff;--theme-100:#e0f2fe;--theme-400:#38bdf8;--theme-500:#0ea5e9;--theme-600:#0284c7;--theme-700:#0369a1}
   .heat-cell{border-radius:3px;transition:all .15s;cursor:pointer;width:14px;height:14px}
   .heat-cell:hover{transform:scale(1.3)}
-  .heat-0{background:var(--bg-input)}.heat-1{background:#9be9a8}.heat-2{background:#40c463}.heat-3{background:#30a14e}.heat-4{background:#216e39}
-  .dark .heat-0{background:#161b22}.dark .heat-1{background:#0e4429}.dark .heat-2{background:#006d32}.dark .heat-3{background:#26a641}.dark .heat-4{background:#39d353}
+  .heat-0{background:var(--heat-0, var(--bg-input))}.heat-1{background:var(--heat-1, #9be9a8)}.heat-2{background:var(--heat-2, #40c463)}.heat-3{background:var(--heat-3, #30a14e)}.heat-4{background:var(--heat-4, #216e39)}
+  .dark .heat-0{background:var(--heat-0, #161b22)}.dark .heat-1{background:var(--heat-1, #0e4429)}.dark .heat-2{background:var(--heat-2, #006d32)}.dark .heat-3{background:var(--heat-3, #26a641)}.dark .heat-4{background:var(--heat-4, #39d353)}
     .soft-card {
       background: var(--bg-card);
       border: 1px solid var(--border-card);
@@ -162,7 +168,12 @@
     button.bg-red-50:not([disabled]):active {
       background-color: #fee2e2 !important;
     }
-  </style>
+  
+.scrollbar-hide {-ms-overflow-style:none;scrollbar-width:none;}
+.scrollbar-hide::-webkit-scrollbar{display:none;}
+    summary { list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+</style>
 </head>
 <body>
   <div id="app" class="app-root max-w-md mx-auto relative overflow-hidden" :class="[darkMode?'dark':'','theme-'+themeColor]" :data-theme="themeColor">
@@ -269,6 +280,7 @@
                   <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg text-xs font-bold text-white flex items-center justify-center shrink-0" :style="{background: habit.color || 'var(--theme-400)'}">{{ habit.name.charAt(0) }}</span>
                         <h3 class="font-bold text-base text-slate-800 truncate">{{ habit.name }}</h3>
                         <span class="text-xs px-2 py-0.5 rounded-lg shrink-0 bg-slate-100 text-slate-500 font-medium">{{ translateFreq(habit.frequencyType) }}</span>
                         <span v-if="isWeekend" class="text-xs px-2 py-0.5 rounded-lg shrink-0 font-semibold bg-amber-50 text-amber-500">{{t('doubleEXP')}}</span>
@@ -321,6 +333,7 @@
                   <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg text-xs font-bold text-white flex items-center justify-center shrink-0 opacity-60" :style="{background: habit.color || 'var(--theme-400)'}">{{ habit.name.charAt(0) }}</span>
                         <h3 class="font-bold text-base text-slate-500 truncate">{{ habit.name }}</h3>
                         <span class="text-xs px-2 py-0.5 rounded-lg shrink-0 bg-slate-100 text-slate-500 font-medium">{{ translateFreq(habit.frequencyType) }}</span>
                       </div>
@@ -426,18 +439,122 @@
             </article>
           </div>
 
+
+          <!-- 兑换日志 -->
+          <div class="mt-2 border-t border-slate-200/60 pt-2">
+            <div @click="isRedeemLogOpen = !isRedeemLogOpen" class="flex items-center justify-between cursor-pointer py-2">
+              <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('list')"></span><span>{{t('redeemLog')}}</span></h2>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-slate-500">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</span>
+                <span class="icon-line !w-4 !h-4 text-slate-400 transition-transform" :class="isRedeemLogOpen ? 'rotate-180' : ''" v-html="icon('chevronDown')"></span>
+              </div>
+            </div>
+            <div v-show="isRedeemLogOpen" class="pt-2 space-y-3 tab-fade-in">
+              <div class="flex items-center justify-between">
+                <p class="text-xs text-slate-400">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
+                <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-full font-bold min-h-[32px]">{{t('clear')}}</button>
+              </div>
+            <div class="flex gap-2 mb-3">
+              <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
+              <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('today')}}</button>
+              <button @click="rewardHistoryFilter = 'month'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('month')}}</button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <div class="soft-card rounded-2xl p-3 text-center">
+                <p class="text-[10px] text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
+                <p class="text-lg font-bold text-slate-800">{{ rewardStats.totalCount }}</p>
+              </div>
+              <div class="soft-card rounded-2xl p-3 text-center">
+                <p class="text-[10px] text-slate-400 font-semibold">{{t('totalCost')}}</p>
+                <p class="text-lg font-bold text-red-500">{{ rewardStats.totalExp }}</p>
+              </div>
+              <div class="soft-card rounded-2xl p-3 text-center">
+                <p class="text-[10px] text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
+                <p class="text-lg font-bold text-amber-500">{{ rewardStats.monthCount }}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <div class="soft-card rounded-2xl p-3 text-center">
+                <p class="text-[10px] text-slate-400 font-semibold">{{t('avgCost')}}</p>
+                <p class="text-lg font-bold text-slate-800">{{ rewardStats.avgExp }} EXP</p>
+              </div>
+              <div class="soft-card rounded-2xl p-3 text-center">
+                <p class="text-[10px] text-slate-400 font-semibold">{{t('revokedCount')}}</p>
+                <p class="text-lg font-bold" :class="rewardStats.revokedCount > 0 ? 'text-orange-500' : 'text-slate-300'">{{ rewardStats.revokedCount }}<span v-if="rewardStats.totalCount > 0" class="text-[10px] font-normal text-slate-400 ml-0.5">{{ rewardStats.revokeRate }}%</span></p>
+              </div>
+              <div class="soft-card rounded-2xl p-3 text-center">
+                <p class="text-[10px] text-slate-400 font-semibold">{{t('todayRedeems')}}</p>
+                <p class="text-lg font-bold" :class="rewardStats.todayCount > 0 ? 'text-emerald-500' : 'text-slate-300'">{{ rewardStats.todayCount }}</p>
+              </div>
+            </div>
+
+            <div v-if="rewardStats.totalCount > 0" class="soft-card rounded-2xl p-4 mb-3">
+              <p class="text-xs font-bold text-slate-700 mb-3">{{t('week7Trend')}}</p>
+              <div class="flex items-end justify-between gap-1.5" style="height: 60px;">
+                <div v-for="(d, i) in rewardStats.week7Data" :key="i" class="flex-1 flex flex-col items-center gap-1">
+                  <div class="w-full rounded-t-md transition-all" :class="d.isToday ? 'ring-1 ring-offset-1' : ''" :style="{height: Math.max(4, d.count / Math.max(rewardStats.week7Max, 1) * 44) + 'px', background: d.count > 0 ? 'var(--theme-400)' : (darkMode ? '#1e1b4b' : '#f1f5f9'), '--tw-ring-color': 'var(--theme-400)', '--tw-ring-offset-color': darkMode ? '#1a1a2e' : '#f8fafc'}"></div>
+                  <span class="text-[9px]" :class="d.isToday ? 'font-bold text-slate-700' : 'text-slate-400'">{{ d.label }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="rewardStats.topItems.length > 0" class="soft-card rounded-2xl p-4 mb-3">
+              <p class="text-xs font-bold text-slate-700 mb-2">{{t('topRedeems')}}</p>
+              <div class="space-y-2">
+                <div v-for="(item, i) in rewardStats.topItems" :key="item.name" class="flex items-center gap-3">
+                  <span class="text-xs font-bold w-4 text-center" :class="i === 0 ? 'text-amber-500' : 'text-slate-300'">{{ i + 1 }}</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-slate-700 truncate">{{ item.name }}</p>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" :style="{width: (item.count / rewardStats.topItems[0].count * 100) + '%', background: 'var(--theme-400)'}"></div></div>
+                    <span class="text-xs font-bold text-slate-500 w-8 text-right">{{ item.count }}{{t('times')}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-sm text-slate-500">
+              <div v-if="filteredRewardHistory.length === 0" class="flex flex-col items-center justify-center py-12">
+                <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
+                  <span class="icon-line !w-7 !h-7" v-html="icon('list')"></span>
+                </div>
+                <p class="text-slate-400 font-bold">{{ rewardHistory.length === 0 ? t('noRedeemRecords') : t('noFilteredRecords') }}</p>
+                <p class="text-xs text-slate-300 mt-1">{{ rewardHistory.length === 0 ? t('noRedeemRecordsDesc') : t('noFilterRecordsDesc') }}</p>
+              </div>
+              <div v-for="(log, index) in filteredRewardHistory" :key="log.id" class="soft-card rounded-2xl p-4" :class="log.revoked ? 'opacity-60' : ''">
+                <div class="flex justify-between items-start gap-3">
+                  <div class="min-w-0 flex-1">
+                    <p class="font-bold text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{t('redeemAction')}} <strong>{{ log.rewardName }}</strong><span v-if="log.revoked" class="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-medium">{{t('redeemRevoked')}}</span></p>
+                    <p class="text-xs text-slate-400 mt-1">{{ formatDateTime(log.timestamp) }}</p>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
+                    <button v-if="index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="text-xs text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
+                    <button v-else @click="deleteRewardLog(log.id)" class="text-xs text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+            </div>
+          </div>
         </div>
       </section>
     <!-- 打卡记录 Tab (Calendar/Heatmap/Stats) -->
     <section v-show="activeTab==='calendar'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-      <div class="flex gap-2 mb-4">
-        <button @click="calendarSubTab='calendar'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='calendar'?'bg-slate-900 text-white':'bg-slate-50 text-slate-600 border border-slate-200'">{{t('calendar')}}</button>
-        <button @click="calendarSubTab='heatmap'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='heatmap'?'bg-slate-900 text-white':'bg-slate-50 text-slate-600 border border-slate-200'">{{t('heatmap')}}</button>
-        <button @click="calendarSubTab='stats'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='stats'?'bg-slate-900 text-white':'bg-slate-50 text-slate-600 border border-slate-200'">{{t('stats')}}</button>
-        <button @click="calendarSubTab='redeem'" class="flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px]" :class="calendarSubTab==='redeem'?'bg-slate-900 text-white':'bg-slate-50 text-slate-600 border border-slate-200'">{{t('redeemLog')}}</button>
+      <div class="relative flex p-1 mb-4 rounded-full bg-slate-100">
+        <!-- 滑动背景指示器 -->
+        <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-slate-900" :style="{width:'calc(25% - 4px)',left:'calc(' + (['calendar','heatmap','stats','habitData'].indexOf(calendarSubTab) * 25) + '% + 2px)'}" style="box-shadow: 0 1px 2px rgba(0,0,0,0.08);"></div>
+
+        <button @click="calendarSubTab='calendar'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300 whitespace-nowrap" :class="calendarSubTab==='calendar'?'text-white':'text-slate-600'">{{t('calendar')}}</button>
+        <button @click="calendarSubTab='heatmap'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300 whitespace-nowrap" :class="calendarSubTab==='heatmap'?'text-white':'text-slate-600'">{{t('heatmap')}}</button>
+        <button @click="calendarSubTab='stats'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300 whitespace-nowrap" :class="calendarSubTab==='stats'?'text-white':'text-slate-600'">{{t('stats')}}</button>
+        <button @click="calendarSubTab='habitData'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300 whitespace-nowrap" :class="calendarSubTab==='habitData'?'text-white':'text-slate-600'">{{t('data')}}</button>
       </div>
       <!-- Calendar -->
-      <div v-show="calendarSubTab==='calendar'" class="flex-1 min-h-0 scroll-area">
+      <div v-show="calendarSubTab==='calendar'" class="flex-1 min-h-0 scroll-area tab-fade-in">
         <div class="soft-card rounded-2xl p-4 mb-4">
           <div class="flex items-center justify-between mb-4">
             <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-semibold text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[40px]">{{t('prevMonth')}}</button>
@@ -476,8 +593,8 @@
               <template v-if="day.date">
                 <p class="text-xs font-semibold">{{ day.day }}</p>
                 <div class="mt-1 flex flex-wrap justify-center gap-0.5">
-                  <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                  <span v-if="day.items.length > 4" class="text-[10px] text-emerald-500 leading-none">+</span>
+                  <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full" :style="{background: item.color || 'var(--theme-400)'}"></span>
+                  <span v-if="day.items.length > 4" class="text-[10px] leading-none" :style="{color: 'var(--theme-500)'}">+</span>
                 </div>
               </template>
             </button>
@@ -502,7 +619,7 @@
         <div class="scroll-end-spacer"></div>
       </div>
       <!-- Heatmap -->
-      <div v-show="calendarSubTab==='heatmap'" class="flex-1 min-h-0 scroll-area">
+      <div v-show="calendarSubTab==='heatmap'" class="flex-1 min-h-0 scroll-area tab-fade-in">
         <div class="soft-card rounded-2xl p-4 mb-4">
           <h3 class="text-sm font-bold text-slate-800 mb-3">{{t('heatmapTitle')}}</h3>
           <div class="overflow-x-auto pb-2"><div class="inline-flex gap-1" style="min-width:100%">
@@ -522,135 +639,161 @@
         <div class="scroll-end-spacer"></div>
       </div>
       <!-- Stats -->
-      <div v-show="calendarSubTab==='stats'" class="flex-1 min-h-0 scroll-area space-y-4">
-        <div class="soft-card rounded-2xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('weeklyReport')}}</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekCheckins')}}</p><p class="text-lg font-bold text-amber-600">{{weeklyStats.checkins}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekRate')}}</p><p class="text-lg font-bold text-amber-600">{{weeklyStats.rate}}%</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekEXP')}}</p><p class="text-lg font-bold text-emerald-600">+{{weeklyStats.expGained}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('weekBestStreak')}}</p><p class="text-lg font-bold text-orange-500">{{weeklyStats.bestStreak}}</p></div>
+      <div v-show="calendarSubTab==='stats'" class="flex-1 min-h-0 scroll-area space-y-4 tab-fade-in">
+        <!-- Hero 周报 -->
+        <div class="soft-card rounded-3xl p-5 text-center">
+          <p class="text-xs font-semibold text-slate-400 mb-3">{{t('weeklyReport')}}</p>
+          <div class="flex items-center justify-center gap-6">
+            <div>
+              <p class="text-4xl font-black text-slate-800">{{weeklyStats.checkins}}</p>
+              <p class="text-xs text-slate-400 mt-1">{{t('weekCheckins')}}</p>
+            </div>
+            <div class="w-px h-12 bg-slate-200"></div>
+            <div>
+              <p class="text-4xl font-black" :style="{color: 'var(--theme-500)'}">{{weeklyStats.rate}}%</p>
+              <p class="text-xs text-slate-400 mt-1">{{t('weekRate')}}</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-100">
+            <div class="text-center">
+              <p class="text-lg font-bold text-emerald-600">+{{weeklyStats.expGained}}</p>
+              <p class="text-[10px] text-slate-400">{{t('weekEXP')}}</p>
+            </div>
+            <div class="text-center">
+              <p class="text-lg font-bold text-orange-500">{{weeklyStats.bestStreak}}</p>
+              <p class="text-[10px] text-slate-400">{{t('weekBestStreak')}}</p>
+            </div>
           </div>
         </div>
-        <div class="soft-card rounded-2xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('monthlyReport')}}</h3>
-          <div class="grid grid-cols-2 gap-2">
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthCheckDays')}}</p><p class="text-lg font-bold text-amber-600">{{monthlyStats.checkDays}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthRate2')}}</p><p class="text-lg font-bold text-amber-600">{{monthlyStats.rate}}%</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthExpEarned')}}</p><p class="text-lg font-bold text-emerald-600">+{{monthlyStats.expEarned}}</p></div>
-            <div class="bg-slate-50 rounded-2xl p-3 text-center"><p class="text-xs text-slate-400 font-semibold">{{t('monthExpSpent')}}</p><p class="text-lg font-bold text-red-500">-{{monthlyStats.expSpent}}</p></div>
+
+        <!-- Hero 月报 -->
+        <div class="soft-card rounded-3xl p-5 text-center">
+          <p class="text-xs font-semibold text-slate-400 mb-3">{{t('monthlyReport')}}</p>
+          <div class="flex items-center justify-center gap-6">
+            <div>
+              <p class="text-4xl font-black text-slate-800">{{monthlyStats.checkDays}}</p>
+              <p class="text-xs text-slate-400 mt-1">{{t('monthCheckDays')}}</p>
+            </div>
+            <div class="w-px h-12 bg-slate-200"></div>
+            <div>
+              <p class="text-4xl font-black" :style="{color: 'var(--theme-500)'}">{{monthlyStats.rate}}%</p>
+              <p class="text-xs text-slate-400 mt-1">{{t('monthRate2')}}</p>
+            </div>
           </div>
-          <div class="mt-2 bg-slate-50 rounded-2xl p-3"><p class="text-xs text-slate-400 font-semibold">{{t('mostChecked')}}</p><p class="text-sm font-bold text-slate-800 mt-1">{{monthlyStats.topHabit||t('none')}}</p></div>
-        </div>
-        <div class="soft-card rounded-2xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('expLogTitle')}}</h3>
-          <div v-if="expLogs.length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noExpLogs')}}</div>
-          <div v-else class="space-y-2 max-h-64 overflow-y-auto">
-            <div v-for="log in expLogs.slice(0,50)" :key="log.id" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800 truncate">{{log.habitName||log.rewardName||''}}</p><p class="text-xs text-slate-400">{{formatDateTime(log.timestamp)}}</p></div><span class="text-xs font-semibold whitespace-nowrap" :class="log.amount>=0?'text-emerald-600':'text-red-500'">{{log.amount>=0?'+':''}}{{log.amount}} EXP</span></div>
+          <div class="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-slate-100">
+            <div class="text-center">
+              <p class="text-lg font-bold text-emerald-600">+{{monthlyStats.expEarned}}</p>
+              <p class="text-[10px] text-slate-400">{{t('monthExpEarned')}}</p>
+            </div>
+            <div class="text-center">
+              <p class="text-lg font-bold text-red-500">-{{monthlyStats.expSpent}}</p>
+              <p class="text-[10px] text-slate-400">{{t('monthExpSpent')}}</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <p class="text-xs text-slate-400">{{t('mostChecked')}}</p>
+            <p class="text-sm font-bold text-slate-800 mt-1">{{monthlyStats.topHabit||t('none')}}</p>
           </div>
         </div>
-        <div class="soft-card rounded-2xl p-4"><h3 class="text-sm font-bold text-slate-800 mb-3">{{t('achievements')}} ({{unlockedAchievements.length}}/{{allAchievements.length}})</h3>
-          <div class="space-y-2">
-            <div v-for="ach in allAchievements" :key="ach.id" class="bg-slate-50 rounded-2xl p-3 flex items-center gap-3" :class="isAchievementUnlocked(ach.id)?'':'opacity-40'">
+
+        <!-- EXP日志（折叠） -->
+        <details class="soft-card rounded-2xl p-4">
+          <summary class="text-sm font-bold text-slate-800 cursor-pointer list-none flex items-center justify-between">
+            <span>{{t('expLogTitle')}}</span>
+            <span class="text-xs text-slate-400">{{expLogs.length}} {{t('items')}}</span>
+          </summary>
+          <div class="mt-3 space-y-2 max-h-64 overflow-y-auto">
+            <div v-if="expLogs.length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noExpLogs')}}</div>
+            <div v-for="log in expLogs.slice(0,50)" :key="log.id" class="bg-slate-50 rounded-xl p-3 flex justify-between items-center"><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800 truncate">{{log.habitName||log.rewardName||''}}</p><p class="text-xs text-slate-400">{{formatDateTime(log.timestamp)}}</p></div><span class="text-xs font-semibold whitespace-nowrap" :class="log.amount>=0?'text-emerald-600':'text-red-500'">{{log.amount>=0?'+':''}}{{log.amount}} EXP</span></div>
+          </div>
+        </details>
+
+        <!-- 成就（折叠） -->
+        <details class="soft-card rounded-2xl p-4">
+          <summary class="text-sm font-bold text-slate-800 cursor-pointer list-none flex items-center justify-between">
+            <span>{{t('achievements')}}</span>
+            <span class="text-xs text-slate-400">{{unlockedAchievements.length}}/{{allAchievements.length}}</span>
+          </summary>
+          <div class="mt-3 space-y-2">
+            <div v-for="ach in allAchievements" :key="ach.id" class="bg-slate-50 rounded-xl p-3 flex items-center gap-3" :class="isAchievementUnlocked(ach.id)?'':'opacity-40'">
               <div class="w-10 h-10 rounded-xl flex items-center justify-center" :class="isAchievementUnlocked(ach.id)?'bg-amber-50 text-amber-500':'bg-slate-100 text-slate-400'"><span class="icon-line !w-5 !h-5" v-html="icon(ach.icon)"></span></div>
               <div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-800">{{ach.name}}</p><p class="text-xs text-slate-400">{{ach.desc}}</p></div>
               <div v-if="isAchievementUnlocked(ach.id)" class="text-xs font-semibold px-2 py-1 rounded-full bg-amber-50 text-amber-500">+{{ach.reward}} EXP</div>
             </div>
           </div>
-        </div>
+        </details>
         <div class="scroll-end-spacer"></div>
       </div>
 
-      <!-- 兑换日志 -->
-      <div v-show="calendarSubTab==='redeem'" class="flex-1 min-h-0 scroll-area space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('list')"></span><span>{{t('redeemLog')}}</span></h2>
-          <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-full font-bold min-h-[32px]">{{t('clear')}}</button>
+      <!-- 习惯数据 -->
+      <div v-show="calendarSubTab==='habitData'" class="flex-1 min-h-0 scroll-area space-y-3 tab-fade-in">
+        <div v-if="habits.length === 0" class="flex flex-col items-center justify-center py-20">
+          <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
+            <span class="icon-line !w-7 !h-7" v-html="icon('barChart')"></span>
+          </div>
+          <p class="text-slate-400 font-bold">{{t('noHabitsYet')}}</p>
         </div>
-        <p class="text-xs text-slate-400">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
-
-        <div class="flex gap-2">
-          <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
-          <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('today')}}</button>
-          <button @click="rewardHistoryFilter = 'month'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('month')}}</button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-2">
-          <div class="bg-white rounded-2xl p-3 text-center border border-slate-100">
-            <p class="text-[10px] text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
-            <p class="text-lg font-bold text-slate-800">{{ rewardStats.totalCount }}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-3 text-center border border-slate-100">
-            <p class="text-[10px] text-slate-400 font-semibold">{{t('totalCost')}}</p>
-            <p class="text-lg font-bold text-red-500">{{ rewardStats.totalExp }}</p>
-          </div>
-          <div class="bg-white rounded-2xl p-3 text-center border border-slate-100">
-            <p class="text-[10px] text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
-            <p class="text-lg font-bold text-amber-500">{{ rewardStats.monthCount }}</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-2">
-          <div class="bg-white rounded-2xl p-3 text-center border border-slate-100">
-            <p class="text-[10px] text-slate-400 font-semibold">{{t('avgCost')}}</p>
-            <p class="text-lg font-bold text-slate-800">{{ rewardStats.avgExp }} EXP</p>
-          </div>
-          <div class="bg-white rounded-2xl p-3 text-center border border-slate-100">
-            <p class="text-[10px] text-slate-400 font-semibold">{{t('revokedCount')}}</p>
-            <p class="text-lg font-bold" :class="rewardStats.revokedCount > 0 ? 'text-orange-500' : 'text-slate-300'">{{ rewardStats.revokedCount }}<span v-if="rewardStats.totalCount > 0" class="text-[10px] font-normal text-slate-400 ml-0.5">{{ rewardStats.revokeRate }}%</span></p>
-          </div>
-          <div class="bg-white rounded-2xl p-3 text-center border border-slate-100">
-            <p class="text-[10px] text-slate-400 font-semibold">{{t('todayRedeems')}}</p>
-            <p class="text-lg font-bold" :class="rewardStats.todayCount > 0 ? 'text-emerald-500' : 'text-slate-300'">{{ rewardStats.todayCount }}</p>
-          </div>
-        </div>
-
-        <div v-if="rewardStats.totalCount > 0" class="soft-card rounded-2xl p-4">
-          <p class="text-xs font-bold text-slate-700 mb-3">{{t('week7Trend')}}</p>
-          <div class="flex items-end justify-between gap-1.5" style="height: 60px;">
-            <div v-for="(d, i) in rewardStats.week7Data" :key="i" class="flex-1 flex flex-col items-center gap-1">
-              <div class="w-full rounded-t-md transition-all" :class="d.isToday ? 'ring-1 ring-offset-1' : ''" :style="{height: Math.max(4, d.count / Math.max(rewardStats.week7Max, 1) * 44) + 'px', background: d.count > 0 ? 'var(--theme-400)' : (darkMode ? '#1e1b4b' : '#f1f5f9'), '--tw-ring-color': 'var(--theme-400)', '--tw-ring-offset-color': darkMode ? '#1a1a2e' : '#f8fafc'}"></div>
-              <span class="text-[9px]" :class="d.isToday ? 'font-bold text-slate-700' : 'text-slate-400'">{{ d.label }}</span>
+        <template v-else>
+          <!-- 总览统计 -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="soft-card rounded-2xl p-4 text-center">
+              <p class="text-2xl font-bold text-slate-800">{{ allHabitsTotalCheckins }}</p>
+              <p class="text-xs text-slate-400 font-semibold mt-1">{{t('totalCheckins')}}</p>
+            </div>
+            <div class="soft-card rounded-2xl p-4 text-center">
+              <p class="text-2xl font-bold text-slate-800">{{ allHabitsTotalDays }}</p>
+              <p class="text-xs text-slate-400 font-semibold mt-1">{{t('totalDays')}}</p>
             </div>
           </div>
-        </div>
 
-        <div v-if="rewardStats.topItems.length > 0" class="soft-card rounded-2xl p-4">
-          <p class="text-xs font-bold text-slate-700 mb-2">{{t('topRedeems')}}</p>
-          <div class="space-y-2">
-            <div v-for="(item, i) in rewardStats.topItems" :key="item.name" class="flex items-center gap-3">
-              <span class="text-xs font-bold w-4 text-center" :class="i === 0 ? 'text-amber-500' : 'text-slate-300'">{{ i + 1 }}</span>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-slate-700 truncate">{{ item.name }}</p>
-              </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" :style="{width: (item.count / rewardStats.topItems[0].count * 100) + '%', background: 'var(--theme-400)'}"></div></div>
-                <span class="text-xs font-bold text-slate-500 w-8 text-right">{{ item.count }}{{t('times')}}</span>
-              </div>
-            </div>
+          <!-- 周/月/年切换 -->
+          <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
+            <button @click="habitDataRange='week'" class="flex-1 text-xs font-semibold py-2 rounded-lg transition-all" :class="habitDataRange==='week'?'bg-white text-slate-900 shadow-sm':'text-slate-400'">{{t('week')}}</button>
+            <button @click="habitDataRange='month'" class="flex-1 text-xs font-semibold py-2 rounded-lg transition-all" :class="habitDataRange==='month'?'bg-white text-slate-900 shadow-sm':'text-slate-400'">{{t('month')}}</button>
+            <button @click="habitDataRange='year'" class="flex-1 text-xs font-semibold py-2 rounded-lg transition-all" :class="habitDataRange==='year'?'bg-white text-slate-900 shadow-sm':'text-slate-400'">{{t('year')}}</button>
           </div>
-        </div>
 
-        <div class="space-y-2 text-sm text-slate-500">
-          <div v-if="filteredRewardHistory.length === 0" class="flex flex-col items-center justify-center py-12">
-            <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
-              <span class="icon-line !w-7 !h-7" v-html="icon('list')"></span>
-            </div>
-            <p class="text-slate-400 font-bold">{{ rewardHistory.length === 0 ? t('noRedeemRecords') : t('noFilteredRecords') }}</p>
-            <p class="text-xs text-slate-300 mt-1">{{ rewardHistory.length === 0 ? t('noRedeemRecordsDesc') : t('noFilterRecordsDesc') }}</p>
+          <!-- 月份导航 -->
+          <div v-if="habitDataRange!=='year'" class="flex items-center justify-center gap-4">
+            <button @click="shiftHabitDataMonth(-1)" class="text-slate-400 active:text-slate-700">
+              <span class="icon-line !w-4 !h-4" v-html="icon('chevronLeft')"></span>
+            </button>
+            <span class="text-sm font-bold text-slate-700">{{ habitDataMonthLabel }}</span>
+            <button @click="shiftHabitDataMonth(1)" class="text-slate-400 active:text-slate-700">
+              <span class="icon-line !w-4 !h-4" v-html="icon('chevronRight')"></span>
+            </button>
           </div>
-          <div v-for="(log, index) in filteredRewardHistory" :key="log.id" class="soft-card rounded-2xl p-4" :class="log.revoked ? 'opacity-60' : ''">
-            <div class="flex justify-between items-start gap-3">
+
+          <!-- 每个习惯的日历网格 -->
+          <div v-for="habit in habits" :key="habit.id" class="soft-card rounded-2xl p-4">
+            <div class="flex items-start gap-3 mb-3">
               <div class="min-w-0 flex-1">
-                <p class="font-bold text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{t('redeemAction')}} <strong>{{ log.rewardName }}</strong><span v-if="log.revoked" class="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-medium">{{t('redeemRevoked')}}</span></p>
-                <p class="text-xs text-slate-400 mt-1">{{ formatDateTime(log.timestamp) }}</p>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="w-6 h-6 rounded-lg text-xs font-bold text-white flex items-center justify-center shrink-0" :style="{background: habit.color || 'var(--theme-400)'}">{{ habit.name.charAt(0) }}</span>
+                  <h3 class="text-sm font-bold text-slate-800 truncate">{{ habit.name }}</h3>
+                </div>
+                <p class="text-xs font-bold" :style="{color: habit.color || 'var(--theme-500)'}">X{{ getHabitRangeStats(habit).count }}</p>
+                <p class="text-xs text-slate-400 mt-0.5">{{ getHabitRangeStats(habit).days }}{{t('days')}}</p>
+                <p class="text-xs text-slate-400">{{ getHabitRangeStats(habit).rate }}%</p>
               </div>
-              <div class="flex items-center gap-2 shrink-0">
-                <span class="font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
-                <button v-if="index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="text-xs text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
-                <button v-else @click="deleteRewardLog(log.id)" class="text-xs text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
+              <!-- 日历网格 -->
+              <div class="grid grid-cols-7 gap-1 shrink-0">
+                <div v-for="day in getHabitCalendarDays(habit)" :key="day.d" class="rounded-md flex items-center justify-center font-semibold transition-all"
+                  :class="[
+                    habitDataRange === 'week' ? 'w-7 h-7 text-[10px]' : habitDataRange === 'month' ? 'w-5 h-5 text-[9px]' : 'w-4 h-4 text-[8px]',
+                    day.checked ? '' : 'bg-slate-700/50 text-slate-500'
+                  ]"
+                  :style="day.checked ? {background: habit.color || 'var(--theme-400)', color: '#fff'} : {}">
+                  {{ habitDataRange === 'year' && !day.checked ? '' : day.d }}
+                </div>
               </div>
             </div>
           </div>
-          <div class="scroll-end-spacer"></div>
-        </div>
+        </template>
+
+        <div class="scroll-end-spacer"></div>
       </div>
+
     </section>
 
     <!-- 设置 Tab -->
@@ -697,6 +840,7 @@
               <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
             </div>
           </div>
+        </div>
         <div class="soft-card rounded-2xl p-4 space-y-2"><h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-xs text-slate-400">{{t('aboutDesc')}}</p></div>
         <button @click="showOnboarding" class="w-full soft-card rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition-all min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('helpCircle')"></span><span class="text-sm font-bold text-slate-800">{{t('viewTutorial')}}</span></button>
         <div class="soft-card rounded-2xl p-4">
@@ -731,9 +875,9 @@
     </Transition>
 
     <!-- 底部导航 -->
-    <nav class="fixed w-[calc(100%-40px)] max-w-sm rounded-3xl h-14 shadow-2xl shadow-black/10 flex justify-around items-center z-40 p-1 relative" :style="{left:'50%',transform:'translateX(-50%)',bottom:safeBottom + 'px',background:'var(--bg-nav)',border:'1px solid var(--border-card)'}">
+    <nav class="fixed bottom-0 left-0 right-0 flex justify-around items-center z-40 px-2" :style="{height:'calc(4rem + env(safe-area-inset-bottom))',paddingBottom:'env(safe-area-inset-bottom)',background:'var(--bg-nav)',borderTop:'1px solid var(--border-card)'}">
       <!-- 滑动背景指示器 -->
-      <div class="absolute top-1 bottom-1 rounded-2xl transition-all duration-300 ease-out pointer-events-none" :style="{width:'calc(25% - 4px)',left:'calc(' + (['habit','store','calendar','settings'].indexOf(activeTab) * 25) + '% + 2px)',background:'var(--theme-100)'}"></div>
+      <div class="absolute top-1 bottom-1 rounded-2xl transition-all duration-300 ease-out pointer-events-none" :style="{width:'calc(25% - 8px)',left:'calc(' + (['habit','store','calendar','settings'].indexOf(activeTab) * 25) + '% + 4px)',background:'var(--theme-100)'}"></div>
 
       <button @click="activeTab='habit'" class="relative z-10 flex-1 h-full rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='habit'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='habit'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('target')"></span><span>{{t('todayCheckin')}}</span></button>
       <button @click="activeTab='store'" class="relative z-10 flex-1 h-full rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='store'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='store'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('gift')"></span><span>{{t('rewardStore')}}</span></button>
@@ -752,44 +896,10 @@
           <button @click="closeModal('habitAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
         </div>
         <div class="space-y-1">
-          <button @click="showHabitTrend" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-emerald-500" v-html="icon('barChart')"></span><span>{{t('viewTrend')}}</span></button>
           <button @click="retroHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckin')}}</span></button>
           <button @click="editHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
           <button @click="archiveHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-500 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('archive')"></span><span>{{t('archive')}}</span></button>
           <button @click="deleteHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 习惯趋势弹窗 -->
-    <div v-if="modals.habitTrend" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('habitTrend')">
-      <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs sheet-enter">
-        <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-100">
-          <div class="min-w-0 flex-1">
-            <p class="text-xs text-slate-400 font-bold">{{t('trendTitle')}}</p>
-            <h3 class="text-base font-bold text-slate-800 truncate">{{ selectedHabitItem ? selectedHabitItem.name : '' }}</h3>
-          </div>
-          <button @click="closeModal('habitTrend')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
-        </div>
-        <div class="mb-3 flex justify-between items-center">
-          <span class="text-xs text-slate-400">{{t('last30Days')}}</span>
-          <span class="text-[10px] font-semibold" :class="habitTrendRate >= 80 ? 'text-emerald-500' : habitTrendRate >= 50 ? 'text-amber-500' : 'text-red-400'">{{ habitTrendData.filter(d=>d.checked).length }}/30 ({{ habitTrendRate }}%)</span>
-        </div>
-        <!-- 热力图日历 -->
-        <div class="grid grid-cols-7 gap-1 mb-2">
-          <div v-for="day in habitTrendData" :key="day.date" class="flex flex-col items-center gap-0.5">
-            <div class="w-full rounded-md transition-all" :class="day.checked ? 'ring-1' : ''" :style="{
-              aspectRatio: '1',
-              background: day.checked ? 'var(--theme-400)' : (darkMode ? '#1e1b4b' : '#f1f5f9'),
-              boxShadow: day.checked ? '0 0 4px var(--theme-400)' : 'none'
-            }"></div>
-            <span class="text-[6px]" :style="{color: darkMode ? '#6366f1' : '#94a3b8'}">{{ day.label }}</span>
-          </div>
-        </div>
-        <!-- 完成率 -->
-        <div class="flex items-center justify-center gap-3 text-[10px]">
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded" :style="{background:'var(--theme-400)'}"></span>{{t('checked')}}</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded" :style="{background: darkMode ? '#1e1b4b' : '#f1f5f9'}"></span>{{t('missed')}}</span>
         </div>
       </div>
     </div>
@@ -861,8 +971,8 @@
             <template v-if="day.date">
               <p class="text-xs font-semibold">{{ day.day }}</p>
               <div class="mt-1 flex flex-wrap justify-center gap-0.5">
-                <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span v-if="day.items.length > 4" class="text-[10px] text-emerald-500 leading-none">+</span>
+                <span v-for="item in day.items.slice(0, 4)" :key="item.id" class="w-1.5 h-1.5 rounded-full" :style="{background: item.color || 'var(--theme-400)'}"></span>
+                <span v-if="day.items.length > 4" class="text-[10px] leading-none" :style="{color: 'var(--theme-500)'}">+</span>
               </div>
             </template>
           </button>
@@ -1108,8 +1218,11 @@
         const rewardHistory = ref([]);
         const storeFilter = ref('all');
         const calendarSubTab = ref('calendar');
+        const habitDataRange = ref('month');
+        const habitDataMonth = ref(new Date().getMonth());
         const storeSort = ref('asc');
         const rewardHistoryFilter = ref('all');
+        const isRedeemLogOpen = ref(false);
         const expLogs = ref([]);
         const achievements = ref([]);
 
@@ -1163,8 +1276,8 @@
         const archivedHabits = computed(() => habits.value.filter(h => h.archived));
 
         function t(key) {
-          const zh = {loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'};
-          const en = {loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'};
+          const zh = {loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'};
+          const en = {loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'};
           const dict = lang.value === 'en' ? en : zh;
           return dict[key] || key;
         }
@@ -1276,6 +1389,34 @@
         }
 
         // ===== 图标 =====
+        function generateHeatColors(baseColor) {
+          // 将颜色转换为HSL，生成5级渐变
+          const hex = baseColor.replace('#', '');
+          const r = parseInt(hex.substr(0, 2), 16) / 255;
+          const g = parseInt(hex.substr(2, 2), 16) / 255;
+          const b = parseInt(hex.substr(4, 2), 16) / 255;
+          const max = Math.max(r, g, b), min = Math.min(r, g, b);
+          let h, s, l = (max + min) / 2;
+          if (max === min) { h = s = 0; }
+          else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+              case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+              case g: h = ((b - r) / d + 2) / 6; break;
+              case b: h = ((r - g) / d + 4) / 6; break;
+            }
+          }
+          // 生成5级亮度
+          return [
+            `hsl(${Math.round(h * 360)}, ${Math.round(s * 30)}%, 95%)`,
+            `hsl(${Math.round(h * 360)}, ${Math.round(s * 60)}%, 85%)`,
+            `hsl(${Math.round(h * 360)}, ${Math.round(s * 80)}%, 70%)`,
+            `hsl(${Math.round(h * 360)}, ${Math.round(s * 90)}%, 55%)`,
+            `hsl(${Math.round(h * 360)}, ${Math.round(s * 95)}%, 40%)`
+          ];
+        }
+
         function getStoreItemIcon(name) {
           const n = (name || '').toLowerCase();
           if (/奶茶|咖啡|饮料|喝|茶|可乐|果汁/.test(n)) return 'coffee';
@@ -1317,6 +1458,8 @@
             database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
             info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
             plus: '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+            chevronLeft: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>',
+            chevronRight: '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>',
             zap: '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"></polygon></svg>',
             star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
             fileText: '<svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>',
@@ -1597,6 +1740,96 @@
           };
         });
 
+        // ===== 习惯数据 =====
+        const habitDataMonthLabel = computed(() => {
+          const y = new Date().getFullYear();
+          const m = habitDataMonth.value + 1;
+          return `${y}-${String(m).padStart(2, '0')}`;
+        });
+
+        const allHabitsTotalCheckins = computed(() => {
+          return checkIns.value.filter(c => habits.value.some(h => h.id === c.habitId)).length;
+        });
+
+        const allHabitsTotalDays = computed(() => {
+          const dates = new Set(checkIns.value.filter(c => habits.value.some(h => h.id === c.habitId)).map(c => c.date));
+          return dates.size;
+        });
+
+        function getHabitRangeStats(habit) {
+          const range = habitDataRange.value;
+          let dates;
+          if (range === 'week') {
+            const wr = getWeekRange();
+            dates = checkIns.value.filter(i => i.habitId === habit.id && i.date >= wr.start && i.date <= wr.end);
+          } else if (range === 'month') {
+            const prefix = habitDataMonthLabel.value;
+            dates = checkIns.value.filter(i => i.habitId === habit.id && i.date.startsWith(prefix));
+          } else {
+            const prefix = todayStr.value.slice(0, 4);
+            dates = checkIns.value.filter(i => i.habitId === habit.id && i.date.startsWith(prefix));
+          }
+          const uniqueDays = new Set(dates.map(d => d.date)).size;
+          const count = dates.length;
+          let totalDays;
+          if (range === 'week') totalDays = 7;
+          else if (range === 'month') {
+            const [y, m] = habitDataMonthLabel.value.split('-').map(Number);
+            totalDays = new Date(y, m, 0).getDate();
+          } else {
+            totalDays = 365;
+          }
+          return { count, days: uniqueDays, rate: totalDays > 0 ? Math.round(uniqueDays / totalDays * 100) : 0 };
+        }
+
+        function getHabitCalendarDays(habit) {
+          const range = habitDataRange.value;
+          const checkedDates = new Set(checkIns.value.filter(i => i.habitId === habit.id).map(i => i.date));
+          const days = [];
+          if (range === 'week') {
+            const wr = getWeekRange();
+            for (let i = 0; i < 7; i++) {
+              const d = new Date(wr.start);
+              d.setDate(d.getDate() + i);
+              const ds = formatDate(d);
+              days.push({ d: d.getDate(), checked: checkedDates.has(ds) });
+            }
+          } else if (range === 'month') {
+            const [y, m] = habitDataMonthLabel.value.split('-').map(Number);
+            const totalDays = new Date(y, m, 0).getDate();
+            for (let d = 1; d <= totalDays; d++) {
+              const ds = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+              days.push({ d, checked: checkedDates.has(ds) });
+            }
+          } else {
+            // Year: show last 30 days
+            for (let i = 29; i >= 0; i--) {
+              const d = new Date();
+              d.setDate(d.getDate() - i);
+              const ds = formatDate(d);
+              days.push({ d: d.getDate(), checked: checkedDates.has(ds) });
+            }
+          }
+          return days;
+        }
+
+        function shiftHabitDataMonth(delta) {
+          habitDataMonth.value += delta;
+          if (habitDataMonth.value > 11) { habitDataMonth.value = 0; }
+          if (habitDataMonth.value < 0) { habitDataMonth.value = 11; }
+        }
+
+        function getHabitEmoji(habit) {
+          const iconMap = {
+            coffee: '', gamepad: '🎮', bed: '🛏', pizza: '',
+            film: '🎬', book: '📖', music: '', shopping: '🛒',
+            target: '🎯', flame: '', zap: '⚡', star: '⭐',
+            fileText: '📝', layers: '📚', award: '🏅', crown: '',
+            gift: '🎁', trophy: '🏆', sparkles: '✨'
+          };
+          return iconMap[getStoreItemIcon(habit.name)] || '📌';
+        }
+
         // ===== 周统计 =====
         function getWeekRange(dateStr = todayStr.value) {
           const date = parseDate(dateStr);
@@ -1624,6 +1857,44 @@
             .map(item => item.date)).size;
           const target = clamp(Number(habit.monthlyTarget) || 15, 1, 31);
           return { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
+        }
+
+        function getHabitYearStats(habit) {
+          const prefix = todayStr.value.slice(0, 4);
+          const count = new Set(checkIns.value
+            .filter(item => item.habitId === habit.id && item.date.startsWith(prefix))
+            .map(item => item.date)).size;
+          const totalDays = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 1)) / 86400000) + 1;
+          const target = Math.round(totalDays * 0.7);
+          return { count, target, percent: Math.min(100, Math.round((count / Math.max(target, 1)) * 100)), isMet: count >= target, totalDays };
+        }
+
+        function getHabitStreak(habit) {
+          const dates = [...new Set(checkIns.value
+            .filter(item => item.habitId === habit.id)
+            .map(item => item.date))].sort().reverse();
+          if (dates.length === 0) return { current: 0, best: 0 };
+          let current = 0, best = 0, streak = 1;
+          const today = todayStr.value;
+          const yesterday = formatDate(new Date(Date.now() - 86400000));
+          if (dates[0] === today || dates[0] === yesterday) {
+            current = 1;
+            for (let i = 1; i < dates.length; i++) {
+              const d1 = new Date(dates[i - 1]);
+              const d2 = new Date(dates[i]);
+              const diff = (d1 - d2) / 86400000;
+              if (diff === 1) { current++; } else { break; }
+            }
+          }
+          best = current;
+          streak = 1;
+          for (let i = 1; i < dates.length; i++) {
+            const d1 = new Date(dates[i - 1]);
+            const d2 = new Date(dates[i]);
+            if ((d1 - d2) / 86400000 === 1) { streak++; best = Math.max(best, streak); }
+            else { streak = 1; }
+          }
+          return { current, best };
         }
 
         const checkInsByDate = computed(() => {
@@ -2756,7 +3027,7 @@
         });
 
         return {
-          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeFilter, storeSort, rewardHistoryFilter, filteredStoreItems, filteredRewardHistory, rewardStats, todayRedeemCount,
+          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeFilter, storeSort, rewardHistoryFilter, isRedeemLogOpen, filteredStoreItems, filteredRewardHistory, rewardStats, todayRedeemCount, habitDataRange, habitDataMonth, habitDataMonthLabel, allHabitsTotalCheckins, allHabitsTotalDays, getHabitRangeStats, getHabitCalendarDays, shiftHabitDataMonth, getHabitEmoji,
           calendarSubTab, toast, dialog, closeDialog, redeemToast, eventToast, showEventToast,
           modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, selectedStoreItem, habitCalendarMonth, selectedHabitDate,
           todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
@@ -2766,7 +3037,7 @@
           checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep, safeBottom,
           weekLabels, allAchievements, unlockedAchievements, isAchievementUnlocked,
           weeklyStats, monthlyStats, heatmapData, getHeatLevel, lastBackupDate, onboardingSteps, appVersion,
-          showArchived, habitSort, toggleSort, icon, getStoreItemIcon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getTodayNote, getHabitItemsByDate, checkInsByDate, openHabitModal, saveHabit,
+          showArchived, habitSort, toggleSort, icon, getStoreItemIcon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getHabitYearStats, getHabitStreak, getTodayNote, getHabitItemsByDate, checkInsByDate, openHabitModal, saveHabit,
           deleteHabitDirectly, showHabitAction, showHabitTrend, habitTrendData, habitTrendRate, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, submitCheckInNote, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, archiveHabitFromAction, openHabitCalendar, openRewardHistory, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
           openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, canUndoRewardLog, undoRewardLog, deleteRewardLog, clearRewardHistory,
           exportData, triggerImportData, importData, executeImport, unarchiveHabit, showOnboarding, closeOnboarding, resetApp, openHabitCalendarDetail: selectHabitCalendarDate
@@ -2804,6 +3075,8 @@
     .toast-leave-active { transition: all .2s ease-in; }
     .toast-enter-from { opacity: 0; transform: translate(-50%, -8px); }
     .toast-leave-to { opacity: 0; transform: translate(-50%, -8px); }
-  </style>
+      summary { list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+</style>
 </body>
 </html>
