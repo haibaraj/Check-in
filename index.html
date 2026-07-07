@@ -546,7 +546,7 @@
     <section v-show="activeTab==='calendar'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
       <div class="relative flex p-1 mb-4 rounded-full bg-slate-100">
         <!-- 滑动背景指示器 -->
-        <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-slate-900" :style="{width:'calc(25% - 4px)',left:'calc(' + (['calendar','heatmap','stats','habitData'].indexOf(calendarSubTab) * 25) + '% + 2px)'}" style="box-shadow: 0 1px 2px rgba(0,0,0,0.08);"></div>
+        <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-slate-900" :style="calendarSubTab==='calendar'?{left:'4px',right:'75%'}:calendarSubTab==='heatmap'?{left:'25%',right:'50%'}:calendarSubTab==='stats'?{left:'50%',right:'25%'}:{left:'75%',right:'4px'}" style="box-shadow: 0 1px 2px rgba(0,0,0,0.08);"></div>
 
         <button @click="calendarSubTab='calendar'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300 whitespace-nowrap" :class="calendarSubTab==='calendar'?'text-white':'text-slate-600'">{{t('calendar')}}</button>
         <button @click="calendarSubTab='heatmap'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300 whitespace-nowrap" :class="calendarSubTab==='heatmap'?'text-white':'text-slate-600'">{{t('heatmap')}}</button>
@@ -822,7 +822,7 @@
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line" :style="{color:darkMode?'#fbbf24':'#64748b'}" v-html="icon(darkMode?'moon':'sun')"></span><span class="text-sm font-bold text-slate-800">{{t('darkMode')}}</span></div>
             <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
               <!-- 滑动背景指示器 -->
-              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 2px)',left:'calc(' + (darkMode ? 1 : 0) * 50 + '% + 1px)'}"></div>
+              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{left: darkMode ? '50%' : '4px', right: darkMode ? '4px' : '50%'}"></div>
               <button @click="setDarkMode(false)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="!darkMode?'text-slate-950':'text-slate-400'">{{t('light')}}</button>
               <button @click="setDarkMode(true)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkMode?'text-slate-950':'text-slate-400'">{{t('dark')}}</button>
             </div>
@@ -835,7 +835,7 @@
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-slate-400" v-html="icon('globe')"></span><span class="text-sm font-bold text-slate-800">{{t('language')}}</span></div>
             <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
               <!-- 滑动背景指示器 -->
-              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{width:'calc(50% - 4px)',left: lang==='en' ? 'calc(50%)' : '4px'}"></div>
+              <div class="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out pointer-events-none bg-amber-400" :style="{left: lang==='en' ? '50%' : '4px', right: lang==='en' ? '4px' : '50%'}"></div>
               <button @click="setLanguage('zh')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='zh'?'text-slate-950':'text-slate-400'">中文</button>
               <button @click="setLanguage('en')" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] whitespace-nowrap transition-colors duration-300" :class="lang==='en'?'text-slate-950':'text-slate-400'">EN</button>
             </div>
@@ -877,7 +877,7 @@
     <!-- 底部导航 -->
     <nav class="fixed bottom-0 left-0 right-0 flex justify-around items-center z-40 px-2" :style="{height:'calc(4rem + env(safe-area-inset-bottom))',paddingBottom:'env(safe-area-inset-bottom)',background:'var(--bg-nav)',borderTop:'1px solid var(--border-card)'}">
       <!-- 滑动背景指示器 -->
-      <div class="absolute top-1 bottom-1 rounded-2xl transition-all duration-300 ease-out pointer-events-none" :style="{width:'calc(25% - 8px)',left:'calc(' + (['habit','store','calendar','settings'].indexOf(activeTab) * 25) + '% + 4px)',background:'var(--theme-100)'}"></div>
+      <div class="absolute top-1 bottom-1 rounded-2xl transition-all duration-300 ease-out pointer-events-none" :style="activeTab==='habit'?{left:'8px',right:'75%',background:'var(--theme-100)'}:activeTab==='store'?{left:'25%',right:'50%',background:'var(--theme-100)'}:activeTab==='calendar'?{left:'50%',right:'25%',background:'var(--theme-100)'}:{left:'75%',right:'8px',background:'var(--theme-100)'}" style="background:var(--theme-100)"></div>
 
       <button @click="activeTab='habit'" class="relative z-10 flex-1 h-full rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='habit'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='habit'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('target')"></span><span>{{t('todayCheckin')}}</span></button>
       <button @click="activeTab='store'" class="relative z-10 flex-1 h-full rounded-2xl flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors duration-300" :style="activeTab==='store'?{color:'var(--theme-700)'}:{color:'var(--text-muted)'}"><span class="icon-line transition-transform duration-300" :class="activeTab==='store'?'scale-110':'scale-100'" :style="{width:'18px',height:'18px'}" v-html="icon('gift')"></span><span>{{t('rewardStore')}}</span></button>
