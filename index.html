@@ -378,7 +378,13 @@
               <p class="text-sm font-bold text-slate-800">{{t('rewardStore')}}</p>
               <p class="text-lg font-bold text-amber-600 leading-tight">{{ userProfile.currentExp }} <span class="text-xs font-medium text-slate-400">EXP</span></p>
             </div>
-            <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
+            <div class="flex items-center gap-2">
+              <button @click="openRewardHistory" class="relative w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 transition-transform duration-150" :aria-label="t('redeemLog')">
+                <span class="icon-line !w-5 !h-5" v-html="icon('fileText')"></span>
+                <span v-if="rewardHistory.length > (userProfile.lastSeenRewardCount || 0)" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500"></span>
+              </button>
+              <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
+            </div>
           </div>
 
           <!-- 筛选栏 -->
@@ -440,104 +446,88 @@
           </div>
 
 
-          <!-- 兑换日志 -->
-          <div class="mt-2 border-t border-slate-200/60 pt-2">
-            <div @click="isRedeemLogOpen = !isRedeemLogOpen" class="flex items-center justify-between cursor-pointer py-2">
-              <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('list')"></span><span>{{t('redeemLog')}}</span></h2>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-medium text-slate-500">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</span>
-                <span class="icon-line !w-4 !h-4 text-slate-400 transition-transform" :class="isRedeemLogOpen ? 'rotate-180' : ''" v-html="icon('chevronDown')"></span>
-              </div>
-            </div>
-            <div v-show="isRedeemLogOpen" class="pt-2 space-y-3 tab-fade-in">
-              <div class="flex items-center justify-between">
-                <p class="text-xs text-slate-400">{{ t('recordCount').replace('%d', rewardHistory.length) }}</p>
-                <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-full font-bold min-h-[32px]">{{t('clear')}}</button>
-              </div>
-            <div class="flex gap-2 mb-3">
-              <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
-              <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('today')}}</button>
-              <button @click="rewardHistoryFilter = 'month'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full" :class="rewardHistoryFilter === 'month' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('month')}}</button>
-            </div>
-
-            <div class="grid grid-cols-3 gap-2 mb-3">
-              <div class="soft-card rounded-2xl p-3 text-center">
-                <p class="text-[10px] text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
-                <p class="text-lg font-bold text-slate-800">{{ rewardStats.totalCount }}</p>
-              </div>
-              <div class="soft-card rounded-2xl p-3 text-center">
-                <p class="text-[10px] text-slate-400 font-semibold">{{t('totalCost')}}</p>
-                <p class="text-lg font-bold text-red-500">{{ rewardStats.totalExp }}</p>
-              </div>
-              <div class="soft-card rounded-2xl p-3 text-center">
-                <p class="text-[10px] text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
-                <p class="text-lg font-bold text-amber-500">{{ rewardStats.monthCount }}</p>
-              </div>
-            </div>
-            <div class="grid grid-cols-3 gap-2 mb-3">
-              <div class="soft-card rounded-2xl p-3 text-center">
-                <p class="text-[10px] text-slate-400 font-semibold">{{t('avgCost')}}</p>
-                <p class="text-lg font-bold text-slate-800">{{ rewardStats.avgExp }} EXP</p>
-              </div>
-              <div class="soft-card rounded-2xl p-3 text-center">
-                <p class="text-[10px] text-slate-400 font-semibold">{{t('revokedCount')}}</p>
-                <p class="text-lg font-bold" :class="rewardStats.revokedCount > 0 ? 'text-orange-500' : 'text-slate-300'">{{ rewardStats.revokedCount }}<span v-if="rewardStats.totalCount > 0" class="text-[10px] font-normal text-slate-400 ml-0.5">{{ rewardStats.revokeRate }}%</span></p>
-              </div>
-              <div class="soft-card rounded-2xl p-3 text-center">
-                <p class="text-[10px] text-slate-400 font-semibold">{{t('todayRedeems')}}</p>
-                <p class="text-lg font-bold" :class="rewardStats.todayCount > 0 ? 'text-emerald-500' : 'text-slate-300'">{{ rewardStats.todayCount }}</p>
-              </div>
-            </div>
-
-            <div v-if="rewardStats.totalCount > 0" class="soft-card rounded-2xl p-4 mb-3">
-              <p class="text-xs font-bold text-slate-700 mb-3">{{t('week7Trend')}}</p>
-              <div class="flex items-end justify-between gap-1.5" style="height: 60px;">
-                <div v-for="(d, i) in rewardStats.week7Data" :key="i" class="flex-1 flex flex-col items-center gap-1">
-                  <div class="w-full rounded-t-md transition-all" :class="d.isToday ? 'ring-1 ring-offset-1' : ''" :style="{height: Math.max(4, d.count / Math.max(rewardStats.week7Max, 1) * 44) + 'px', background: d.count > 0 ? 'var(--theme-400)' : (darkMode ? '#1e1b4b' : '#f1f5f9'), '--tw-ring-color': 'var(--theme-400)', '--tw-ring-offset-color': darkMode ? '#1a1a2e' : '#f8fafc'}"></div>
-                  <span class="text-[9px]" :class="d.isToday ? 'font-bold text-slate-700' : 'text-slate-400'">{{ d.label }}</span>
+          <!-- 兑换日志弹窗 -->
+          <div v-if="modals.rewardHistory" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('rewardHistory')">
+            <div class="w-full rounded-t-3xl p-5 max-w-md sheet-enter max-h-[85vh] flex flex-col" style="background: var(--bg-main);">
+              <!-- 弹窗头部 -->
+              <div class="flex items-center justify-between mb-4 pb-3 border-b" style="border-color: var(--border-card);">
+                <div>
+                  <h3 class="text-base font-bold text-slate-800">{{t('redeemLog')}}</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</p>
                 </div>
+                <button @click="closeModal('rewardHistory')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
               </div>
-            </div>
 
-            <div v-if="rewardStats.topItems.length > 0" class="soft-card rounded-2xl p-4 mb-3">
-              <p class="text-xs font-bold text-slate-700 mb-2">{{t('topRedeems')}}</p>
-              <div class="space-y-2">
-                <div v-for="(item, i) in rewardStats.topItems" :key="item.name" class="flex items-center gap-3">
-                  <span class="text-xs font-bold w-4 text-center" :class="i === 0 ? 'text-amber-500' : 'text-slate-300'">{{ i + 1 }}</span>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-slate-700 truncate">{{ item.name }}</p>
+              <!-- 弹窗内容 -->
+              <div class="overflow-y-auto flex-1 -mx-1 px-1 pb-4">
+                <!-- 空状态 -->
+                <div v-if="rewardHistory.length === 0" class="flex flex-col items-center justify-center py-16">
+                  <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
+                    <span class="icon-line !w-7 !h-7" v-html="icon('fileText')"></span>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full" :style="{width: (item.count / rewardStats.topItems[0].count * 100) + '%', background: 'var(--theme-400)'}"></div></div>
-                    <span class="text-xs font-bold text-slate-500 w-8 text-right">{{ item.count }}{{t('times')}}</span>
-                  </div>
+                  <p class="text-slate-400 font-bold">{{ t('noRedeemRecords') }}</p>
+                  <p class="text-xs text-slate-300 mt-1 text-center">{{ t('noRedeemRecordsDesc') }}</p>
                 </div>
-              </div>
-            </div>
 
-            <div class="space-y-2 text-sm text-slate-500">
-              <div v-if="filteredRewardHistory.length === 0" class="flex flex-col items-center justify-center py-12">
-                <div class="w-16 h-16 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-3">
-                  <span class="icon-line !w-7 !h-7" v-html="icon('list')"></span>
-                </div>
-                <p class="text-slate-400 font-bold">{{ rewardHistory.length === 0 ? t('noRedeemRecords') : t('noFilteredRecords') }}</p>
-                <p class="text-xs text-slate-300 mt-1">{{ rewardHistory.length === 0 ? t('noRedeemRecordsDesc') : t('noFilterRecordsDesc') }}</p>
-              </div>
-              <div v-for="(log, index) in filteredRewardHistory" :key="log.id" class="soft-card rounded-2xl p-4" :class="log.revoked ? 'opacity-60' : ''">
-                <div class="flex justify-between items-start gap-3">
-                  <div class="min-w-0 flex-1">
-                    <p class="font-bold text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{t('redeemAction')}} <strong>{{ log.rewardName }}</strong><span v-if="log.revoked" class="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-medium">{{t('redeemRevoked')}}</span></p>
-                    <p class="text-xs text-slate-400 mt-1">{{ formatDateTime(log.timestamp) }}</p>
+                <template v-else>
+                  <!-- 关键指标 -->
+                  <div class="flex gap-2 mb-3">
+                    <div class="flex-1 soft-card rounded-2xl p-3 text-center">
+                      <p class="text-[10px] text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
+                      <p class="text-lg font-bold text-slate-800">{{ rewardStats.totalCount }}</p>
+                    </div>
+                    <div class="flex-1 soft-card rounded-2xl p-3 text-center">
+                      <p class="text-[10px] text-slate-400 font-semibold">{{t('totalCost')}}</p>
+                      <p class="text-lg font-bold text-red-500">{{ rewardStats.totalExp }}</p>
+                    </div>
+                    <div class="flex-1 soft-card rounded-2xl p-3 text-center">
+                      <p class="text-[10px] text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
+                      <p class="text-lg font-bold text-amber-500">{{ rewardStats.monthCount }}</p>
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span class="font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
-                    <button v-if="index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="text-xs text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
-                    <button v-else @click="deleteRewardLog(log.id)" class="text-xs text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
+
+                  <!-- 筛选器与清空 -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex gap-2">
+                      <button @click="rewardHistoryFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="rewardHistoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
+                      <button @click="rewardHistoryFilter = 'today'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="rewardHistoryFilter === 'today' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('today')}}</button>
+                    </div>
+                    <button @click="clearRewardHistory" class="text-xs text-red-400 bg-red-50 px-3 py-2 rounded-full font-bold min-h-[32px]">{{t('clear')}}</button>
                   </div>
-                </div>
+
+                  <!-- 过滤后空状态 -->
+                  <div v-if="groupedRewardHistory.length === 0" class="flex flex-col items-center justify-center py-12">
+                    <p class="text-slate-400 font-bold">{{ t('noFilteredRecords') }}</p>
+                    <p class="text-xs text-slate-300 mt-1 text-center">{{ t('noFilterRecordsDesc') }}</p>
+                  </div>
+
+                  <!-- 日志分组列表 -->
+                  <div v-else class="space-y-4">
+                    <section v-for="(group, groupIndex) in groupedRewardHistory" :key="group.key">
+                      <h4 class="text-xs font-bold text-slate-400 mb-2 px-1">{{ group.label }}</h4>
+                      <div class="space-y-2">
+                        <div v-for="(log, index) in group.logs" :key="log.id" class="soft-card rounded-2xl p-3 flex items-center gap-3" :class="log.revoked ? 'opacity-60' : ''">
+                          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-amber-50 text-amber-500'">
+                            <span class="icon-line !w-5 !h-5" v-html="icon(log.revoked ? 'fileText' : getStoreItemIcon(log.rewardName))"></span>
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                              <p class="font-bold text-sm text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{ log.rewardName }}</p>
+                              <span v-if="log.revoked" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium shrink-0">{{t('redeemRevoked')}}</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                              <span class="text-xs text-slate-400">{{ formatDateTime(log.timestamp) }}</span>
+                              <span class="text-xs font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
+                            </div>
+                          </div>
+                          <button v-if="groupIndex === 0 && index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="shrink-0 text-xs text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg active:bg-amber-100 font-bold">{{t('undo')}}</button>
+                          <button v-else @click="deleteRewardLog(log.id)" class="shrink-0 text-xs text-red-400 bg-red-50 px-2.5 py-2 rounded-lg active:bg-red-100 font-bold">{{t('delete')}}</button>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </template>
               </div>
-            </div>
-          
             </div>
           </div>
         </div>
@@ -1207,7 +1197,7 @@
         const appLoading = ref(true);
         const showArchived = ref(false);
         const activeTab = ref('habit');
-        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created' });
+        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created', lastSeenRewardCount: 0 });
         const habits = ref([]);
         const checkIns = ref([]);
         const storeItems = ref([
@@ -1222,7 +1212,6 @@
         const habitDataMonth = ref(new Date().getMonth());
         const storeSort = ref('asc');
         const rewardHistoryFilter = ref('all');
-        const isRedeemLogOpen = ref(false);
         const expLogs = ref([]);
         const achievements = ref([]);
 
@@ -1276,8 +1265,8 @@
         const archivedHabits = computed(() => habits.value.filter(h => h.archived));
 
         function t(key) {
-          const zh = {loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'};
-          const en = {loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'};
+          const zh = {loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',undoRedeemConfirm:'确定要撤销兑换「%s」吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',todayGroup:'今天',yesterdayGroup:'昨天',last7Days:'近 7 天',earlier:'更早',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'};
+          const en = {loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',undoRedeemConfirm:'Undo redemption of "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',todayGroup:'Today',yesterdayGroup:'Yesterday',last7Days:'Last 7 Days',earlier:'Earlier',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'};
           const dict = lang.value === 'en' ? en : zh;
           return dict[key] || key;
         }
@@ -1608,6 +1597,7 @@
           if (!userProfile.value.lastBackupReminderDate) userProfile.value.lastBackupReminderDate = '';
           if (userProfile.value.tutorialDone === undefined) userProfile.value.tutorialDone = false;
           if (!userProfile.value.habitSort) userProfile.value.habitSort = 'created';
+          if (userProfile.value.lastSeenRewardCount === undefined) userProfile.value.lastSeenRewardCount = rewardHistory.value.length;
           habits.value = habits.value.map(habit => {
             const originalCreatedAt = habit.createdAt;
             return {
@@ -1701,6 +1691,29 @@
             if (rewardHistoryFilter.value === 'month') return date.slice(0, 7) === currentMonth;
             return true;
           }).slice(0, 100);
+        });
+        const groupedRewardHistory = computed(() => {
+          const today = todayStr.value;
+          const parse = (str) => { const [y, m, d] = str.split('-').map(Number); return new Date(y, m - 1, d); };
+          const todayDate = parse(today);
+          const yesterdayDate = new Date(todayDate); yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+          const weekStartDate = new Date(todayDate); weekStartDate.setDate(weekStartDate.getDate() - 8);
+          const yesterday = formatDate(yesterdayDate);
+          const weekStart = formatDate(weekStartDate);
+          const groups = [
+            { key: 'today', label: t('todayGroup'), logs: [] },
+            { key: 'yesterday', label: t('yesterdayGroup'), logs: [] },
+            { key: 'last7days', label: t('last7Days'), logs: [] },
+            { key: 'earlier', label: t('earlier'), logs: [] }
+          ];
+          filteredRewardHistory.value.forEach(log => {
+            const logDate = formatDate(new Date(log.timestamp));
+            if (logDate === today) groups[0].logs.push(log);
+            else if (logDate === yesterday) groups[1].logs.push(log);
+            else if (logDate > weekStart) groups[2].logs.push(log);
+            else groups[3].logs.push(log);
+          });
+          return groups.filter(g => g.logs.length > 0);
         });
         const rewardStats = computed(() => {
           const currentMonth = todayStr.value.slice(0, 7);
@@ -1990,6 +2003,8 @@
 
         function openRewardHistory() {
           rewardHistoryFilter.value = 'all';
+          userProfile.value.lastSeenRewardCount = rewardHistory.value.length;
+          queueSaveData();
           modals.value.rewardHistory = true;
         }
 
@@ -2461,7 +2476,7 @@
 
         async function undoRewardLog(log) {
           if (!canUndoRewardLog(log)) return;
-          const ok = await showConfirm(t('redeemRevokedMsg') + '「' + log.rewardName + '」？\n' + t('undoCheckinConfirm').replace('%s', log.rewardName));
+          const ok = await showConfirm(t('undoRedeemConfirm').replace('%s', log.rewardName));
           if (!ok) return;
           log.revoked = true;
           userProfile.value.currentExp += log.costExp;
@@ -3027,7 +3042,7 @@
         });
 
         return {
-          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeFilter, storeSort, rewardHistoryFilter, isRedeemLogOpen, filteredStoreItems, filteredRewardHistory, rewardStats, todayRedeemCount, habitDataRange, habitDataMonth, habitDataMonthLabel, allHabitsTotalCheckins, allHabitsTotalDays, getHabitRangeStats, getHabitCalendarDays, shiftHabitDataMonth, getHabitEmoji,
+          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeFilter, storeSort, rewardHistoryFilter, filteredStoreItems, filteredRewardHistory, groupedRewardHistory, rewardStats, todayRedeemCount, habitDataRange, habitDataMonth, habitDataMonthLabel, allHabitsTotalCheckins, allHabitsTotalDays, getHabitRangeStats, getHabitCalendarDays, shiftHabitDataMonth, getHabitEmoji,
           calendarSubTab, toast, dialog, closeDialog, redeemToast, eventToast, showEventToast,
           modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, selectedStoreItem, habitCalendarMonth, selectedHabitDate,
           todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
