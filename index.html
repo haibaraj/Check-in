@@ -24,7 +24,7 @@
     /* ===== Layout ===== */
     .app-root { height: 100dvh; max-height: 100dvh; overscroll-behavior: none; }
     .app-main { height: calc(100% - 4rem - env(safe-area-inset-bottom)); min-height: 0; }
-    .scroll-area { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding-bottom: calc(5rem + env(safe-area-inset-bottom)) !important; }
+    .scroll-area { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important; }
     .safe-bottom { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
     .nav-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
@@ -66,8 +66,10 @@
     .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, -8px); }
 
     /* ===== CSS Variables ===== */
-    :root { --bg-main:#f8f6f2; --bg-card:rgba(255,255,255,.96); --bg-card-solid:#fff; --border-card:rgba(226,232,240,.8); --shadow-card:rgba(15,23,42,.05); --text-primary:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8; --text-faint:#cbd5e1; --bg-input:#f1f5f9; --border-input:#e2e8f0; --bg-overlay:rgba(0,0,0,.55); --bg-nav:rgba(255,255,255,.94); --bg-badge:#f8fafc; --theme-50:#fffbeb; --theme-100:#fef3c7; --theme-400:#fbbf24; --theme-500:#f59e0b; --theme-600:#d97706; --theme-700:#b45309; --shimmer-from:#f1f5f9; --shimmer-mid:#e2e8f0; }
+    :root { --bg-main:#f8f6f2; --bg-card:rgba(255,255,255,.96); --bg-card-solid:#fff; --border-card:rgba(226,232,240,.8); --shadow-card:rgba(15,23,42,.05); --text-primary:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8; --text-faint:#cbd5e1; --bg-input:#f1f5f9; --border-input:#e2e8f0; --bg-overlay:rgba(0,0,0,.55); --bg-nav:rgba(255,255,255,.94); --bg-badge:#f8fafc; --theme-50:#f8fafc; --theme-100:#f1f5f9; --theme-400:#64748b; --theme-500:#475569; --theme-600:#334155; --theme-700:#1e293b; --shimmer-from:#f1f5f9; --shimmer-mid:#e2e8f0; }
     .dark { --bg-main:#1a1a2e; --bg-card:rgba(37,37,64,.94); --bg-card-solid:#252540; --border-card:rgba(55,55,90,.9); --shadow-card:rgba(0,0,0,.2); --text-primary:#f1f5f9; --text-secondary:#94a3b8; --text-muted:#64748b; --text-faint:#475569; --bg-input:#1e1e3a; --border-input:#2d2d50; --bg-overlay:rgba(0,0,0,.7); --bg-nav:rgba(37,37,64,.92); --bg-badge:#2d2d50; --shimmer-from:#252540; --shimmer-mid:#1e1e3a; }
+    .theme-slate { --theme-50:#f8fafc; --theme-100:#f1f5f9; --theme-400:#64748b; --theme-500:#475569; --theme-600:#334155; --theme-700:#1e293b; }
+    .theme-amber { --theme-50:#fffbeb; --theme-100:#fef3c7; --theme-400:#fbbf24; --theme-500:#f59e0b; --theme-600:#d97706; --theme-700:#b45309; }
     .theme-rose { --theme-50:#fff1f2; --theme-100:#ffe4e6; --theme-400:#fb7185; --theme-500:#f43f5e; --theme-600:#e11d48; --theme-700:#be123c; }
     .theme-violet { --theme-50:#f5f3ff; --theme-100:#ede9fe; --theme-400:#a78bfa; --theme-500:#8b5cf6; --theme-600:#7c3aed; --theme-700:#6d28d9; }
     .theme-emerald { --theme-50:#ecfdf5; --theme-100:#d1fae5; --theme-400:#34d399; --theme-500:#10b981; --theme-600:#059669; --theme-700:#047857; }
@@ -1181,7 +1183,7 @@
         const appLoading = ref(true);
         const showArchived = ref(false);
         const activeTab = ref('habit');
-        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created', lastSeenRewardCount: 0 });
+        const userProfile = ref({ currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'slate', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created', lastSeenRewardCount: 0 });
         const habits = ref([]);
         const checkIns = ref([]);
         const storeItems = ref([
@@ -1228,7 +1230,7 @@
         // ===== Theme/Language computed =====
         const lang = computed(() => userProfile.value.lang || 'zh');
         const darkMode = computed(() => userProfile.value.darkMode ?? false);
-        const themeColor = computed(() => userProfile.value.themeColor || 'amber');
+        const themeColor = computed(() => userProfile.value.themeColor || 'slate');
         const habitSort = computed({
           get: () => userProfile.value.habitSort || 'created',
           set: (v) => { userProfile.value.habitSort = v; queueSaveData(); }
@@ -1238,6 +1240,7 @@
           habitSort.value = current === 'created' ? 'streak' : current === 'streak' ? 'category' : 'created';
         }
         const themeColors = [
+          { value: 'slate', color: '#475569' },
           { value: 'amber', color: '#f59e0b' },
           { value: 'rose', color: '#f43f5e' },
           { value: 'violet', color: '#8b5cf6' },
@@ -1527,7 +1530,7 @@
           userProfile.value.totalExp = Math.max(0, Number(userProfile.value.totalExp) || 0);
           if (!userProfile.value.lang) userProfile.value.lang = 'zh';
           if (userProfile.value.darkMode === undefined) userProfile.value.darkMode = false;
-          if (!userProfile.value.themeColor) userProfile.value.themeColor = 'amber';
+          if (!userProfile.value.themeColor) userProfile.value.themeColor = 'slate';
           if (!userProfile.value.lastBackupReminderDate) userProfile.value.lastBackupReminderDate = '';
           if (userProfile.value.tutorialDone === undefined) userProfile.value.tutorialDone = false;
           if (!userProfile.value.habitSort) userProfile.value.habitSort = 'created';
@@ -2862,7 +2865,7 @@
         async function resetApp() {
           const ok = await showConfirm(t('resetMsg'), t('resetConfirm'));
           if (!ok) return;
-          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'amber', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created' };
+          userProfile.value = { currentExp: 0, totalExp: 0, level: 1, lang: 'zh', darkMode: false, themeColor: 'slate', lastBackupReminderDate: '', tutorialDone: false, habitSort: 'created' };
           habits.value = [];
           checkIns.value = [];
           storeItems.value = [
@@ -2884,26 +2887,32 @@
         // --- Theme color override ---
         function applyThemeOverride(c) {
           const colorMap = {
+            slate:   { 50:'#f8fafc', 100:'#f1f5f9', 400:'#64748b', 500:'#475569', 600:'#334155', 700:'#1e293b' },
             amber:   { 50:'#fffbeb', 100:'#fef3c7', 400:'#fbbf24', 500:'#f59e0b', 600:'#d97706', 700:'#b45309' },
             rose:    { 50:'#fff1f2', 100:'#ffe4e6', 400:'#fb7185', 500:'#f43f5e', 600:'#e11d48', 700:'#be123c' },
             violet:  { 50:'#f5f3ff', 100:'#ede9fe', 400:'#a78bfa', 500:'#8b5cf6', 600:'#7c3aed', 700:'#6d28d9' },
             emerald: { 50:'#ecfdf5', 100:'#d1fae5', 400:'#34d399', 500:'#10b981', 600:'#059669', 700:'#047857' },
             sky:     { 50:'#f0f9ff', 100:'#e0f2fe', 400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1' }
           };
-          const cm = colorMap[c] || colorMap.amber;
+          const cm = colorMap[c] || colorMap.slate;
           const css = `
             #app[data-theme="${c}"] .bg-amber-50{background-color:${cm[50]}}
+            #app[data-theme="${c}"] .bg-amber-100{background-color:${cm[100]}}
             #app[data-theme="${c}"] .bg-amber-400{background-color:${cm[400]}}
             #app[data-theme="${c}"] .bg-amber-500{background-color:${cm[500]}}
+            #app[data-theme="${c}"] .bg-amber-700{background-color:${cm[700]}}
+            #app[data-theme="${c}"] .active\:bg-amber-50:active{background-color:${cm[50]}}
+            #app[data-theme="${c}"] .active\:bg-amber-100:active{background-color:${cm[100]}}
             #app[data-theme="${c}"] .active\:bg-amber-500:active{background-color:${cm[500]}}
             #app[data-theme="${c}"] .text-amber-500{color:${cm[500]}}
             #app[data-theme="${c}"] .text-amber-600{color:${cm[600]}}
             #app[data-theme="${c}"] .text-amber-700{color:${cm[700]}}
+            #app[data-theme="${c}"] .active\\:text-amber-600:active{color:${cm[600]}}
             #app[data-theme="${c}"] .border-amber-100{border-color:${cm[100]}}
             #app[data-theme="${c}"] .ring-amber-300{--tw-ring-color:${cm[100]}}
             #app[data-theme="${c}"] .ring-amber-400{--tw-ring-color:${cm[400]}}
-            #app[data-theme="${c}"] .active\\:text-amber-600:active{color:${cm[600]}}
-            #app[data-theme="${c}"] .active\\:bg-amber-50:active{background-color:${cm[50]}}
+            #app[data-theme="${c}"] .from-amber-100{--tw-gradient-from:${cm[100]}}
+            #app[data-theme="${c}"] .to-amber-50{--tw-gradient-to:${cm[50]}}
           `;
           let el = document.getElementById('theme-override');
           if (!el) {
@@ -2941,7 +2950,7 @@
             checkInset();
           }
           // Apply initial theme color override
-          applyThemeOverride(userProfile.value.themeColor || 'amber');
+          applyThemeOverride(userProfile.value.themeColor || 'slate');
           // Sync #app attributes (Vue 3 cannot bind attrs on mount element)
           const appEl = document.getElementById('app');
           function syncAppAttrs() {
