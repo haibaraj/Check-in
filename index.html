@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -8,183 +8,124 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="tailwind.css">
   <style>
-    * { box-sizing: border-box; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      overscroll-behavior: none;
-    }
+    * { box-sizing: border-box; scrollbar-width: none; }
+    html, body { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
     body {
-      margin: 0;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      margin: 0; user-select: none; -webkit-tap-highlight-color: transparent;
       font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f8f6f2;
-      position: fixed;
-      inset: 0;
+      background: var(--bg-main, #f8f6f2); position: fixed; inset: 0;
     }
     input, select, textarea { font-size: 16px; }
     button { touch-action: manipulation; }
     ::-webkit-scrollbar { display: none; }
-    .scroll-end-spacer { height: 1px; }
+
+    /* ===== Layout ===== */
+    .app-root { height: 100dvh; max-height: 100dvh; overscroll-behavior: none; }
+    .app-main { height: calc(100% - 4rem - env(safe-area-inset-bottom)); min-height: 0; }
+    .scroll-area { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding-bottom: calc(5rem + env(safe-area-inset-bottom)) !important; }
     .safe-bottom { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
     .nav-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    .sheet-enter { animation: sheetUp .18s ease-out; }
-    .sheet-enter-smooth { animation: sheetUpSmooth .4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-    .page-enter-smooth { animation: pageInSmooth .35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-    @keyframes pageInSmooth { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
-    .fade-enter { animation: fadeIn .15s ease-out; }
-    .reward-history-fade-enter-active,
-    .reward-history-fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-    .reward-history-fade-enter-from,
-    .reward-history-fade-leave-to { opacity: 0; transform: translateY(6px); }
-    .scrollable-content { -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; touch-action: pan-y; }
-    .reward-history-segment { position: relative; display: flex; padding: 4px; border-radius: 9999px; background: #f1f5f9; }
-    .reward-history-segment .segment-slider { position: absolute; top: 4px; bottom: 4px; border-radius: 9999px; background: #0f172a; transition: left 0.25s cubic-bezier(0.22, 1, 0.36, 1), right 0.25s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
-    .app-root {
-      height: 100vh;
-      height: 100dvh;
-      max-height: 100vh;
-      max-height: 100dvh;
-      overscroll-behavior: none;
-    }
-    .app-main {
-      height: calc(100% - 4rem - env(safe-area-inset-bottom));
-      min-height: 0;
-    }
-    .scroll-area {
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      touch-action: pan-y;
-      padding-bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
-    }
+
+    /* ===== Keyframes ===== */
     @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
     @keyframes sheetUpSmooth { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes pageInSmooth { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes toastSlideIn { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     @keyframes toastSlideOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -20px); opacity: 0; } }
-    .event-toast-enter-active { animation: toastSlideIn .25s ease-out; }
-    .event-toast-leave-active { animation: toastSlideOut .2s ease-in; }
-    @keyframes successPop {
-      0% { opacity: 0; transform: scale(0.5); }
-      40% { opacity: 1; transform: scale(1.1); }
-      100% { opacity: 1; transform: scale(1); }
-    }
+    @keyframes successPop { 0% { opacity: 0; transform: scale(.5); } 40% { opacity: 1; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes pulseText { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
-    @keyframes checkBounce {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.15); }
-      60% { transform: scale(0.95); }
-      100% { transform: scale(1); }
-    }
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-40px); }
-    }
-    @keyframes onboardingSlide {
-      0% { opacity: 0; transform: translateX(24px) scale(0.96); }
-      100% { opacity: 1; transform: translateX(0) scale(1); }
-    }
-    @keyframes tabFadeIn {
-      0% { opacity: 0; transform: translateY(8px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .tab-fade-in { animation: tabFadeIn 0.25s ease-out; }
+    @keyframes checkBounce { 0% { transform: scale(1); } 30% { transform: scale(1.15); } 60% { transform: scale(.95); } 100% { transform: scale(1); } }
+    @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
+    @keyframes onboardingSlide { 0% { opacity: 0; transform: translateX(24px) scale(.96); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
+    @keyframes tabFadeIn { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    /* ===== Animation utilities ===== */
+    .sheet-enter { animation: sheetUp .18s ease-out; }
+    .sheet-enter-smooth { animation: sheetUpSmooth .4s cubic-bezier(.22,1,.36,1) forwards; }
+    .page-enter-smooth { animation: pageInSmooth .35s cubic-bezier(.22,1,.36,1) forwards; }
+    .fade-enter { animation: fadeIn .15s ease-out; }
+    .tab-fade-in { animation: tabFadeIn .25s ease-out; }
     .check-bounce { animation: checkBounce .35s ease-out; }
     .onboarding-slide { animation: onboardingSlide .35s ease-out; }
-    .float-exp {
-      animation: floatUp .8s ease-out forwards;
-      position: absolute;
-      pointer-events: none;
-      font-weight: 900;
-      font-size: 14px;
-      color: #f59e0b;
-      z-index: 30;
-    }
-    .habit-move, .habit-enter-active, .habit-leave-active { transition: all 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
-    .habit-enter-from { opacity: 0; transform: translateY(12px) scale(0.97); }
-    
-    .habit-leave-to { opacity: 0; transform: translateY(-12px) scale(0.97); }
+    .float-exp { animation: floatUp .8s ease-out forwards; position: absolute; pointer-events: none; font-weight: 700; font-size: 14px; color: #f59e0b; z-index: 30; }
+
+    /* ===== Vue transitions ===== */
+    .habit-move, .habit-enter-active, .habit-leave-active { transition: all .42s cubic-bezier(.22,1,.36,1); }
+    .habit-enter-from { opacity: 0; transform: translateY(12px) scale(.97); }
+    .habit-leave-to { opacity: 0; transform: translateY(-12px) scale(.97); }
     .habit-leave-active { position: absolute; width: 100%; }
-  :root{--bg-main:#f8f6f2;--bg-card:rgba(255,255,255,.96);--bg-card-solid:#fff;--border-card:rgba(226,232,240,.8);--shadow-card:rgba(15,23,42,.05);--text-primary:#1e293b;--text-secondary:#64748b;--text-muted:#94a3b8;--text-faint:#cbd5e1;--bg-input:#f1f5f9;--border-input:#e2e8f0;--bg-overlay:rgba(0,0,0,.55);--bg-nav:rgba(255,255,255,.94);--bg-badge:#f8fafc;--theme-50:#fffbeb;--theme-100:#fef3c7;--theme-400:#fbbf24;--theme-500:#f59e0b;--theme-600:#d97706;--theme-700:#b45309;--shimmer-from:#f1f5f9;--shimmer-mid:#e2e8f0}
-  .dark{--bg-main:#1a1a2e;--bg-card:rgba(37,37,64,.94);--bg-card-solid:#252540;--border-card:rgba(55,55,90,.9);--shadow-card:rgba(0,0,0,.2);--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--text-faint:#475569;--bg-input:#1e1e3a;--border-input:#2d2d50;--bg-overlay:rgba(0,0,0,.7);--bg-nav:rgba(37,37,64,.92);--bg-badge:#2d2d50;--shimmer-from:#252540;--shimmer-mid:#1e1e3a}
-  .theme-amber{--theme-50:#fffbeb;--theme-100:#fef3c7;--theme-400:#fbbf24;--theme-500:#f59e0b;--theme-600:#d97706;--theme-700:#b45309}
-  .theme-rose{--theme-50:#fff1f2;--theme-100:#ffe4e6;--theme-400:#fb7185;--theme-500:#f43f5e;--theme-600:#e11d48;--theme-700:#be123c}
-  .theme-violet{--theme-50:#f5f3ff;--theme-100:#ede9fe;--theme-400:#a78bfa;--theme-500:#8b5cf6;--theme-600:#7c3aed;--theme-700:#6d28d9}
-  .theme-emerald{--theme-50:#ecfdf5;--theme-100:#d1fae5;--theme-400:#34d399;--theme-500:#10b981;--theme-600:#059669;--theme-700:#047857}
-  .theme-sky{--theme-50:#f0f9ff;--theme-100:#e0f2fe;--theme-400:#38bdf8;--theme-500:#0ea5e9;--theme-600:#0284c7;--theme-700:#0369a1}
-  .heat-cell{border-radius:3px;transition:all .15s;cursor:pointer;width:14px;height:14px}
-  .heat-cell:hover{transform:scale(1.3)}
-  .heat-0{background:var(--heat-0, var(--bg-input))}.heat-1{background:var(--heat-1, #9be9a8)}.heat-2{background:var(--heat-2, #40c463)}.heat-3{background:var(--heat-3, #30a14e)}.heat-4{background:var(--heat-4, #216e39)}
-  .dark .heat-0{background:var(--heat-0, #161b22)}.dark .heat-1{background:var(--heat-1, #0e4429)}.dark .heat-2{background:var(--heat-2, #006d32)}.dark .heat-3{background:var(--heat-3, #26a641)}.dark .heat-4{background:var(--heat-4, #39d353)}
-    .soft-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      box-shadow: 0 8px 24px var(--shadow-card);
-    }
+    .reward-history-fade-enter-active, .reward-history-fade-leave-active { transition: opacity .2s ease, transform .2s ease; }
+    .reward-history-fade-enter-from, .reward-history-fade-leave-to { opacity: 0; transform: translateY(6px); }
+    .event-toast-enter-active { animation: toastSlideIn .25s ease-out; }
+    .event-toast-leave-active { animation: toastSlideOut .2s ease-in; }
+    .toast-enter-active { transition: all .2s ease-out; }
+    .toast-leave-active { transition: all .2s ease-in; }
+    .toast-enter-from, .toast-leave-to { opacity: 0; transform: translate(-50%, -8px); }
+
+    /* ===== CSS Variables ===== */
+    :root { --bg-main:#f8f6f2; --bg-card:rgba(255,255,255,.96); --bg-card-solid:#fff; --border-card:rgba(226,232,240,.8); --shadow-card:rgba(15,23,42,.05); --text-primary:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8; --text-faint:#cbd5e1; --bg-input:#f1f5f9; --border-input:#e2e8f0; --bg-overlay:rgba(0,0,0,.55); --bg-nav:rgba(255,255,255,.94); --bg-badge:#f8fafc; --theme-50:#fffbeb; --theme-100:#fef3c7; --theme-400:#fbbf24; --theme-500:#f59e0b; --theme-600:#d97706; --theme-700:#b45309; --shimmer-from:#f1f5f9; --shimmer-mid:#e2e8f0; }
+    .dark { --bg-main:#1a1a2e; --bg-card:rgba(37,37,64,.94); --bg-card-solid:#252540; --border-card:rgba(55,55,90,.9); --shadow-card:rgba(0,0,0,.2); --text-primary:#f1f5f9; --text-secondary:#94a3b8; --text-muted:#64748b; --text-faint:#475569; --bg-input:#1e1e3a; --border-input:#2d2d50; --bg-overlay:rgba(0,0,0,.7); --bg-nav:rgba(37,37,64,.92); --bg-badge:#2d2d50; --shimmer-from:#252540; --shimmer-mid:#1e1e3a; }
+    .theme-rose { --theme-50:#fff1f2; --theme-100:#ffe4e6; --theme-400:#fb7185; --theme-500:#f43f5e; --theme-600:#e11d48; --theme-700:#be123c; }
+    .theme-violet { --theme-50:#f5f3ff; --theme-100:#ede9fe; --theme-400:#a78bfa; --theme-500:#8b5cf6; --theme-600:#7c3aed; --theme-700:#6d28d9; }
+    .theme-emerald { --theme-50:#ecfdf5; --theme-100:#d1fae5; --theme-400:#34d399; --theme-500:#10b981; --theme-600:#059669; --theme-700:#047857; }
+    .theme-sky { --theme-50:#f0f9ff; --theme-100:#e0f2fe; --theme-400:#38bdf8; --theme-500:#0ea5e9; --theme-600:#0284c7; --theme-700:#0369a1; }
+
+    /* ===== Heatmap ===== */
+    .heat-cell { border-radius: 3px; transition: all .15s; cursor: pointer; width: 14px; height: 14px; }
+    .heat-cell:hover { transform: scale(1.3); }
+    .heat-0 { background: var(--heat-0, var(--bg-input)); }
+    .heat-1 { background: var(--heat-1, #9be9a8); }
+    .heat-2 { background: var(--heat-2, #40c463); }
+    .heat-3 { background: var(--heat-3, #30a14e); }
+    .heat-4 { background: var(--heat-4, #216e39); }
+    .dark .heat-0 { background: var(--heat-0, #161b22); }
+    .dark .heat-1 { background: var(--heat-1, #0e4429); }
+    .dark .heat-2 { background: var(--heat-2, #006d32); }
+    .dark .heat-3 { background: var(--heat-3, #26a641); }
+    .dark .heat-4 { background: var(--heat-4, #39d353); }
+
+    /* ===== Cards ===== */
+    .card, .soft-card { background: var(--bg-card); border: 1px solid var(--border-card); box-shadow: 0 8px 24px var(--shadow-card); border-radius: 1rem; }
     .modal-card { background: var(--bg-card-solid); }
-    .dark .text-slate-800, .dark .text-slate-900 { color: var(--text-primary) !important; }
-    .dark .text-slate-700 { color: var(--text-secondary) !important; }
-    .dark .text-slate-600 { color: var(--text-secondary) !important; }
-    .dark .text-slate-500 { color: var(--text-muted) !important; }
-    .dark .text-slate-400 { color: var(--text-muted) !important; }
-    .dark .text-slate-300 { color: var(--text-faint) !important; }
-    .dark .bg-slate-50, .dark .bg-slate-100 { background: var(--bg-input) !important; }
-    .dark .bg-white\/70 { background: var(--bg-card) !important; }
-    .dark .bg-white { background: var(--bg-card-solid) !important; }
-    .dark .bg-slate-50 { background: var(--bg-main) !important; }
-    .dark .border-slate-50, .dark .border-slate-100 { border-color: var(--border-input) !important; }
-    .icon-line {
-      width: 1.05rem;
-      height: 1.05rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 auto;
-    }
-    .icon-line svg {
-      width: 100%;
-      height: 100%;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }    /* 通用按钮按压反馈 */
-    button:not([disabled]):active,
-    [role="button"]:active {
-      transition: transform .15s ease, background-color .15s ease, filter .15s ease;
-    }
-    button:not([disabled]):not([class*="active:scale"]):active,
-    [role="button"]:not([class*="active:scale"]):active {
-      transform: scale(0.97);
-    }
-    button.bg-amber-400:not([disabled]):not([class*="active:bg-"]):active {
-      filter: brightness(0.92);
-    }
-    button.bg-slate-100:not([disabled]):active {
-      background-color: #e2e8f0 !important;
-    }
-    button.bg-white:not([disabled]):not([class*="active:bg-"]):active {
-      background-color: #f8fafc !important;
-    }
-    button.bg-emerald-50:not([disabled]):active {
-      background-color: #d1fae5 !important;
-    }
-    button.bg-red-50:not([disabled]):active {
-      background-color: #fee2e2 !important;
-    }
-  
-.scrollbar-hide {-ms-overflow-style:none;scrollbar-width:none;}
-.scrollbar-hide::-webkit-scrollbar{display:none;}
+
+    /* ===== Dark mode overrides (specificity 0-2-0 > Tailwind 0-1-0, no !important needed) ===== */
+    .dark .text-slate-800, .dark .text-slate-900 { color: var(--text-primary); }
+    .dark .text-slate-700, .dark .text-slate-600 { color: var(--text-secondary); }
+    .dark .text-slate-500, .dark .text-slate-400 { color: var(--text-muted); }
+    .dark .text-slate-300 { color: var(--text-faint); }
+    .dark .bg-slate-50, .dark .bg-slate-100 { background: var(--bg-input); }
+    .dark .bg-white\/70 { background: var(--bg-card); }
+    .dark .bg-white { background: var(--bg-card-solid); }
+    .dark .border-slate-50, .dark .border-slate-100 { border-color: var(--border-input); }
+
+    /* ===== Icons ===== */
+    .icon-line { width: 1.05rem; height: 1.05rem; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+    .icon-line svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ===== Button press feedback (consolidated) ===== */
+    button:not([disabled]):active, [role="button"]:active { transition: transform .15s ease, background-color .15s ease, filter .15s ease; }
+    button:not([disabled]):not([class*="active:scale"]):active, [role="button"]:not([class*="active:scale"]):active { transform: scale(.97); }
+    button:not([disabled]):active.bg-amber-400 { filter: brightness(.92); }
+    button:not([disabled]):active.bg-slate-100 { background-color: #e2e8f0; }
+    button:not([disabled]):active.bg-white { background-color: #f8fafc; }
+    button:not([disabled]):active.bg-emerald-50 { background-color: #d1fae5; }
+    button:not([disabled]):active.bg-red-50 { background-color: #fee2e2; }
+
+    /* ===== Repeated utility classes (extracted from 3+ occurrences) ===== */
+    .input-field { width: 100%; background: var(--bg-input); border: 1px solid var(--border-input); border-radius: 1rem; padding: .75rem; font-size: .875rem; outline: none; }
+    .input-field:focus { box-shadow: 0 0 0 2px var(--theme-100); }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+    .sheet-card { width: 100%; max-width: 28rem; border-radius: 1rem 1rem 0 0; padding: 1.25rem; }
+    .btn-act { flex: 1; padding: .75rem; border-radius: 1rem; font-weight: 700; min-height: 48px; transition: transform .15s; }
+    .btn-act:active { transform: scale(.95); }
+    .action-item { width: 100%; display: flex; align-items: center; gap: .75rem; padding: .875rem .5rem; font-size: .875rem; font-weight: 700; border-radius: 1rem; min-height: 48px; }
+
     summary { list-style: none; }
     summary::-webkit-details-marker { display: none; }
-</style>
+  </style>
 </head>
 <body>
   <div id="app" class="app-root max-w-md mx-auto relative overflow-hidden" :class="[darkMode?'dark':'','theme-'+themeColor]" :data-theme="themeColor">
@@ -205,7 +146,7 @@
       <section v-show="activeTab === 'habit'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
         <!-- 轻量统计栏 -->
         <div class="mb-3">
-          <div class="soft-card rounded-2xl p-3">
+          <div class="card p-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3 min-w-0 flex-1">
                 <div class="shrink-0">
@@ -219,7 +160,7 @@
                   <p v-if="levelProgress.next" class="text-xs text-slate-400 mt-0.5">{{ levelProgress.remaining }} → Lv{{ userProfile.level + 1 }}</p>
                 </div>
               </div>
-              <div class="shrink-0 flex items-center gap-3 pl-4 border-l border-slate-100 ml-3">
+              <div v-if="activeHabits.length > 0" class="shrink-0 flex items-center gap-3 pl-4 border-l border-slate-100 ml-3">
                 <div class="text-right">
                   <p class="text-[11px] font-medium text-slate-400">{{t('todayDone')}}</p>
                   <p class="text-lg font-bold text-emerald-600 leading-tight">{{ todayCompletedCount }}<span class="text-xs font-medium text-slate-300">/{{ activeHabits.length }}</span></p>
@@ -248,7 +189,7 @@
 
         <div class="flex-1 min-h-0 scroll-area">
           <!-- 空状态 -->
-          <div v-if="activeHabits.length === 0" class="soft-card rounded-2xl p-8 text-center text-sm relative overflow-hidden">
+          <div v-if="activeHabits.length === 0" class="card p-8 text-center text-sm relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-br from-amber-100/40 via-transparent to-indigo-100/30 pointer-events-none"></div>
             <div class="relative">
               <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-amber-100 to-amber-50 text-amber-500 flex items-center justify-center mb-4 shadow-inner">
@@ -286,7 +227,7 @@
                   @mouseup="cancelHabitLongPress"
                   @mouseleave="cancelHabitLongPress"
                   @contextmenu.prevent="showHabitAction(habit)"
-                  class="soft-card rounded-2xl p-5 active:scale-[0.98] transition-all select-none"
+                  class="card p-5 active:scale-[0.98] transition-all select-none"
                 >
                   <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1">
@@ -339,7 +280,7 @@
                   @mouseup="cancelHabitLongPress"
                   @mouseleave="cancelHabitLongPress"
                   @contextmenu.prevent="showHabitAction(habit)"
-                  class="soft-card rounded-2xl p-5 active:scale-[0.98] transition-all select-none opacity-80"
+                  class="card p-5 active:scale-[0.98] transition-all select-none opacity-80"
                 >
                   <div class="flex items-center gap-3">
                     <div class="min-w-0 flex-1">
@@ -376,186 +317,159 @@
               </transition-group>
             </div>
           </div>
-
-          <div class="scroll-end-spacer"></div>
         </div>
       </section>
       <!-- 奖励商店 Tab -->
       <section v-show="activeTab === 'store'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
-        <div class="flex-1 min-h-0 scroll-area space-y-4">
-          <!-- 轻量EXP栏 -->
-          <div class="soft-card rounded-2xl p-3 flex items-center justify-between">
-            <div>
-              <p class="text-sm font-bold text-slate-800">{{t('rewardStore')}}</p>
-              <p class="text-lg font-bold text-amber-600 leading-tight">{{ userProfile.currentExp }} <span class="text-xs font-medium text-slate-400">EXP</span></p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button @click="openRewardHistory" class="relative w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 transition-transform duration-150" :aria-label="t('redeemLog')">
-                <span class="icon-line !w-5 !h-5" v-html="icon('fileText')"></span>
-                <span v-if="rewardHistory.length > (userProfile.lastSeenRewardCount || 0)" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500"></span>
-              </button>
-              <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
-            </div>
+        <!-- 头部：兑换日志返回按钮或商店工具栏 -->
+        <div v-if="!modals.rewardHistory" class="card p-3 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-bold text-slate-800">{{t('rewardStore')}}</p>
+            <p class="text-lg font-bold text-amber-600 leading-tight">{{ userProfile.currentExp }} <span class="text-xs font-medium text-slate-400">EXP</span></p>
           </div>
-
-          <!-- 筛选栏 -->
-          <div class="flex gap-2 overflow-x-auto pb-1">
-            <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
-            <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('available')}}</button>
-            <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('expNotEnough')}}</button>
-            <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('soldout')}}</button>
-          </div>
-
-          <!-- 商品列表 -->
-          <div class="space-y-2">
-            <div class="flex justify-between items-center text-xs text-slate-400 px-1">
-              <span class="font-medium">{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
-              <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-slate-50 border border-slate-200 text-slate-600 font-semibold px-3 py-1.5 rounded-full min-h-[32px]">
-                {{t('price')}} {{ storeSort==='asc' ? t('lowToHigh') : t('highToLow') }}
-              </button>
-            </div>
-
-            <div v-if="filteredStoreItems.length === 0" class="soft-card rounded-2xl p-6 text-center">
-              <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
-                <span class="icon-line !w-6 !h-6" v-html="icon('gift')"></span>
-              </div>
-              <p class="font-bold text-slate-800 text-sm">{{ storeItems.length === 0 ? t('createFirstReward') : t('noWishesFiltered') }}</p>
-              <p class="text-sm text-slate-400 mt-1 leading-relaxed">{{ storeItems.length === 0 ? t('firstRewardDesc') : t('switchFilter') }}</p>
-              <button @click="openStoreModal(null)" class="mt-4 bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
-            </div>
-
-            <article
-              v-for="item in filteredStoreItems"
-              :key="item.id"
-              @touchstart="startStoreLongPress(item)"
-              @touchmove="cancelStoreLongPress"
-              @touchend="cancelStoreLongPress"
-              @mousedown="startStoreLongPress(item)"
-              @mouseup="cancelStoreLongPress"
-              @mouseleave="cancelStoreLongPress"
-              @contextmenu.prevent="showStoreAction(item)"
-              class="soft-card p-4 rounded-2xl flex items-center gap-3 active:scale-[0.98] transition-all select-none"
-              :class="item.stock === 0 ? 'opacity-50 grayscale' : ''"
-            >
-              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
-                <span class="icon-line !w-5 !h-5" v-html="icon(getStoreItemIcon(item.name))"></span>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="font-bold text-sm text-slate-800 truncate">{{ item.name }}</h3>
-                <div class="mt-1 flex items-center gap-2 text-xs text-slate-400">
-                  <span>{{ item.expCost }} EXP</span>
-                  <span class="text-slate-200">|</span>
-                  <span>{{t('stock')}} {{ item.stock===-1 ? t('unlimited') : item.stock + ' ' + t('times') }}</span>
-                </div>
-              </div>
-              <div class="shrink-0">
-                <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-bold px-4 py-2 rounded-full transition-colors shadow-sm whitespace-nowrap min-h-[36px]" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
-                  {{ item.stock===0 ? t('soldout') : userProfile.currentExp < item.expCost ? t('notEnough') : t('redeem') }}
-                </button>
-              </div>
-            </article>
-          </div>
-
-
-          <!-- 兑换日志全屏页 -->
-          <div v-if="modals.rewardHistory" class="fixed inset-0 z-50 fade-enter" @click.self="closeModal('rewardHistory')">
-            <div class="absolute inset-0 bg-black/60" aria-hidden="true"></div>
-            <div class="absolute inset-0 page-enter-smooth overflow-y-auto" style="background: var(--bg-main); -webkit-overflow-scrolling: touch; overscroll-behavior-y: auto;">
-              <div class="min-h-full flex flex-col">
-                <!-- 页面头部 -->
-                <div class="sticky top-0 z-10 flex items-center gap-3 px-5 pt-5 pb-3 border-b" style="background: var(--bg-main); border-color: var(--border-card);">
-                  <button @click="closeModal('rewardHistory')" class="shrink-0 w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center active:scale-95 active:bg-slate-200 transition-transform" :aria-label="t('close')">
-                    <span class="icon-line !w-5 !h-5" v-html="icon('chevronLeft')"></span>
-                  </button>
-                  <div class="flex-1 min-w-0">
-                    <h3 class="text-base font-bold text-slate-800">{{t('redeemLog')}}</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</p>
-                  </div>
-                </div>
-
-                <!-- 页面内容 -->
-                <div class="flex-1 px-5 pb-8">
-                  <!-- 空状态 -->
-                  <div v-if="rewardHistory.length === 0" class="flex flex-col items-center justify-center py-20">
-                    <div class="w-20 h-20 rounded-3xl bg-slate-100 text-slate-300 flex items-center justify-center mb-4">
-                      <span class="icon-line !w-8 !h-8" v-html="icon('fileText')"></span>
-                    </div>
-                    <p class="text-slate-500 font-bold text-sm">{{ t('noRedeemRecords') }}</p>
-                    <p class="text-xs text-slate-400 mt-1.5 text-center max-w-[240px]">{{ t('noRedeemRecordsDesc') }}</p>
-                  </div>
-
-                  <template v-else>
-                    <!-- 关键指标 -->
-                    <div class="grid grid-cols-3 gap-2 my-4">
-                      <div class="soft-card rounded-2xl p-3 text-center">
-                        <p class="text-xs text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
-                        <p class="text-xl font-bold text-slate-800 mt-1">{{ rewardStats.totalCount }}</p>
-                      </div>
-                      <div class="soft-card rounded-2xl p-3 text-center">
-                        <p class="text-xs text-slate-400 font-semibold">{{t('totalCost')}}</p>
-                        <p class="text-xl font-bold mt-1" :class="rewardStats.totalExp > 0 ? 'text-red-500' : 'text-slate-800'">{{ rewardStats.totalExp }}</p>
-                      </div>
-                      <div class="soft-card rounded-2xl p-3 text-center">
-                        <p class="text-xs text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
-                        <p class="text-xl font-bold text-amber-500 mt-1">{{ rewardStats.monthCount }}</p>
-                      </div>
-                    </div>
-
-                    <!-- 筛选器与清空 -->
-                    <div class="flex items-center justify-between gap-3 mb-4">
-                      <div class="reward-history-segment flex-1">
-                        <div class="segment-slider" :style="rewardHistoryFilter === 'all' ? {left:'4px',right:'50%'} : {left:'50%',right:'4px'}"></div>
-                        <button @click="rewardHistoryFilter = 'all'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300" :class="rewardHistoryFilter === 'all' ? 'text-white' : 'text-slate-600'">{{t('all')}}</button>
-                        <button @click="rewardHistoryFilter = 'today'" class="relative z-10 flex-1 text-xs font-semibold py-2 rounded-full min-h-[36px] transition-colors duration-300" :class="rewardHistoryFilter === 'today' ? 'text-white' : 'text-slate-600'">{{t('today')}}</button>
-                      </div>
-                      <button @click="clearRewardHistory" class="shrink-0 w-9 h-9 rounded-xl bg-red-50 text-red-400 flex items-center justify-center active:scale-95 active:bg-red-100 transition-transform" :title="t('clear')" :aria-label="t('clear')">
-                        <span class="icon-line !w-4 !h-4" v-html="icon('trash')"></span>
-                      </button>
-                    </div>
-
-                    <transition name="reward-history-fade" mode="out-in">
-                      <div v-if="groupedRewardHistory.length === 0" key="empty" class="flex flex-col items-center justify-center py-16">
-                        <p class="text-slate-500 font-bold text-sm">{{ t('noFilteredRecords') }}</p>
-                        <p class="text-xs text-slate-400 mt-1.5 text-center max-w-[240px]">{{ t('noFilterRecordsDesc') }}</p>
-                      </div>
-
-                      <div v-else key="list" class="space-y-5">
-                        <section v-for="(group, groupIndex) in groupedRewardHistory" :key="group.key">
-                          <h4 class="text-xs font-bold text-slate-400 mb-2.5 px-1">{{ group.label }}</h4>
-                          <div class="space-y-2.5">
-                            <div v-for="(log, index) in group.logs" :key="log.id" class="soft-card rounded-2xl p-3.5 flex items-center gap-3" :class="log.revoked ? 'opacity-60' : ''">
-                              <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-amber-50 text-amber-500'">
-                                <span class="icon-line !w-5 !h-5" v-html="icon(log.revoked ? 'fileText' : getStoreItemIcon(log.rewardName))"></span>
-                              </div>
-                              <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-2">
-                                  <p class="font-bold text-sm text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{ log.rewardName }}</p>
-                                  <span v-if="log.revoked" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium shrink-0">{{t('redeemRevoked')}}</span>
-                                </div>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                  <span class="text-xs text-slate-400">{{ formatDateTime(log.timestamp) }}</span>
-                                  <span class="text-xs font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
-                                </div>
-                              </div>
-                              <div class="flex items-center gap-1.5 shrink-0">
-                                <button v-if="groupIndex === 0 && index === 0 && rewardHistoryFilter === 'all' && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 active:bg-amber-100 transition-transform" :title="t('undo')" :aria-label="t('undo')">
-                                  <span class="icon-line !w-4 !h-4" v-html="icon('rotateCcw')"></span>
-                                </button>
-                                <button @click="deleteRewardLog(log.id)" class="w-9 h-9 rounded-xl bg-red-50 text-red-400 flex items-center justify-center active:scale-95 active:bg-red-100 transition-transform" :title="t('delete')" :aria-label="t('delete')">
-                                  <span class="icon-line !w-4 !h-4" v-html="icon('trash')"></span>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </section>
-                      </div>
-                    </transition>
-                  </template>
-                </div>
-              </div>
-            </div>
+          <div class="flex items-center gap-2">
+            <button @click="openRewardHistory" class="relative w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 transition-transform duration-150" :aria-label="t('redeemLog')">
+              <span class="icon-line !w-5 !h-5" v-html="icon('fileText')"></span>
+              <span v-if="rewardHistory.length > (userProfile.lastSeenRewardCount || 0)" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500"></span>
+            </button>
+            <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
           </div>
         </div>
+        <div v-if="modals.rewardHistory" class="flex items-center gap-3 px-2 pb-2">
+          <button @click="closeModal('rewardHistory')" class="shrink-0 w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center active:scale-95 active:bg-slate-200 transition-transform" :aria-label="t('close')">
+            <span class="icon-line !w-5 !h-5" v-html="icon('chevronLeft')"></span>
+          </button>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-bold text-slate-800">{{t('redeemLog')}}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</p>
+          </div>
+        </div>
+
+        <div class="flex-1 min-h-0 scroll-area">
+          <!-- 兑换日志 -->
+          <template v-if="modals.rewardHistory">
+            <div class="page-enter-smooth px-4 pb-8 space-y-5">
+              <!-- 关键指标 -->
+              <div class="grid grid-cols-3 gap-2 mt-2">
+                <div class="card p-3 text-center">
+                  <p class="text-xs text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
+                  <p class="text-xl font-bold text-slate-800 mt-1">{{ rewardStats.totalCount }}</p>
+                </div>
+                <div class="card p-3 text-center">
+                  <p class="text-xs text-slate-400 font-semibold">{{t('totalCost')}}</p>
+                  <p class="text-xl font-bold mt-1" :class="rewardStats.totalExp > 0 ? 'text-red-500' : 'text-slate-800'">{{ rewardStats.totalExp }}</p>
+                </div>
+                <div class="card p-3 text-center">
+                  <p class="text-xs text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
+                  <p class="text-xl font-bold text-amber-500 mt-1">{{ rewardStats.monthCount }}</p>
+                </div>
+              </div>
+
+              <transition name="reward-history-fade" mode="out-in">
+                <div v-if="groupedRewardHistory.length === 0" key="empty" class="flex flex-col items-center justify-center py-16">
+                  <p class="text-slate-500 font-bold text-sm">{{ t('noFilteredRecords') }}</p>
+                  <p class="text-xs text-slate-400 mt-1.5 text-center max-w-[240px]">{{ t('noFilterRecordsDesc') }}</p>
+                </div>
+
+                <div v-else key="list" class="space-y-5">
+                  <section v-for="(group, groupIndex) in groupedRewardHistory" :key="group.key">
+                    <h4 class="text-xs font-bold text-slate-400 mb-2.5 px-1">{{ group.label }}</h4>
+                    <div class="space-y-2.5">
+                      <div v-for="(log, index) in group.logs" :key="log.id" class="card p-3.5 flex items-center gap-3" :class="log.revoked ? 'opacity-60' : ''">
+                        <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-amber-50 text-amber-500'">
+                          <span class="icon-line !w-5 !h-5" v-html="icon(log.revoked ? 'fileText' : getStoreItemIcon(log.rewardName))"></span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <div class="flex items-center gap-2">
+                            <p class="font-bold text-sm text-slate-800 truncate" :class="log.revoked ? 'line-through text-slate-400' : ''">{{ log.rewardName }}</p>
+                            <span v-if="log.revoked" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium shrink-0">{{t('redeemRevoked')}}</span>
+                          </div>
+                          <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-xs text-slate-400">{{ formatDateTime(log.timestamp) }}</span>
+                            <span class="text-xs font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <button v-if="groupIndex === 0 && index === 0 && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 active:bg-amber-100 transition-transform" :title="t('undo')" :aria-label="t('undo')">
+                            <span class="icon-line !w-4 !h-4" v-html="icon('rotateCcw')"></span>
+                          </button>
+                          <button @click="deleteRewardLog(log.id)" class="w-9 h-9 rounded-xl bg-red-50 text-red-400 flex items-center justify-center active:scale-95 active:bg-red-100 transition-transform" :title="t('delete')" :aria-label="t('delete')">
+                            <span class="icon-line !w-4 !h-4" v-html="icon('trash')"></span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </transition>
+            </div>
+          </template>
+
+          <!-- 商店商品列表 -->
+          <template v-else>
+            <div class="space-y-4">
+              <!-- 筛选栏 -->
+              <div class="flex gap-2 overflow-x-auto pb-1">
+                <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
+                <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('available')}}</button>
+                <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('expNotEnough')}}</button>
+                <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('soldout')}}</button>
+              </div>
+
+              <!-- 商品列表 -->
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs text-slate-400 px-1">
+                  <span class="font-medium">{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
+                  <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-slate-50 border border-slate-200 text-slate-600 font-semibold px-3 py-1.5 rounded-full min-h-[32px]">
+                    {{t('price')}} {{ storeSort==='asc' ? t('lowToHigh') : t('highToLow') }}
+                  </button>
+                </div>
+
+                <div v-if="filteredStoreItems.length === 0" class="card p-6 text-center">
+                  <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+                    <span class="icon-line !w-6 !h-6" v-html="icon('gift')"></span>
+                  </div>
+                  <p class="font-bold text-slate-800 text-sm">{{ storeItems.length === 0 ? t('createFirstReward') : t('noWishesFiltered') }}</p>
+                  <p class="text-sm text-slate-400 mt-1 leading-relaxed">{{ storeItems.length === 0 ? t('firstRewardDesc') : t('switchFilter') }}</p>
+                  <button @click="openStoreModal(null)" class="mt-4 bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
+                </div>
+
+                <article
+                  v-for="item in filteredStoreItems"
+                  :key="item.id"
+                  @touchstart="startStoreLongPress(item)"
+                  @touchmove="cancelStoreLongPress"
+                  @touchend="cancelStoreLongPress"
+                  @mousedown="startStoreLongPress(item)"
+                  @mouseup="cancelStoreLongPress"
+                  @mouseleave="cancelStoreLongPress"
+                  @contextmenu.prevent="showStoreAction(item)"
+                  class="card p-4 flex items-center gap-3 active:scale-[0.98] transition-all select-none"
+                  :class="item.stock === 0 ? 'opacity-50 grayscale' : ''"
+                >
+                  <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+                    <span class="icon-line !w-5 !h-5" v-html="icon(getStoreItemIcon(item.name))"></span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-bold text-sm text-slate-800 truncate">{{ item.name }}</h3>
+                    <div class="mt-1 flex items-center gap-2 text-xs text-slate-400">
+                      <span>{{ item.expCost }} EXP</span>
+                      <span class="text-slate-200">|</span>
+                      <span>{{t('stock')}} {{ item.stock===-1 ? t('unlimited') : item.stock + ' ' + t('times') }}</span>
+                    </div>
+                  </div>
+                  <div class="shrink-0">
+                    <button @touchstart.stop @mousedown.stop @click.stop="redeemReward(item)" :disabled="item.stock === 0 || userProfile.currentExp < item.expCost" class="text-xs font-bold px-4 py-2 rounded-full transition-colors shadow-sm whitespace-nowrap min-h-[36px]" :class="item.stock === 0 || userProfile.currentExp < item.expCost ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white active:scale-95'">
+                      {{ item.stock===0 ? t('soldout') : userProfile.currentExp < item.expCost ? t('notEnough') : t('redeem') }}
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </template>
+        </div>
+
+
       </section>
     <!-- 打卡记录 Tab (Calendar/Heatmap/Stats) -->
     <section v-show="activeTab==='calendar'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
@@ -570,7 +484,7 @@
       </div>
       <!-- Calendar -->
       <div v-show="calendarSubTab==='calendar'" class="flex-1 min-h-0 scroll-area tab-fade-in">
-        <div class="soft-card rounded-2xl p-4 mb-4">
+        <div class="card p-4 mb-4">
           <div class="flex items-center justify-between mb-4">
             <button @click="shiftHabitCalendarMonth(-1)" class="text-xs font-semibold text-slate-600 bg-slate-50 px-4 py-2.5 rounded-full active:text-amber-600 min-h-[40px]">{{t('prevMonth')}}</button>
             <span class="text-base font-bold text-slate-800">{{ habitCalendarMonthLabel }}</span>
@@ -615,7 +529,7 @@
             </button>
           </div>
         </div>
-        <div class="soft-card rounded-2xl p-4 mb-4">
+        <div class="card p-4 mb-4">
           <div class="flex justify-between items-center mb-3">
             <h3 class="text-sm font-bold text-slate-800">{{ selectedHabitDate }} {{t('checkRecords')}}</h3>
             <span class="text-xs text-slate-400">{{ selectedHabitDateItems.length }} {{t('items')}}</span>
@@ -631,11 +545,10 @@
             </div>
           </div>
         </div>
-        <div class="scroll-end-spacer"></div>
       </div>
       <!-- Heatmap -->
       <div v-show="calendarSubTab==='heatmap'" class="flex-1 min-h-0 scroll-area tab-fade-in">
-        <div class="soft-card rounded-2xl p-4 mb-4">
+        <div class="card p-4 mb-4">
           <h3 class="text-sm font-bold text-slate-800 mb-3">{{t('heatmapTitle')}}</h3>
           <div class="overflow-x-auto pb-2"><div class="inline-flex gap-1" style="min-width:100%">
             <div v-for="(week,wi) in heatmapData" :key="wi" class="flex flex-col gap-1">
@@ -644,28 +557,27 @@
           </div></div>
           <div class="flex items-center justify-end gap-1 mt-3 text-xs text-slate-400"><span>{{t('less')}}</span><div class="w-3 h-3 rounded-sm heat-0"></div><div class="w-3 h-3 rounded-sm heat-1"></div><div class="w-3 h-3 rounded-sm heat-2"></div><div class="w-3 h-3 rounded-sm heat-3"></div><div class="w-3 h-3 rounded-sm heat-4"></div><span>{{t('more')}}</span></div>
         </div>
-        <div v-if="heatmapSelectedDate" class="soft-card rounded-2xl p-4 mb-4">
+        <div v-if="heatmapSelectedDate" class="card p-4 mb-4">
           <div class="flex justify-between items-center mb-3"><h3 class="text-sm font-bold text-slate-800">{{heatmapSelectedDate}} {{t('checkRecords')}}</h3><button @click="heatmapSelectedDate=''" class="text-xs text-slate-400">✕</button></div>
           <div class="space-y-2">
             <div v-if="getHabitItemsByDate(heatmapSelectedDate).length===0" class="text-center py-6 text-slate-300 text-sm">{{t('noRecords')}}</div>
             <div v-for="item in getHabitItemsByDate(heatmapSelectedDate)" :key="item.logId" class="bg-slate-50 rounded-2xl p-3 flex justify-between items-center"><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">{{item.name}}</p><p class="text-xs text-slate-400">{{item.time||'--:--'}} <span v-if="item.note">· {{item.note}}</span></p></div><span class="text-xs font-semibold text-emerald-600">+{{item.expGained||0}} EXP</span></div>
           </div>
         </div>
-        <div class="scroll-end-spacer"></div>
       </div>
       <!-- Stats -->
       <div v-show="calendarSubTab==='stats'" class="flex-1 min-h-0 scroll-area space-y-4 tab-fade-in">
         <!-- Hero 周报 -->
-        <div class="soft-card rounded-3xl p-5 text-center">
+        <div class="card rounded-3xl p-5 text-center">
           <p class="text-xs font-semibold text-slate-400 mb-3">{{t('weeklyReport')}}</p>
           <div class="flex items-center justify-center gap-6">
             <div>
-              <p class="text-4xl font-black text-slate-800">{{weeklyStats.checkins}}</p>
+              <p class="text-4xl font-bold text-slate-800">{{weeklyStats.checkins}}</p>
               <p class="text-xs text-slate-400 mt-1">{{t('weekCheckins')}}</p>
             </div>
             <div class="w-px h-12 bg-slate-200"></div>
             <div>
-              <p class="text-4xl font-black" :style="{color: 'var(--theme-500)'}">{{weeklyStats.rate}}%</p>
+              <p class="text-4xl font-bold" :style="{color: 'var(--theme-500)'}">{{weeklyStats.rate}}%</p>
               <p class="text-xs text-slate-400 mt-1">{{t('weekRate')}}</p>
             </div>
           </div>
@@ -682,16 +594,16 @@
         </div>
 
         <!-- Hero 月报 -->
-        <div class="soft-card rounded-3xl p-5 text-center">
+        <div class="card rounded-3xl p-5 text-center">
           <p class="text-xs font-semibold text-slate-400 mb-3">{{t('monthlyReport')}}</p>
           <div class="flex items-center justify-center gap-6">
             <div>
-              <p class="text-4xl font-black text-slate-800">{{monthlyStats.checkDays}}</p>
+              <p class="text-4xl font-bold text-slate-800">{{monthlyStats.checkDays}}</p>
               <p class="text-xs text-slate-400 mt-1">{{t('monthCheckDays')}}</p>
             </div>
             <div class="w-px h-12 bg-slate-200"></div>
             <div>
-              <p class="text-4xl font-black" :style="{color: 'var(--theme-500)'}">{{monthlyStats.rate}}%</p>
+              <p class="text-4xl font-bold" :style="{color: 'var(--theme-500)'}">{{monthlyStats.rate}}%</p>
               <p class="text-xs text-slate-400 mt-1">{{t('monthRate2')}}</p>
             </div>
           </div>
@@ -712,7 +624,7 @@
         </div>
 
         <!-- EXP日志（折叠） -->
-        <details class="soft-card rounded-2xl p-4">
+        <details class="card p-4">
           <summary class="text-sm font-bold text-slate-800 cursor-pointer list-none flex items-center justify-between">
             <span>{{t('expLogTitle')}}</span>
             <span class="text-xs text-slate-400">{{expLogs.length}} {{t('items')}}</span>
@@ -724,7 +636,7 @@
         </details>
 
         <!-- 成就（折叠） -->
-        <details class="soft-card rounded-2xl p-4">
+        <details class="card p-4">
           <summary class="text-sm font-bold text-slate-800 cursor-pointer list-none flex items-center justify-between">
             <span>{{t('achievements')}}</span>
             <span class="text-xs text-slate-400">{{unlockedAchievements.length}}/{{allAchievements.length}}</span>
@@ -737,7 +649,6 @@
             </div>
           </div>
         </details>
-        <div class="scroll-end-spacer"></div>
       </div>
 
       <!-- 习惯数据 -->
@@ -751,11 +662,11 @@
         <template v-else>
           <!-- 总览统计 -->
           <div class="grid grid-cols-2 gap-3">
-            <div class="soft-card rounded-2xl p-4 text-center">
+            <div class="card p-4 text-center">
               <p class="text-2xl font-bold text-slate-800">{{ allHabitsTotalCheckins }}</p>
               <p class="text-xs text-slate-400 font-semibold mt-1">{{t('totalCheckins')}}</p>
             </div>
-            <div class="soft-card rounded-2xl p-4 text-center">
+            <div class="card p-4 text-center">
               <p class="text-2xl font-bold text-slate-800">{{ allHabitsTotalDays }}</p>
               <p class="text-xs text-slate-400 font-semibold mt-1">{{t('totalDays')}}</p>
             </div>
@@ -780,7 +691,7 @@
           </div>
 
           <!-- 每个习惯的日历网格 -->
-          <div v-for="habit in habits" :key="habit.id" class="soft-card rounded-2xl p-4">
+          <div v-for="habit in habits" :key="habit.id" class="card p-4">
             <div class="flex items-start gap-3 mb-3">
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 mb-1">
@@ -806,7 +717,6 @@
           </div>
         </template>
 
-        <div class="scroll-end-spacer"></div>
       </div>
 
     </section>
@@ -815,14 +725,14 @@
     <section v-show="activeTab==='settings'" class="h-full flex flex-col p-4 overflow-hidden min-h-0">
       <div class="flex-1 min-h-0 scroll-area space-y-3">
         <div class="mb-2"><p class="text-xs text-slate-400 font-medium">呱呱呱呱呱呱</p><h1 class="text-2xl font-bold text-slate-900 tracking-tight mt-0.5">{{t('settings')}}</h1></div>
-        <div class="soft-card rounded-2xl p-4 space-y-1">
+        <div class="card p-4 space-y-1">
           <h3 class="text-xs font-semibold text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('database')"></span>{{t('dataManagement')}}</h3>
           <button @click="exportData" class="w-full flex items-center gap-3 py-4 px-3 text-sm font-bold text-slate-700 min-h-[44px]"><span class="icon-line text-emerald-500" v-html="icon('download')"></span>{{t('exportData')}}</button>
           <button @click="triggerImportData" class="w-full flex items-center gap-3 py-4 px-3 text-sm font-bold text-slate-700 min-h-[44px]"><span class="icon-line text-blue-500" v-html="icon('upload')"></span>{{t('importData')}}</button>
           <input type="file" ref="importFileInput" accept=".json" @change="importData" class="hidden" />
           <div class="text-xs px-2 text-slate-400">{{t('lastBackup')}}: {{lastBackupDate||t('never')}}</div>
         </div>
-        <div class="soft-card rounded-2xl p-4">
+        <div class="card p-4">
           <button @click="showArchived=!showArchived" class="w-full flex items-center justify-between mb-2">
             <h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('archive')"></span>{{t('archivedGoals')}} ({{archivedHabits.length}})</h3>
             <span class="icon-line text-slate-400 transition-transform" :class="showArchived?'rotate-180':''" v-html="icon('chevronDown')"></span>
@@ -832,7 +742,7 @@
             <div v-for="habit in archivedHabits" :key="habit.id" class="bg-slate-50 rounded-xl p-3 flex items-center justify-between mt-2"><div class="min-w-0"><p class="text-sm font-bold text-slate-800 truncate">{{habit.name}}</p><p class="text-xs text-slate-400">{{t('best')}} {{habit.maxStreak||0}} {{t('days')}}</p></div><button @click="unarchiveHabit(habit.id)" class="text-xs font-semibold px-3 py-2 rounded-lg bg-amber-50 text-amber-500">{{t('restore')}}</button></div>
           </div>
         </div>
-        <div class="soft-card rounded-2xl p-4 space-y-3">
+        <div class="card p-4 space-y-3">
           <h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('palette')"></span>{{t('appearance')}}</h3>
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line" :style="{color:darkMode?'#fbbf24':'#64748b'}" v-html="icon(darkMode?'moon':'sun')"></span><span class="text-sm font-bold text-slate-800">{{t('darkMode')}}</span></div>
             <div class="flex items-center rounded-full p-1 bg-slate-100 relative">
@@ -856,18 +766,16 @@
             </div>
           </div>
         </div>
-        <div class="soft-card rounded-2xl p-4 space-y-2"><h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-xs text-slate-400">{{t('aboutDesc')}}</p></div>
-        <button @click="showOnboarding" class="w-full soft-card rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition-all min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('helpCircle')"></span><span class="text-sm font-bold text-slate-800">{{t('viewTutorial')}}</span></button>
-        <div class="soft-card rounded-2xl p-4">
+        <div class="card p-4 space-y-2"><h3 class="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><span class="icon-line text-slate-400" v-html="icon('info')"></span>{{t('about')}}</h3><p class="text-xs text-slate-400">呱呱呱呱呱呱 v{{appVersion}}</p><p class="text-xs text-slate-400">{{t('aboutDesc')}}</p></div>
+        <button @click="showOnboarding" class="w-full card p-4 flex items-center gap-3 active:scale-[0.98] transition-all min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('helpCircle')"></span><span class="text-sm font-bold text-slate-800">{{t('viewTutorial')}}</span></button>
+        <div class="card p-4">
           <button @click="resetApp" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[44px]"><span class="icon-line" v-html="icon('trash')"></span>{{t('resetApp')}}</button>
           <p class="text-xs mt-1 px-2 text-slate-400">{{t('resetHint')}}</p>
         </div>
-        <div class="scroll-end-spacer"></div>
       </div>
     </section>
 
     </main>
-
 
     <!-- Event Toast (level-up, achievement) -->
     <Transition name="event-toast">
@@ -901,8 +809,8 @@
     </nav>
 
     <!-- 目标管理弹窗 - 增加标题 -->
-    <div v-if="modals.habitAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habitAction')">
-      <div class="modal-card w-full rounded-t-2xl p-5 max-w-md sheet-enter">
+    <div v-if="modals.habitAction" class="modal-backdrop fade-enter" @click.self="closeModal('habitAction')">
+      <div class="modal-card sheet-card sheet-enter">
         <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
           <div class="min-w-0 flex-1">
             <p class="text-xs text-slate-400 font-bold">{{t('goalManage')}}</p>
@@ -911,17 +819,17 @@
           <button @click="closeModal('habitAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
         </div>
         <div class="space-y-1">
-          <button @click="retroHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckin')}}</span></button>
-          <button @click="editHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
-          <button @click="archiveHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-500 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('archive')"></span><span>{{t('archive')}}</span></button>
-          <button @click="deleteHabitFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+          <button @click="retroHabitFromAction" class="action-item text-slate-700 active:bg-slate-50"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckin')}}</span></button>
+          <button @click="editHabitFromAction" class="action-item text-slate-700 active:bg-slate-50"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
+          <button @click="archiveHabitFromAction" class="action-item text-slate-500 active:bg-slate-50"><span class="icon-line" v-html="icon('archive')"></span><span>{{t('archive')}}</span></button>
+          <button @click="deleteHabitFromAction" class="action-item text-red-500 active:bg-red-50"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
         </div>
       </div>
     </div>
 
     <!-- 商店管理弹窗 - 增加标题 -->
-    <div v-if="modals.storeAction" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('storeAction')">
-      <div class="modal-card w-full rounded-t-2xl p-5 max-w-md sheet-enter">
+    <div v-if="modals.storeAction" class="modal-backdrop fade-enter" @click.self="closeModal('storeAction')">
+      <div class="modal-card sheet-card sheet-enter">
         <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
           <div class="min-w-0 flex-1">
             <p class="text-xs text-slate-400 font-bold">{{t('wishManage')}}</p>
@@ -930,8 +838,8 @@
           <button @click="closeModal('storeAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
         </div>
         <div class="space-y-1">
-          <button @click="editStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-slate-700 active:bg-slate-50 rounded-2xl min-h-[48px]"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
-          <button @click="deleteStoreFromAction" class="w-full flex items-center gap-3 py-3.5 px-2 text-sm font-bold text-red-500 active:bg-red-50 rounded-2xl min-h-[48px]"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+          <button @click="editStoreFromAction" class="action-item text-slate-700 active:bg-slate-50"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
+          <button @click="deleteStoreFromAction" class="action-item text-red-500 active:bg-red-50"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
         </div>
       </div>
     </div>
@@ -1008,24 +916,23 @@
             </div>
             <span class="text-xs font-semibold text-emerald-600">+{{ item.expGained || 0 }} EXP</span>
           </div>
-          <div class="scroll-end-spacer"></div>
         </div>
       </div>
     </div>
 
     <!-- 新增/编辑目标 -->
-    <div v-if="modals.habit" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('habit')">
-      <div class="modal-card w-full rounded-t-2xl p-5 max-w-md text-xs sheet-enter">
+    <div v-if="modals.habit" class="modal-backdrop fade-enter" @click.self="closeModal('habit')">
+      <div class="modal-card sheet-card text-xs sheet-enter">
         <h3 class="font-bold text-base text-slate-800 mb-4">{{ habitForm.id ? t('editGoal') : t('newGoal') }}</h3>
         <div class="space-y-3">
           <label class="block">
             <span class="block text-slate-500 mb-1">{{t('goalName')}}</span>
-            <input type="text" v-model.trim="habitForm.name" maxlength="30" :placeholder="t('goalNamePlaceholder')" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input type="text" v-model.trim="habitForm.name" maxlength="30" :placeholder="t('goalNamePlaceholder')" class="input-field" />
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('frequency')}}</span>
-              <select v-model="habitForm.frequencyType" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+              <select v-model="habitForm.frequencyType" class="input-field p-2.5">
                 <option value="daily">{{t('daily')}}</option>
                 <option value="weekly">{{t('weeklyCumulative')}}</option>
                 <option value="monthly">{{t('monthlyCumulative')}}</option>
@@ -1036,77 +943,77 @@
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('expPerCheckin')}}</span>
-              <input type="number" inputmode="numeric" min="1" max="999" v-model.number="habitForm.expReward" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input type="number" inputmode="numeric" min="1" max="999" v-model.number="habitForm.expReward" class="input-field p-2.5 font-bold" />
             </label>
           </div>
           <label v-if="habitForm.frequencyType === 'weekly'" class="block">
             <span class="block text-slate-500 mb-1">{{t('weeklyTarget')}}</span>
-            <input type="number" inputmode="numeric" min="1" max="7" v-model.number="habitForm.weeklyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input type="number" inputmode="numeric" min="1" max="7" v-model.number="habitForm.weeklyTarget" class="input-field p-2.5 font-bold" />
           </label>
           <label v-if="habitForm.frequencyType === 'monthly'" class="block">
             <span class="block text-slate-500 mb-1">{{t('monthlyTarget')}}</span>
-            <input type="number" inputmode="numeric" min="1" max="31" v-model.number="habitForm.monthlyTarget" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input type="number" inputmode="numeric" min="1" max="31" v-model.number="habitForm.monthlyTarget" class="input-field p-2.5 font-bold" />
           </label>
           <div class="bg-amber-50 text-amber-700 rounded-2xl p-3 leading-relaxed">
             {{t('streakBonusDesc')}}
           </div>
         </div>
         <div class="mt-6 flex gap-3">
-          <button @click="closeModal('habit')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="saveHabit" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm active:bg-amber-500 active:scale-95 min-h-[48px]">{{t('saveGoal')}}</button>
+          <button @click="closeModal('habit')" class="btn-act bg-slate-100 text-slate-500">{{t('cancel')}}</button>
+          <button @click="saveHabit" class="btn-act bg-amber-400 text-slate-950 shadow-sm">{{t('saveGoal')}}</button>
         </div>
       </div>
     </div>
 
     <!-- 补签弹窗 -->
-    <div v-if="modals.retroactive" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('retroactive')">
+    <div v-if="modals.retroactive" class="modal-backdrop items-center justify-center p-4 fade-enter" @click.self="closeModal('retroactive')">
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs">
         <h3 class="font-bold text-sm text-slate-800 mb-2 flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('calendar')"></span><span>{{t('retroCheckinTitle')}}</span></h3>
         <p class="text-slate-400 mb-3">{{t('retroDesc')}}</p>
-        <input type="date" v-model="retroDate" :max="todayStr" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center mb-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
+        <input type="date" v-model="retroDate" :max="todayStr" class="input-field text-center mb-4 font-bold" />
         <div class="flex gap-2">
-          <button @click="closeModal('retroactive')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="submitRetroCheckIn" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm active:bg-amber-500 active:scale-95 min-h-[48px]">{{t('submitRetro')}}</button>
+          <button @click="closeModal('retroactive')" class="btn-act bg-slate-100 text-slate-500">{{t('cancel')}}</button>
+          <button @click="submitRetroCheckIn" class="btn-act bg-amber-400 text-slate-950 shadow-sm">{{t('submitRetro')}}</button>
         </div>
       </div>
     </div>
 
     <!-- 新增/编辑心愿 -->
-    <div v-if="modals.store" class="fixed inset-0 bg-black/60 z-50 flex items-end justify-center fade-enter" @click.self="closeModal('store')">
-      <div class="modal-card w-full rounded-t-2xl p-5 max-w-md text-xs sheet-enter">
+    <div v-if="modals.store" class="modal-backdrop fade-enter" @click.self="closeModal('store')">
+      <div class="modal-card sheet-card text-xs sheet-enter">
         <h3 class="font-bold text-base text-slate-800 mb-4">{{ storeForm.id ? t('editWish') : t('addWish') }}</h3>
         <div class="space-y-3">
           <label class="block">
             <span class="block text-slate-500 mb-1">{{t('wishName')}}</span>
-            <input type="text" v-model.trim="storeForm.name" maxlength="30" :placeholder="t('wishNamePlaceholder')" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <input type="text" v-model.trim="storeForm.name" maxlength="30" :placeholder="t('wishNamePlaceholder')" class="input-field" />
           </label>
           <div class="grid grid-cols-2 gap-3">
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('redeemPrice')}}</span>
-              <input type="number" inputmode="numeric" min="1" max="99999" v-model.number="storeForm.expCost" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input type="number" inputmode="numeric" min="1" max="99999" v-model.number="storeForm.expCost" class="input-field p-2.5 font-bold" />
             </label>
             <label class="block">
               <span class="block text-slate-500 mb-1">{{t('stockLabel')}}</span>
-              <input type="number" inputmode="numeric" min="-1" v-model.number="storeForm.stock" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              <input type="number" inputmode="numeric" min="-1" v-model.number="storeForm.stock" class="input-field p-2.5 font-bold" />
             </label>
           </div>
         </div>
         <div class="mt-6 flex gap-3">
-          <button @click="closeModal('store')" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('cancel')}}</button>
-          <button @click="saveStoreItem" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm active:bg-amber-500 active:scale-95 min-h-[48px]">{{t('confirmSave')}}</button>
+          <button @click="closeModal('store')" class="btn-act bg-slate-100 text-slate-500">{{t('cancel')}}</button>
+          <button @click="saveStoreItem" class="btn-act bg-amber-400 text-slate-950 shadow-sm">{{t('confirmSave')}}</button>
         </div>
       </div>
     </div>
 
     <!-- 打卡备注底部 Sheet -->
-    <div v-if="modals.checkInNote" class="fixed inset-0 bg-black/40 z-50 flex items-end justify-center fade-enter" @click.self="submitCheckInNote">
-      <div class="modal-card w-full rounded-t-2xl p-5 max-w-md sheet-enter">
+    <div v-if="modals.checkInNote" class="modal-backdrop fade-enter" style="background:rgba(0,0,0,.4)" @click.self="submitCheckInNote">
+      <div class="modal-card sheet-card sheet-enter">
         <div class="flex justify-between items-center mb-3">
           <h3 class="font-bold text-sm flex items-center gap-1.5"><span class="icon-line text-amber-500" v-html="icon('edit')"></span>{{t('addNote')}}</h3>
           <button @click="checkInNoteText='';submitCheckInNote()" class="text-xs text-slate-400 font-bold px-2 py-1 rounded-lg active:bg-slate-100">{{t('skip')}}</button>
         </div>
         <p class="text-xs text-slate-400 mb-2">{{t('noteHint')}}</p>
-        <textarea v-model="checkInNoteText" maxlength="200" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none" :placeholder="t('notePlaceholder')"></textarea>
+        <textarea v-model="checkInNoteText" maxlength="200" rows="2" class="input-field resize-none" :placeholder="t('notePlaceholder')"></textarea>
         <div class="mt-3 flex gap-2">
           <button @click="submitCheckInNote" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm active:bg-amber-500 active:scale-95 min-h-[44px]">{{t('save')}}</button>
         </div>
@@ -1114,13 +1021,13 @@
     </div>
 
     <!-- 导入选择弹窗 -->
-    <div v-if="modals.importChoice" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 fade-enter" @click.self="closeModal('importChoice')">
+    <div v-if="modals.importChoice" class="modal-backdrop items-center justify-center p-4 fade-enter" @click.self="closeModal('importChoice')">
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 text-xs">
         <h3 class="font-bold text-sm mb-2">{{t('importChoice')}}</h3>
         <p class="text-slate-400 mb-4 leading-relaxed">{{t('importChoiceDesc')}}</p>
         <div class="space-y-2">
-          <button @click="executeImport('overwrite')" class="w-full bg-amber-400 text-slate-950 py-3 rounded-2xl text-sm font-bold active:bg-amber-500 active:scale-95 min-h-[48px]">{{t('overwriteImport')}}</button>
-          <button @click="executeImport('merge')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl text-sm font-bold min-h-[48px]">{{t('mergeImport')}}</button>
+          <button @click="executeImport('overwrite')" class="w-full btn-act bg-amber-400 text-slate-950 text-sm">{{t('overwriteImport')}}</button>
+          <button @click="executeImport('merge')" class="w-full btn-act bg-slate-100 text-slate-700 text-sm">{{t('mergeImport')}}</button>
           <button @click="closeModal('importChoice')" class="w-full text-slate-500 py-2 text-sm">{{t('cancel')}}</button>
         </div>
       </div>
@@ -1138,15 +1045,16 @@
           <span v-for="i in onboardingSteps.length" :key="i" class="w-2 h-2 rounded-full" :class="i-1===onboardingStep?'bg-amber-400':'bg-slate-200'"></span>
         </div>
         <div class="flex gap-3 px-4 pb-6">
-          <button v-if="onboardingStep>0" @click="onboardingStep--" class="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold min-h-[48px]">{{t('prev')}}</button>
-          <button v-if="onboardingStep<onboardingSteps.length-1" @click="onboardingStep++" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm active:bg-amber-500 active:scale-95 min-h-[48px]">{{t('next')}}</button>
-          <button v-else @click="closeOnboarding" class="flex-1 bg-amber-400 text-slate-950 py-3 rounded-2xl font-bold shadow-sm active:bg-amber-500 active:scale-95 min-h-[48px]">{{t('start')}}</button>
+          <button v-if="onboardingStep>0" @click="onboardingStep--" class="btn-act bg-slate-100 text-slate-500">{{t('prev')}}</button>
+          <button v-if="onboardingStep<onboardingSteps.length-1" @click="onboardingStep++" class="btn-act bg-amber-400 text-slate-950 shadow-sm">{{t('next')}}</button>
+          <button v-else @click="closeOnboarding" class="btn-act bg-amber-400 text-slate-950 shadow-sm">{{t('start')}}</button>
         </div>
       </div>
     </div>
 
-    <!-- 确认对话框 -->
-    <div v-if="dialog.visible" class="fixed inset-0 bg-black/55 z-[80] flex items-center justify-center p-6 fade-enter">
+    <!-- 确认对话框（Teleport 到 body，确保在所有覆盖层之上） -->
+    <teleport to="body">
+    <div v-if="dialog.visible" class="fixed inset-0 bg-black/55 z-[10000] flex items-center justify-center p-6 fade-enter">
       <div class="modal-card w-full max-w-xs rounded-3xl p-5 shadow-2xl">
         <h3 class="text-base font-bold text-slate-900 mb-2">{{ dialog.title }}</h3>
         <p class="text-sm leading-6 text-slate-600 whitespace-pre-line">{{ dialog.message }}</p>
@@ -1158,6 +1066,7 @@
         </div>
       </div>
     </div>
+    </teleport>
 
     <!-- 打卡成功 Toast -->
     <Transition name="toast">
@@ -1191,6 +1100,56 @@
       for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) { if (totalExp >= LEVEL_THRESHOLDS[i]) return i + 1; }
       return 1;
     }
+    const I18N = {zh:{loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',undoRedeemConfirm:'确定要撤销兑换「%s」吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',todayGroup:'今天',yesterdayGroup:'昨天',last7Days:'近 7 天',earlier:'更早',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'}, en:{loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',undoRedeemConfirm:'Undo redemption of "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',todayGroup:'Today',yesterdayGroup:'Yesterday',last7Days:'Last 7 Days',earlier:'Earlier',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'}};
+    const ICONS = {
+            target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>',
+            gift: '<svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"></path><path d="M2 7h20v5H2z"></path><path d="M12 7v14"></path><path d="M12 7H8.5A2.5 2.5 0 1 1 11 4.5L12 7z"></path><path d="M12 7h3.5A2.5 2.5 0 1 0 13 4.5L12 7z"></path></svg>',
+            calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>',
+            barChart: '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+            checkCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>',
+            edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"></path></svg>',
+            trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 15H6L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>',
+            list: '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>',
+            archive: '<svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>',
+            bell: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+            trophy: '<svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>',
+            download: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+            upload: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
+            moon: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+            sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+            palette: '<svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="17.5" cy="10.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="8.5" cy="7.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="6.5" cy="12.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>',
+            globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
+            helpCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            sort: '<svg viewBox="0 0 24 24"><path d="M8 3l-4 4h3v10h2V7h3L8 3zM16 21l4-4h-3V7h-2v10h-3l4 4z"></path></svg>',
+            flame: '<svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>',
+            chevronDown: '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>',
+            trendingUp: '<svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>',
+            settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+            database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
+            info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+            plus: '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+            chevronLeft: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>',
+            chevronRight: '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+            zap: '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"></polygon></svg>',
+            star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+            fileText: '<svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>',
+            layers: '<svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
+            award: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
+            crown: '<svg viewBox="0 0 24 24"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>',
+            sparkles: '<svg viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>',
+            coffee: '<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>',
+            gamepad: '<svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>',
+            bed: '<svg viewBox="0 0 24 24"><path d="M2 4v16"></path><path d="M2 8h18a2 2 0 0 1 2 2v10"></path><path d="M2 17h20"></path><path d="M6 8v9"></path></svg>',
+            pizza: '<svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"></path><circle cx="12" cy="14" r="2"></circle><circle cx="8" cy="10" r="1"></circle><circle cx="16" cy="12" r="1"></circle></svg>',
+            film: '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
+            book: '<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+            music: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
+            shopping: '<svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
+            square: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect></svg>',
+            checkSquare: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="m8 12 2.5 2.5L16 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+            x: '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg>',
+            rotateCcw: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
+          };
     const ACHIEVEMENTS_DEF = [
       { id: 'first_checkin', icon: 'target', reward: 20 },
       { id: 'streak_7', icon: 'flame', reward: 20 },
@@ -1214,7 +1173,7 @@
           rewardHistory: 'my_checkin_reward_history_v3'
         };
         const DB_NAME = 'my_checkin_indexed_db';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2; // v2: 增加版本迁移支持
         const DB_STORE = 'app_data';
         let dbPromise = null;
 
@@ -1289,12 +1248,7 @@
         const activeHabits = computed(() => habits.value.filter(h => !h.archived));
         const archivedHabits = computed(() => habits.value.filter(h => h.archived));
 
-        function t(key) {
-          const zh = {loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',undoRedeemConfirm:'确定要撤销兑换「%s」吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',todayGroup:'今天',yesterdayGroup:'昨天',last7Days:'近 7 天',earlier:'更早',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'};
-          const en = {loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',undoRedeemConfirm:'Undo redemption of "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',todayGroup:'Today',yesterdayGroup:'Yesterday',last7Days:'Last 7 Days',earlier:'Earlier',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'};
-          const dict = lang.value === 'en' ? en : zh;
-          return dict[key] || key;
-        }
+        function t(key) { return (I18N[lang.value] || I18N.zh)[key] || key; }
 
         function setDarkMode(v) { userProfile.value.darkMode = Boolean(v); queueSaveData(); }
         function setThemeColor(c) {
@@ -1444,58 +1398,7 @@
           return 'gift';
         }
 
-        function icon(name) {
-          const icons = {
-            target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>',
-            gift: '<svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"></path><path d="M2 7h20v5H2z"></path><path d="M12 7v14"></path><path d="M12 7H8.5A2.5 2.5 0 1 1 11 4.5L12 7z"></path><path d="M12 7h3.5A2.5 2.5 0 1 0 13 4.5L12 7z"></path></svg>',
-            calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>',
-            barChart: '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
-            checkCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>',
-            edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"></path></svg>',
-            trash: '<svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 15H6L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>',
-            list: '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>',
-            archive: '<svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>',
-            bell: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
-            trophy: '<svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>',
-            download: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
-            upload: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
-            moon: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
-            sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
-            palette: '<svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="17.5" cy="10.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="8.5" cy="7.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><circle cx="6.5" cy="12.5" r="2.5" fill="currentColor" stroke="none" opacity="0.3"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg>',
-            globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
-            helpCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
-            sort: '<svg viewBox="0 0 24 24"><path d="M8 3l-4 4h3v10h2V7h3L8 3zM16 21l4-4h-3V7h-2v10h-3l4 4z"></path></svg>',
-            flame: '<svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>',
-            chevronDown: '<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>',
-            trendingUp: '<svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>',
-            settings: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
-            database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
-            info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
-            plus: '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
-            chevronLeft: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>',
-            chevronRight: '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>',
-            zap: '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"></polygon></svg>',
-            star: '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
-            fileText: '<svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>',
-            layers: '<svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
-            award: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>',
-            crown: '<svg viewBox="0 0 24 24"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg>',
-            sparkles: '<svg viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>',
-            coffee: '<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>',
-            gamepad: '<svg viewBox="0 0 24 24"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>',
-            bed: '<svg viewBox="0 0 24 24"><path d="M2 4v16"></path><path d="M2 8h18a2 2 0 0 1 2 2v10"></path><path d="M2 17h20"></path><path d="M6 8v9"></path></svg>',
-            pizza: '<svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"></path><circle cx="12" cy="14" r="2"></circle><circle cx="8" cy="10" r="1"></circle><circle cx="16" cy="12" r="1"></circle></svg>',
-            film: '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
-            book: '<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
-            music: '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
-            shopping: '<svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
-            square: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect></svg>',
-            checkSquare: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="m8 12 2.5 2.5L16 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
-            x: '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg>',
-            rotateCcw: '<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 3v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
-          };
-          return icons[name] || '';
-        }
+        function icon(name) { return ICONS[name] || ''; }
 
         // ===== IndexedDB =====
         function openDatabase() {
@@ -1508,9 +1411,13 @@
             const request = indexedDB.open(DB_NAME, DB_VERSION);
             request.onupgradeneeded = event => {
               const db = event.target.result;
+              const oldVersion = event.oldVersion;
+              // v1 → v2: 确保 object store 存在
               if (!db.objectStoreNames.contains(DB_STORE)) {
                 db.createObjectStore(DB_STORE, { keyPath: 'key' });
               }
+              // 未来版本迁移在此追加：if (oldVersion < 3) { ... }
+              console.log('[DB] upgraded from v' + oldVersion + ' to v' + DB_VERSION);
             };
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
@@ -1733,7 +1640,7 @@
             { key: 'last7days', label: t('last7Days'), logs: [] },
             { key: 'earlier', label: t('earlier'), logs: [] }
           ];
-          filteredRewardHistory.value.forEach(log => {
+          rewardHistory.value.forEach(log => {
             const logDate = formatDate(new Date(log.timestamp));
             if (logDate === today) groups[0].logs.push(log);
             else if (logDate === yesterday) groups[1].logs.push(log);
@@ -2079,32 +1986,11 @@
         }
 
         // ===== 震动 =====
-        function vibrateOnCheckIn() {
+        function vibrate(ms = 120) {
           try {
-            if (window.plus && plus.device && typeof plus.device.vibrate === 'function') {
-              plus.device.vibrate(120);
-              return;
-            }
-            if (navigator.vibrate) {
-              navigator.vibrate(120);
-            }
-          } catch (error) {
-            console.warn('震动调用失败。', error);
-          }
-        }
-
-        function vibrateShort() {
-          try {
-            if (window.plus && plus.device && typeof plus.device.vibrate === 'function') {
-              plus.device.vibrate(80);
-              return;
-            }
-            if (navigator.vibrate) {
-              navigator.vibrate(80);
-            }
-          } catch (error) {
-            console.warn('震动调用失败。', error);
-          }
+            if (window.plus && plus.device && typeof plus.device.vibrate === 'function') { plus.device.vibrate(ms); return; }
+            if (navigator.vibrate) navigator.vibrate(ms);
+          } catch (e) { console.warn('Vibrate failed.', e); }
         }
 
         // ===== 目标操作 =====
@@ -2360,7 +2246,7 @@
           // Achievement check (feature 12)
           checkAchievements();
 
-          vibrateOnCheckIn();
+          vibrate();
           showToast(t('expGainedToast').replace('%d', expGained));
           queueSaveData();
           return { ok: true, streakBonus, streakDays: result.currentStreak };
@@ -2485,7 +2371,7 @@
           rewardHistory.value.unshift(log);
           // EXP Log
           expLogs.value.unshift({ id: getId('e'), type: 'redeem', amount: -item.expCost, rewardName: item.name, timestamp: Date.now(), note: '' });
-          vibrateShort();
+          vibrate(80);
           await syncStorageData();
           // Success overlay (feature 9)
           showRedeemToast(t('redeemSuccess').replace('%s', item.name));
@@ -2655,28 +2541,35 @@
               return;
             } catch (e) { console.warn('plus.io export failed', e); }
           }
-          // Mobile: Web Share API
-          if (navigator.share && navigator.canShare) {
+          // Mobile: Web Share API（仅移动端真实浏览器环境）
+          let exported = false;
+          if (!window.plus && navigator.share && navigator.canShare && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
             try {
               const file = new File([json], filename, { type: 'application/json' });
               if (navigator.canShare({ files: [file] })) {
                 await navigator.share({ files: [file], title: filename });
-              } else { throw 0; }
+                exported = true;
+              }
             } catch (e) { if (e.name === 'AbortError') return; }
           }
           // Fallback: blob download
-          try {
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = filename;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-          } catch (e) {
+          if (!exported) {
             try {
-              await navigator.clipboard.writeText(json);
-              showToast('✓ Clipboard');
-            } catch (e2) { console.warn('Export failed', e2); return; }
+              const blob = new Blob([json], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = filename;
+              document.body.appendChild(a); a.click(); document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (e) {
+              try {
+                await navigator.clipboard.writeText(json);
+                showToast('✓ Clipboard');
+                userProfile.value.lastBackupReminderDate = todayStr.value;
+                queueSaveData();
+                return;
+              } catch (e2) { console.warn('Export failed', e2); showToast('Export failed'); return; }
+            }
           }
           userProfile.value.lastBackupReminderDate = todayStr.value;
           queueSaveData();
@@ -2999,18 +2892,18 @@
           };
           const cm = colorMap[c] || colorMap.amber;
           const css = `
-            #app[data-theme="${c}"] .bg-amber-50{background-color:${cm[50]} !important}
-            #app[data-theme="${c}"] .bg-amber-400{background-color:${cm[400]} !important}
-            #app[data-theme="${c}"] .bg-amber-500{background-color:${cm[500]} !important}
-            #app[data-theme="${c}"] .active\:bg-amber-500:active{background-color:${cm[500]} !important}
-            #app[data-theme="${c}"] .text-amber-500{color:${cm[500]} !important}
-            #app[data-theme="${c}"] .text-amber-600{color:${cm[600]} !important}
-            #app[data-theme="${c}"] .text-amber-700{color:${cm[700]} !important}
-            #app[data-theme="${c}"] .border-amber-100{border-color:${cm[100]} !important}
-            #app[data-theme="${c}"] .ring-amber-300{--tw-ring-color:${cm[100]} !important}
-            #app[data-theme="${c}"] .ring-amber-400{--tw-ring-color:${cm[400]} !important}
-            #app[data-theme="${c}"] .active\\:text-amber-600:active{color:${cm[600]} !important}
-            #app[data-theme="${c}"] .active\\:bg-amber-50:active{background-color:${cm[50]} !important}
+            #app[data-theme="${c}"] .bg-amber-50{background-color:${cm[50]}}
+            #app[data-theme="${c}"] .bg-amber-400{background-color:${cm[400]}}
+            #app[data-theme="${c}"] .bg-amber-500{background-color:${cm[500]}}
+            #app[data-theme="${c}"] .active\:bg-amber-500:active{background-color:${cm[500]}}
+            #app[data-theme="${c}"] .text-amber-500{color:${cm[500]}}
+            #app[data-theme="${c}"] .text-amber-600{color:${cm[600]}}
+            #app[data-theme="${c}"] .text-amber-700{color:${cm[700]}}
+            #app[data-theme="${c}"] .border-amber-100{border-color:${cm[100]}}
+            #app[data-theme="${c}"] .ring-amber-300{--tw-ring-color:${cm[100]}}
+            #app[data-theme="${c}"] .ring-amber-400{--tw-ring-color:${cm[400]}}
+            #app[data-theme="${c}"] .active\\:text-amber-600:active{color:${cm[600]}}
+            #app[data-theme="${c}"] .active\\:bg-amber-50:active{background-color:${cm[50]}}
           `;
           let el = document.getElementById('theme-override');
           if (!el) {
@@ -3057,6 +2950,8 @@
             cls.push('theme-' + themeColor.value);
             appEl.className = 'app-root max-w-md mx-auto relative overflow-hidden ' + cls.join(' ');
             appEl.setAttribute('data-theme', themeColor.value);
+            // Sync dark class to html for teleported elements (dialog, reward history)
+            document.documentElement.classList.toggle('dark', darkMode.value);
           }
           syncAppAttrs();
           watch([darkMode, themeColor], syncAppAttrs);
@@ -3111,14 +3006,5 @@
     }).mount('#app');
   </script>
 
-  <!-- Toast 过渡样式 -->
-  <style>
-    .toast-enter-active { transition: all .2s ease-out; }
-    .toast-leave-active { transition: all .2s ease-in; }
-    .toast-enter-from { opacity: 0; transform: translate(-50%, -8px); }
-    .toast-leave-to { opacity: 0; transform: translate(-50%, -8px); }
-      summary { list-style: none; }
-    summary::-webkit-details-marker { display: none; }
-</style>
 </body>
 </html>
