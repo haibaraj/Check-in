@@ -410,14 +410,6 @@
           <!-- 商店商品列表 -->
           <template v-else>
             <div class="space-y-4">
-              <!-- 筛选栏 -->
-              <div class="flex gap-2 overflow-x-auto pb-1">
-                <button @click="storeFilter = 'all'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('all')}}</button>
-                <button @click="storeFilter = 'available'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'available' ? 'bg-emerald-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('available')}}</button>
-                <button @click="storeFilter = 'locked'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'locked' ? 'bg-amber-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('expNotEnough')}}</button>
-                <button @click="storeFilter = 'soldout'" class="shrink-0 text-xs font-semibold px-4 py-2 rounded-full min-h-[36px]" :class="storeFilter === 'soldout' ? 'bg-slate-500 text-white' : 'bg-slate-50 text-slate-600 border border-slate-200'">{{t('soldout')}}</button>
-              </div>
-
               <!-- 商品列表 -->
               <div class="space-y-2">
                 <div class="flex justify-between items-center text-xs text-slate-400 px-1">
@@ -1612,13 +1604,7 @@
         const isAllDoneToday = computed(() => activeHabits.value.length > 0 && pendingHabits.value.length === 0);
         const todayRedeemCount = computed(() => rewardHistory.value.filter(log => formatDate(new Date(log.timestamp)) === todayStr.value).length);
         const filteredStoreItems = computed(() => {
-          const filtered = storeItems.value.filter(item => {
-            if (storeFilter.value === 'available') return item.stock !== 0 && userProfile.value.currentExp >= item.expCost;
-            if (storeFilter.value === 'locked') return item.stock !== 0 && userProfile.value.currentExp < item.expCost;
-            if (storeFilter.value === 'soldout') return item.stock === 0;
-            return true;
-          });
-          return [...filtered].sort((a, b) => storeSort.value === 'asc' ? a.expCost - b.expCost : b.expCost - a.expCost);
+          return [...storeItems.value].sort((a, b) => storeSort.value === 'asc' ? a.expCost - b.expCost : b.expCost - a.expCost);
         });
         const filteredRewardHistory = computed(() => {
           const currentMonth = todayStr.value.slice(0, 7);
