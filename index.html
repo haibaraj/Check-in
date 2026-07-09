@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="vue.global.prod.js"></script>
   <link rel="stylesheet" href="tailwind.css">
   <style>
     * { box-sizing: border-box; scrollbar-width: none; }
@@ -32,6 +32,9 @@
     @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: translateY(0); opacity: 1; } }
     @keyframes sheetUpSmooth { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes pageInSmooth { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pageOutSmooth { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-24px); } }
+    @keyframes headerSlideIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes headerSlideOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-12px); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes toastSlideIn { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
     @keyframes toastSlideOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -20px); opacity: 0; } }
@@ -46,6 +49,10 @@
     .sheet-enter { animation: sheetUp .18s ease-out; }
     .sheet-enter-smooth { animation: sheetUpSmooth .4s cubic-bezier(.22,1,.36,1) forwards; }
     .page-enter-smooth { animation: pageInSmooth .35s cubic-bezier(.22,1,.36,1) forwards; }
+    .reward-log-enter-active { animation: pageInSmooth .35s cubic-bezier(.22,1,.36,1) forwards; }
+    .reward-log-leave-active { animation: pageOutSmooth .25s cubic-bezier(.22,1,.36,1) forwards; }
+    .reward-log-header-enter-active { animation: headerSlideIn .3s cubic-bezier(.22,1,.36,1) forwards; }
+    .reward-log-header-leave-active { animation: headerSlideOut .2s cubic-bezier(.22,1,.36,1) forwards; }
     .fade-enter { animation: fadeIn .15s ease-out; }
     .tab-fade-in { animation: tabFadeIn .25s ease-out; }
     .check-bounce { animation: checkBounce .35s ease-out; }
@@ -124,6 +131,8 @@
     .btn-act { flex: 1; padding: .75rem; border-radius: 1rem; font-weight: 700; min-height: 48px; transition: transform .15s; }
     .btn-act:active { transform: scale(.95); }
     .action-item { width: 100%; display: flex; align-items: center; gap: .75rem; padding: .875rem .5rem; font-size: .875rem; font-weight: 700; border-radius: 1rem; min-height: 48px; }
+    .progress-bar { border-radius: 9999px; overflow: hidden; background: var(--bg-input); }
+    .progress-bar > div { height: 100%; transition: width .3s ease; }
 
     summary { list-style: none; }
     summary::-webkit-details-marker { display: none; }
@@ -250,18 +259,14 @@
                       <span class="font-medium">{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
                       <span v-if="getHabitWeekStats(habit).isMet" class="text-slate-500 font-bold">{{t('weekMet')}}</span>
                     </div>
-                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
-                    </div>
+                    <div class="progress-bar h-2"><div class="bg-amber-400" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div></div>
                   </div>
                   <div v-if="habit.frequencyType === 'monthly'" class="mt-3">
                     <div class="flex justify-between text-xs text-slate-400 mb-1">
                       <span class="font-medium">{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
                       <span v-if="getHabitMonthStats(habit).isMet" class="text-slate-500 font-bold">{{t('monthMet')}}</span>
                     </div>
-                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div class="h-full bg-amber-400 transition-all" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div>
-                    </div>
+                    <div class="progress-bar h-2"><div class="bg-amber-400" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div></div>
                   </div>
                 </article>
               </transition-group>
@@ -302,18 +307,14 @@
                       <span class="font-medium">{{t('weekTotal')}} {{ getHabitWeekStats(habit).count }}/{{ habit.weeklyTarget || 3 }}</span>
                       <span v-if="getHabitWeekStats(habit).isMet" class="text-slate-500 font-bold">{{t('weekMet')}}</span>
                     </div>
-                    <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <div class="h-full bg-slate-300 transition-all" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div>
-                    </div>
+                    <div class="progress-bar h-1.5"><div class="bg-slate-300" :style="{ width: getHabitWeekStats(habit).percent + '%' }"></div></div>
                   </div>
                   <div v-if="habit.frequencyType === 'monthly'" class="mt-2">
                     <div class="flex justify-between text-xs text-slate-400 mb-1">
                       <span class="font-medium">{{t('monthTotal')}} {{ getHabitMonthStats(habit).count }}/{{ habit.monthlyTarget || 15 }}</span>
                       <span v-if="getHabitMonthStats(habit).isMet" class="text-slate-500 font-bold">{{t('monthMet')}}</span>
                     </div>
-                    <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <div class="h-full bg-slate-300 transition-all" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div>
-                    </div>
+                    <div class="progress-bar h-1.5"><div class="bg-slate-300" :style="{ width: getHabitMonthStats(habit).percent + '%' }"></div></div>
                   </div>
                 </article>
               </transition-group>
@@ -337,6 +338,7 @@
             <button @click="openStoreModal(null)" class="bg-slate-900 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm min-h-[40px] active:scale-95 transition-transform duration-150">{{t('addWish')}}</button>
           </div>
         </div>
+        <transition name="reward-log-header">
         <div v-if="modals.rewardHistory" class="flex items-center gap-3 px-2 pb-2">
           <button @click="closeModal('rewardHistory')" class="shrink-0 w-9 h-9 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center active:scale-95 active:bg-slate-200 transition-transform" :aria-label="t('close')">
             <span class="icon-line !w-5 !h-5" v-html="icon('chevronLeft')"></span>
@@ -345,40 +347,72 @@
             <h3 class="text-base font-bold text-slate-800">{{t('redeemLog')}}</h3>
             <p class="text-xs text-slate-400 mt-0.5">{{ rewardStats.totalCount }}{{t('times')}} · -{{ rewardStats.totalExp }}EXP</p>
           </div>
+          <button v-if="rewardHistory.length > 0" @click="clearRewardHistory" class="shrink-0 text-xs font-bold text-slate-400 bg-slate-50 px-3 py-2 rounded-full min-h-[36px] active:scale-95 transition-transform">{{t('clear')}}</button>
         </div>
+        </transition>
 
         <div class="flex-1 min-h-0 scroll-area">
           <!-- 兑换日志 -->
-          <template v-if="modals.rewardHistory">
-            <div class="page-enter-smooth px-4 pb-8 space-y-5">
-              <!-- 关键指标 -->
-              <div class="grid grid-cols-3 gap-2 mt-2">
-                <div class="card p-3 text-center">
-                  <p class="text-xs text-slate-400 font-semibold">{{t('totalRedeems')}}</p>
-                  <p class="text-xl font-bold text-slate-800 mt-1">{{ rewardStats.totalCount }}</p>
+          <transition name="reward-log">
+          <div v-if="modals.rewardHistory" class="px-4 pb-8 space-y-5">
+              <!-- 横向统计条 -->
+              <div class="card p-4 mt-2">
+                <div class="grid grid-cols-3 divide-x divide-slate-100">
+                  <div class="text-center px-1">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">{{t('totalRedeems')}}</p>
+                    <p class="text-2xl font-bold text-slate-800 mt-1">{{ rewardStats.totalCount }}</p>
+                  </div>
+                  <div class="text-center px-1">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">{{t('totalCost')}}</p>
+                    <p class="text-2xl font-bold mt-1" :class="rewardStats.totalExp > 0 ? 'text-red-500' : 'text-slate-800'">{{ rewardStats.totalExp }}</p>
+                  </div>
+                  <div class="text-center px-1">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">{{t('avgCost')}}</p>
+                    <p class="text-2xl font-bold mt-1" :style="{color: 'var(--theme-500)'}">{{ rewardStats.avgExp }}</p>
+                  </div>
                 </div>
-                <div class="card p-3 text-center">
-                  <p class="text-xs text-slate-400 font-semibold">{{t('totalCost')}}</p>
-                  <p class="text-xl font-bold mt-1" :class="rewardStats.totalExp > 0 ? 'text-red-500' : 'text-slate-800'">{{ rewardStats.totalExp }}</p>
-                </div>
-                <div class="card p-3 text-center">
-                  <p class="text-xs text-slate-400 font-semibold">{{t('monthRedeems')}}</p>
-                  <p class="text-xl font-bold text-amber-500 mt-1">{{ rewardStats.monthCount }}</p>
+              </div>
+              <!-- 最常兑换 -->
+              <div v-if="rewardStats.topItems.length > 0" class="card p-3">
+                <p class="text-xs text-slate-400 font-semibold mb-2.5">{{t('topRedeems')}}</p>
+                <div class="space-y-2">
+                  <div v-for="(item, i) in rewardStats.topItems" :key="i" class="flex items-center gap-2.5 text-sm">
+                    <span class="w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0" :style="{background: 'var(--theme-50)', color: 'var(--theme-600)'}">{{ i + 1 }}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-slate-700 truncate">{{ item.name }}</span>
+                        <span class="text-xs text-slate-400 shrink-0 ml-2">{{ item.count }}{{t('times')}}</span>
+                      </div>
+                      <div class="progress-bar h-1.5"><div :style="{width: Math.round(item.count / rewardStats.topItems[0].count * 100) + '%', background: 'var(--theme-400)'}"></div></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <transition name="reward-history-fade" mode="out-in">
-                <div v-if="groupedRewardHistory.length === 0" key="empty" class="flex flex-col items-center justify-center py-16">
+              <div v-if="groupedRewardHistory.length === 0" key="empty" class="flex flex-col items-center justify-center py-16">
                   <p class="text-slate-500 font-bold text-sm">{{ t('noFilteredRecords') }}</p>
                   <p class="text-xs text-slate-400 mt-1.5 text-center max-w-[240px]">{{ t('noFilterRecordsDesc') }}</p>
                 </div>
 
                 <div v-else key="list" class="space-y-5">
                   <section v-for="(group, groupIndex) in groupedRewardHistory" :key="group.key">
-                    <h4 class="text-xs font-bold text-slate-400 mb-2.5 px-1">{{ group.label }}</h4>
+                    <div class="flex items-center gap-2 mb-2.5">
+                      <span class="w-1 h-4 rounded-full shrink-0" :style="{background: 'var(--theme-400)'}"></span>
+                      <h4 class="text-xs font-bold text-slate-500">{{ group.label }}</h4>
+                      <div class="flex-1 h-px bg-slate-100"></div>
+                    </div>
                     <div class="space-y-2.5">
-                      <div v-for="(log, index) in group.logs" :key="log.id" class="card p-3.5 flex items-center gap-3" :class="log.revoked ? 'opacity-60' : ''">
-                        <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-amber-50 text-amber-500'">
+                      <div v-for="(log, index) in group.logs" :key="log.id" class="card p-3.5 flex items-center gap-3 active:scale-[0.98] transition-transform"
+                        :class="log.revoked ? 'opacity-60' : ''"
+                        @touchstart="startRewardLogLongPress(log)"
+                        @touchmove="cancelRewardLogLongPress"
+                        @touchend="cancelRewardLogLongPress"
+                        @mousedown="startRewardLogLongPress(log)"
+                        @mouseup="cancelRewardLogLongPress"
+                        @mouseleave="cancelRewardLogLongPress"
+                        @contextmenu.prevent="showRewardLogAction(log)"
+                      >
+                        <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" :class="log.revoked ? 'bg-slate-100 text-slate-300' : 'bg-gradient-to-br from-amber-100 to-amber-50 text-amber-500 shadow-inner'">
                           <span class="icon-line !w-5 !h-5" v-html="icon(log.revoked ? 'fileText' : getStoreItemIcon(log.rewardName))"></span>
                         </div>
                         <div class="min-w-0 flex-1">
@@ -391,25 +425,15 @@
                             <span class="text-xs font-bold whitespace-nowrap" :class="log.revoked ? 'text-slate-300 line-through' : 'text-red-500'">-{{ log.costExp }} EXP</span>
                           </div>
                         </div>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                          <button v-if="groupIndex === 0 && index === 0 && !log.revoked && canUndoRewardLog(log)" @click="undoRewardLog(log)" class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center active:scale-95 active:bg-amber-100 transition-transform" :title="t('undo')" :aria-label="t('undo')">
-                            <span class="icon-line !w-4 !h-4" v-html="icon('rotateCcw')"></span>
-                          </button>
-                          <button @click="deleteRewardLog(log.id)" class="w-9 h-9 rounded-xl bg-red-50 text-red-400 flex items-center justify-center active:scale-95 active:bg-red-100 transition-transform" :title="t('delete')" :aria-label="t('delete')">
-                            <span class="icon-line !w-4 !h-4" v-html="icon('trash')"></span>
-                          </button>
-                        </div>
                       </div>
                     </div>
                   </section>
                 </div>
-              </transition>
-            </div>
-          </template>
+          </transition>
 
           <!-- 商店商品列表 -->
-          <template v-else>
-            <div class="space-y-4">
+          <transition name="reward-log">
+          <div v-if="!modals.rewardHistory" class="space-y-4">
               <!-- 商品列表 -->
               <div class="space-y-2">
                 <div class="flex justify-between items-center text-xs text-slate-400 px-1">
@@ -460,7 +484,8 @@
                 </article>
               </div>
             </div>
-          </template>
+          </div>
+          </transition>
         </div>
 
 
@@ -544,7 +569,13 @@
       <div v-show="calendarSubTab==='heatmap'" class="flex-1 min-h-0 scroll-area tab-fade-in">
         <div class="card p-4 mb-4">
           <h3 class="text-sm font-bold text-slate-800 mb-3">{{t('heatmapTitle')}}</h3>
-          <div class="overflow-x-auto pb-2"><div class="inline-flex gap-1" style="min-width:100%">
+          <div class="overflow-x-auto pb-2">
+            <div class="inline-flex gap-1 mb-1" style="min-width:100%">
+              <template v-for="(lbl, li) in heatmapMonthLabels" :key="li">
+                <span class="text-[10px] font-semibold text-slate-400" :style="{marginLeft: li===0?'0':((lbl.startWeek - heatmapMonthLabels[li-1].startWeek - 1) * 12 + 4) + 'px'}">{{lbl.label}}</span>
+              </template>
+            </div>
+            <div class="inline-flex gap-1" style="min-width:100%">
             <div v-for="(week,wi) in heatmapData" :key="wi" class="flex flex-col gap-1">
               <div v-for="(day,di) in week" :key="di" class="heat-cell" :class="'heat-'+getHeatLevel(day.count)" @click="day.date&&(heatmapSelectedDate=day.date)"></div>
             </div>
@@ -611,6 +642,17 @@
               <p class="text-[10px] text-slate-400">{{t('monthExpSpent')}}</p>
             </div>
           </div>
+          <!-- EXP 收支进度条 -->
+          <div v-if="monthlyStats.expEarned > 0 || monthlyStats.expSpent > 0" class="mt-3">
+            <div class="flex h-2 rounded-full overflow-hidden bg-slate-100">
+              <div class="bg-emerald-500 transition-all" :style="{width: (monthlyStats.expEarned + monthlyStats.expSpent > 0 ? monthlyStats.expEarned / (monthlyStats.expEarned + monthlyStats.expSpent) * 100 : 0) + '%'}"></div>
+              <div class="bg-red-400 transition-all" :style="{width: (monthlyStats.expEarned + monthlyStats.expSpent > 0 ? monthlyStats.expSpent / (monthlyStats.expEarned + monthlyStats.expSpent) * 100 : 0) + '%'}"></div>
+            </div>
+            <div class="flex justify-between mt-1 text-[10px] text-slate-400">
+              <span class="text-emerald-600">{{ Math.round(monthlyStats.expEarned / (monthlyStats.expEarned + monthlyStats.expSpent || 1) * 100) }}%</span>
+              <span class="text-red-400">{{ Math.round(monthlyStats.expSpent / (monthlyStats.expEarned + monthlyStats.expSpent || 1) * 100) }}%</span>
+            </div>
+          </div>
           <div class="mt-4 pt-4 border-t border-slate-100">
             <p class="text-xs text-slate-400">{{t('mostChecked')}}</p>
             <p class="text-sm font-bold text-slate-800 mt-1">{{monthlyStats.topHabit||t('none')}}</p>
@@ -673,8 +715,8 @@
             <button @click="habitDataRange='year'" class="flex-1 text-xs font-semibold py-2 rounded-lg transition-all" :class="habitDataRange==='year'?'bg-white text-slate-900 shadow-sm':'text-slate-400'">{{t('year')}}</button>
           </div>
 
-          <!-- 月份导航 -->
-          <div v-if="habitDataRange!=='year'" class="flex items-center justify-center gap-4">
+          <!-- 月份/年份导航 -->
+          <div v-if="habitDataRange==='month'" class="flex items-center justify-center gap-4">
             <button @click="shiftHabitDataMonth(-1)" class="text-slate-400 active:text-slate-700">
               <span class="icon-line !w-4 !h-4" v-html="icon('chevronLeft')"></span>
             </button>
@@ -682,6 +724,12 @@
             <button @click="shiftHabitDataMonth(1)" class="text-slate-400 active:text-slate-700">
               <span class="icon-line !w-4 !h-4" v-html="icon('chevronRight')"></span>
             </button>
+          </div>
+          <div v-else-if="habitDataRange==='year'" class="text-center">
+            <span class="text-sm font-bold text-slate-700">{{ habitDataMonthLabel.split('-')[0] }}</span>
+          </div>
+          <div v-else class="text-center">
+            <span class="text-sm font-bold text-slate-700">{{ habitDataMonthLabel }}</span>
           </div>
 
           <!-- 每个习惯的日历网格 -->
@@ -698,7 +746,7 @@
               </div>
               <!-- 日历网格 -->
               <div class="grid grid-cols-7 gap-1 shrink-0">
-                <div v-for="day in getHabitCalendarDays(habit)" :key="day.d" class="rounded-md flex items-center justify-center font-semibold transition-all"
+                <div v-for="(day, di) in getHabitCalendarDays(habit)" :key="habitDataRange + '-' + di" class="rounded-md flex items-center justify-center font-semibold transition-colors"
                   :class="[
                     habitDataRange === 'week' ? 'w-7 h-7 text-[10px]' : habitDataRange === 'month' ? 'w-5 h-5 text-[9px]' : 'w-4 h-4 text-[8px]',
                     day.checked ? '' : 'bg-slate-700/50 text-slate-500'
@@ -746,9 +794,12 @@
               <button @click="setDarkMode(true)" class="relative z-10 flex-1 text-xs font-semibold px-4 py-1.5 rounded-full min-h-[32px] transition-colors duration-300" :class="darkMode?'text-slate-950':'text-slate-400'">{{t('dark')}}</button>
             </div>
           </div>
-          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-amber-500" v-html="icon('palette')"></span><span class="text-sm font-bold text-slate-800">{{t('themeColor')}}</span></div>
-            <div class="flex gap-2">
-              <button v-for="c in themeColors" :key="c.value" @click="setThemeColor(c.value)" class="w-7 h-7 rounded-full flex items-center justify-center" :style="{background:c.color,boxShadow:themeColor===c.value?'0 0 0 2px white, 0 0 0 4px '+c.color:'none'}"><span v-if="themeColor===c.value" class="text-white text-xs font-semibold">✓</span></button>
+          <div>
+            <div class="flex items-center gap-2 mb-2.5"><span class="icon-line text-amber-500" v-html="icon('palette')"></span><span class="text-sm font-bold text-slate-800">{{t('themeColor')}}</span></div>
+            <div class="grid grid-cols-6 gap-2">
+              <button v-for="c in themeColors" :key="c.value" @click="setThemeColor(c.value)" class="flex flex-col items-center gap-1 py-2 rounded-xl transition-all active:scale-95" :class="themeColor===c.value?'bg-slate-100':'hover:bg-slate-50'">
+                <span class="w-6 h-6 rounded-full flex items-center justify-center" :style="{background:c.color,boxShadow:themeColor===c.value?'0 0 0 2px white, 0 0 0 4px '+c.color:'none'}"><span v-if="themeColor===c.value" class="text-white text-[10px] font-bold">✓</span></span>
+              </button>
             </div>
           </div>
           <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="icon-line text-slate-400" v-html="icon('globe')"></span><span class="text-sm font-bold text-slate-800">{{t('language')}}</span></div>
@@ -834,6 +885,23 @@
         <div class="space-y-1">
           <button @click="editStoreFromAction" class="action-item text-slate-700 active:bg-slate-50"><span class="icon-line text-blue-500" v-html="icon('edit')"></span><span>{{t('edit')}}</span></button>
           <button @click="deleteStoreFromAction" class="action-item text-red-500 active:bg-red-50"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 奖励日志操作菜单 -->
+    <div v-if="modals.rewardLogAction" class="modal-backdrop fade-enter" @click.self="closeModal('rewardLogAction')">
+      <div class="modal-card sheet-card sheet-enter">
+        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+          <div class="min-w-0 flex-1">
+            <p class="text-xs text-slate-400 font-bold">{{t('rewardLog')}}</p>
+            <h3 class="text-base font-bold text-slate-800 truncate">{{ selectedRewardLog ? selectedRewardLog.rewardName : t('rewardLog') }}</h3>
+          </div>
+          <button @click="closeModal('rewardLogAction')" class="shrink-0 text-slate-400 text-xs bg-slate-50 px-3 py-2 rounded-full font-bold min-h-[36px]">{{t('close')}}</button>
+        </div>
+        <div class="space-y-1">
+          <button v-if="selectedRewardLog && !selectedRewardLog.revoked && canUndoRewardLog(selectedRewardLog)" @click="undoRewardLogFromAction" class="action-item text-slate-700 active:bg-slate-50"><span class="icon-line text-amber-500" v-html="icon('rotateCcw')"></span><span>{{t('undo')}}</span></button>
+          <button @click="deleteRewardLogFromAction" class="action-item text-red-500 active:bg-red-50"><span class="icon-line" v-html="icon('trash')"></span><span>{{t('delete')}}</span></button>
         </div>
       </div>
     </div>
@@ -1094,7 +1162,7 @@
       for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) { if (totalExp >= LEVEL_THRESHOLDS[i]) return i + 1; }
       return 1;
     }
-    const I18N = {zh:{loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',undoRedeemConfirm:'确定要撤销兑换「%s」吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',todayGroup:'今天',yesterdayGroup:'昨天',last7Days:'近 7 天',earlier:'更早',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'}, en:{loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',undoRedeemConfirm:'Undo redemption of "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',todayGroup:'Today',yesterdayGroup:'Yesterday',last7Days:'Last 7 Days',earlier:'Earlier',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'}};
+    const I18N = {zh:{loading:'正在加载数据…',todaySelf:'今日自律',tapHint:'轻点打卡，长按管理',records:'记录',addGoal:'＋ 目标',availableEXP:'可用 EXP',totalEarned:'累计获取',todayDone:'今日完成',todayProgress:'今日进度',rewardStore:'奖励商店',todayRedeemed:'今日已兑换',addWish:'上架心愿',wishStore:'心愿商店',all:'全部',available:'可兑换',expNotEnough:'EXP 不足',soldout:'已售罄',totalWishes:'共',price:'价格',lowToHigh:'低到高',highToLow:'高到低',stock:'库存',unlimited:'无限次',times:'次',longPressManage:'长按可编辑或删除',notEnough:'不足',redeem:'兑换',data:'数据',habitData:'习惯数据',redeemLog:'兑换日志',totalRedeems:'累计兑换',totalCost:'累计消耗',monthRedeems:'本月兑换',avgCost:'平均花费',revokedCount:'撤销次数',todayRedeems:'今日已兑',week7Trend:'近 7 天兑换趋势',topRedeems:'最常兑换',totalRecords:'共',view:'查看',clear:'清空',close:'关闭',settings:'设置',todayCheckin:'今日打卡',checkGoals:'打卡目标',longPressHint:'轻点打卡，长按可补签、编辑或删除',sortByCreated:'最新',sortByStreak:'连击',sortByCategory:'频率',createFirstGoal:'建立第一个目标',firstGoalDesc:'从一个简单的小习惯开始，比如早睡、喝水、背单词。坚持打卡可以获得 EXP。',allDoneToday:'今天目标全部完成',pending:'待打卡',completed:'已完成',streak:'连击',days:'天',best:'最高',checkin:'打卡',done:'已完成',doubleEXP:'双倍 EXP',weekTotal:'本周累计',weekMet:'本周已达成',monthTotal:'本月累计',monthMet:'本月已达成',note:'备注',calendar:'日历',heatmap:'热力图',stats:'统计',prevMonth:'◀ 上月',nextMonth:'下月 ▶',checkDays:'打卡天数',totalDays:'总天数',totalCheckins:'总打卡',totalCompleted:'累计完成',monthRate:'月完成率',checkRecords:'打卡记录',items:'项',noRecords:'这一天没有打卡记录',retroRecord:'补签记录',normalCheckin:'正常打卡',heatmapTitle:'最近 12 周打卡热力图',less:'少',more:'多',weeklyReport:'本周报告',currentStreak:'连续打卡',weekCheckins:'本周打卡',weekRate:'本周完成率',weekEXP:'本周获取 EXP',weekBestStreak:'本周最佳连击',monthlyReport:'本月报告',monthCheckDays:'本月打卡天数',monthRate2:'本月完成率',monthExpEarned:'本月获取 EXP',monthExpSpent:'本月消耗 EXP',mostChecked:'最常打卡目标',none:'暂无',expLogTitle:'EXP 变动明细',noExpLogs:'暂无 EXP 变动记录',achievements:'成就',dataManagement:'数据管理',exportData:'导出数据',importData:'导入数据',lastBackup:'上次备份',never:'从未备份',archivedGoals:'已归档目标',noArchived:'暂无归档目标',restore:'恢复',appearance:'外观',darkMode:'深色模式',light:'浅色',dark:'深色',followSystem:'跟随系统',themeColor:'主题色',language:'语言',about:'关于',aboutDesc:'让每一个灯泡都有被看见和实现的可能。',viewTutorial:'查看使用教程',resetApp:'重置应用',resetHint:'重置将清空所有数据，建议先导出备份。',goalManage:'目标管理',wishManage:'心愿管理',retroCheckin:'补签',edit:'编辑',delete:'删除',archive:'归档',editGoal:'修改目标',goalName:'目标名称',goalNamePlaceholder:'例如：背单词 30 个',frequency:'考核周期',daily:'每日要求',weeklyCumulative:'每周累计要求',monthlyCumulative:'每月累计要求',expPerCheckin:'每次奖励',weeklyTarget:'每周累计要求次数',monthlyTarget:'每月累计要求次数',streakBonusDesc:'连续打卡每满 7 天，系统会额外奖励 10 EXP。',cancel:'取消',saveGoal:'保存目标',retroDesc:'可补签今天及过去日期；补签后会重新计算连续天数。',submitRetro:'提交补签',editWish:'修改心愿',wishName:'心愿名称',wishNamePlaceholder:'例如：喝一杯奶茶 / 玩 1 小时游戏',redeemPrice:'兑换价格',stockLabel:'库存（-1 无限）',confirmSave:'确认保存',alertTitle:'提示',confirmTitle:'确认操作',confirm:'确定',gotIt:'我知道了',createFirstReward:'创建第一个奖励',noWishesFiltered:'当前筛选下没有心愿商品',firstRewardDesc:'用 EXP 兑换一点小奖励，让坚持更有动力。',switchFilter:'可以切换筛选条件，或上架一个新的心愿。',noRedeemRecords:'暂无兑换记录',noFilteredRecords:'当前筛选下暂无记录',redeemAction:'兑换',redeemRevoked:'（已撤销）',addNote:'添加打卡备注',noteHint:'可以为这次打卡添加一段备注（可选）',notePlaceholder:'今天有什么想记录的…',skip:'跳过',save:'保存',undo:'撤销',importChoice:'选择导入方式',importChoiceDesc:'覆盖导入将替换所有现有数据；合并导入会保留现有数据并添加新数据。',overwriteImport:'覆盖导入',mergeImport:'合并导入',prev:'上一步',next:'下一步',start:'开始使用',backupReminderTitle:'备份数据提醒',backupReminderMsg:'您已经超过 7 天没有导出备份数据了，建议立即备份以防数据丢失。',levelUpTitle:'等级提升',levelUpBonus:'升级额外奖励 +10 EXP',levelUpMsg:'恭喜！您已升至 Lv%d！继续坚持打卡吧！',achievementTitle:'成就解锁',achievementMsg:'恭喜解锁「%s」成就！奖励 %d EXP。',resetConfirm:'确认重置应用吗？',resetMsg:'所有数据将被永久删除，建议先导出备份。',needGoalName:'请填写目标名称',needPositiveEXP:'经验值奖励需大于 0',needWishName:'请填写心愿名称',needPositivePrice:'兑换价格必须大于 0',invalidJSON:'无效的 JSON 格式',invalidFormat:'导入数据格式不正确',importVersionTooNew:'备份文件版本太新，请先更新应用。',invalidStock:'库存只能填写 -1 或大于等于 0 的整数',selectDate:'请选择有效日期',futureDate:'不能选择未来日期',alreadyChecked:'该日期已经打过卡了',selectRetroDate:'请选择补签日期',streakReward:'连续 %d 天达成，额外奖励 %s EXP！',redeemSuccess:'已兑换「%s」',undoCheckin:'已撤销今日打卡',undoCheckinConfirm:'确定要撤销「%s」的今日打卡吗？\n撤销后 EXP 将被收回。',undoRedeemConfirm:'确定要撤销兑换「%s」吗？\n撤销后 EXP 将被收回。',soldoutMsg:'该商品已售罄',redeemInsufficient:'EXP 不足，无法兑换',goalMetNoCheckin:'本周期目标已达成，无需再打卡',redeemConfirm:'花费 %d EXP 兑换「%s」吗？',redeemRevokedMsg:'已撤销兑换',first_checkin:'首次打卡',first_checkinDesc:'完成第一次打卡',streak_7:'7天连击',streak_7Desc:'连续打卡达到 7 天',streak_30:'30天连击',streak_30Desc:'连续打卡达到 30 天',streak_100:'100天连击',streak_100Desc:'连续打卡达到 100 天',total_10:'打卡达人',total_10Desc:'累计打卡 10 次',total_50:'坚持之星',total_50Desc:'累计打卡 50 次',total_100:'百次打卡',total_100Desc:'累计打卡 100 次',total_365:'全年打卡',total_365Desc:'累计打卡 365 次',first_redeem:'首次兑换',first_redeemDesc:'完成第一次奖励兑换',redeem_10:'兑换达人',redeem_10Desc:'累计兑换 10 次',wishCount:'共 %d 个心愿',recordCount:'共 %d 条记录',habitItemManage:'打卡项管理',viewTrend:'查看趋势',trendTitle:'打卡趋势',last30Days:'过去 30 天',checked:'已完成',missed:'缺卡',recent5Years:'最近 5 年',newGoal:'新增目标',today:'今天',month:'本月',week:'本周',year:'本年',todayGroup:'今天',yesterdayGroup:'昨天',last7Days:'近 7 天',earlier:'更早',noRedeemRecordsDesc:'兑换心愿后会在这里显示',noFilterRecordsDesc:'可以切换筛选条件查看',retroCheckinTitle:'历史补签',deleteHabitConfirm:'删除此目标会同时清理相关打卡和补签记录，确认删除吗？',deleteWishConfirm:'确认下架删除这个心愿吗？',deleteRewardLogConfirm:'确认删除这条兑换历史记录吗？\n删除记录不会返还已消耗的 EXP。',clearRewardHistoryConfirm:'确认清空所有兑换历史记录吗？\n清空记录不会返还已消耗的 EXP。',saveFailed:'保存失败，请检查存储空间',expGainedToast:'+%d EXP',defaultWish1:'喝一杯冰镇奶茶',defaultWish2:'畅玩两小时游戏',defaultWish3:'睡一个懒觉'}, en:{loading:'Loading…',todaySelf:"Today's Goals",tapHint:'Tap to check in, long press to manage',records:'Records',addGoal:'＋ Goal',availableEXP:'Available EXP',totalEarned:'Total Earned',todayDone:"Today's Done",todayProgress:"Today's Progress",rewardStore:'Reward Store',todayRedeemed:'Redeemed today',addWish:'Add Wish',wishStore:'Wish Store',all:'All',available:'Available',expNotEnough:'Not Enough',soldout:'Sold Out',totalWishes:'Total',price:'Price',lowToHigh:'Low→High',highToLow:'High→Low',stock:'Stock',unlimited:'Unlimited',times:'times',longPressManage:'Long press to edit/delete',notEnough:'Low',redeem:'Redeem',data:'Data',habitData:'Habit Data',redeemLog:'Redeem Log',totalRedeems:'Total',totalCost:'Spent',monthRedeems:'This Month',avgCost:'Avg Cost',revokedCount:'Revoked',todayRedeems:'Today',week7Trend:'7-Day Trend',topRedeems:'Most Redeemed',totalRecords:'Total',view:'View',clear:'Clear',close:'Close',settings:'Settings',todayCheckin:'Today',checkGoals:'Check-in Goals',longPressHint:'Tap to check in, long press to manage',sortByCreated:'Newest',sortByStreak:'Streak',sortByCategory:'Freq',createFirstGoal:'Create First Goal',firstGoalDesc:'Start with a simple habit. Check in daily to earn EXP.',allDoneToday:'All Goals Completed!',pending:'Pending',completed:'Completed',streak:'Streak',days:'days',best:'Best',checkin:'Check In',done:'Done',doubleEXP:'2x EXP',weekTotal:'Week',weekMet:'Met this week',monthTotal:'Month',monthMet:'Met this month',note:'Note',calendar:'Calendar',heatmap:'Heatmap',stats:'Stats',prevMonth:'◀ Prev',nextMonth:'Next ▶',checkDays:'Check Days',totalCompleted:'Total Checks',monthRate:'Rate',checkRecords:'Records',items:'items',noRecords:'No records',retroRecord:'Retro',normalCheckin:'Normal',heatmapTitle:'12-Week Heatmap',less:'Less',more:'More',weeklyReport:'Weekly Report',weekCheckins:'Check-ins',weekRate:'Rate',weekEXP:'EXP Gained',bestStreak:'Best Streak',weekBestStreak:'Best Streak',monthlyReport:'Monthly Report',monthCheckDays:'Check Days',monthRate2:'Rate',monthExpEarned:'EXP Earned',monthExpSpent:'EXP Spent',mostChecked:'Most Checked',none:'None',expLogTitle:'EXP Log',noExpLogs:'No records',achievements:'Achievements',dataManagement:'Data',exportData:'Export',importData:'Import',lastBackup:'Last backup',never:'Never',archivedGoals:'Archived',noArchived:'No archived goals',restore:'Restore',appearance:'Appearance',darkMode:'Dark Mode',light:'Light',dark:'Dark',followSystem:'Auto',themeColor:'Theme',language:'Language',about:'About',aboutDesc:'Every lightbulb deserves to be seen and realized.',viewTutorial:'Tutorial',resetApp:'Reset',resetHint:'Clear all data. Export backup first.',goalManage:'Goal Manage',wishManage:'Wish Manage',retroCheckin:'Retro',edit:'Edit',delete:'Delete',archive:'Archive',editGoal:'Edit Goal',goalName:'Name',goalNamePlaceholder:'e.g. Study 30 words',frequency:'Frequency',daily:'Daily',weeklyCumulative:'Weekly',monthlyCumulative:'Monthly',expPerCheckin:'EXP/check',weeklyTarget:'Weekly target',monthlyTarget:'Monthly target',streakBonusDesc:'Every 7-day streak earns bonus 10 EXP.',cancel:'Cancel',saveGoal:'Save',retroDesc:'Retro check-in for past dates.',submitRetro:'Submit',editWish:'Edit Wish',wishName:'Name',wishNamePlaceholder:'e.g. Bubble tea',redeemPrice:'Price',stockLabel:'Stock (-1=unlimited)',confirmSave:'Save',alertTitle:'Notice',confirmTitle:'Confirm',confirm:'OK',gotIt:'Got it',createFirstReward:'Create First Reward',noWishesFiltered:'No wishes',firstRewardDesc:'Redeem EXP for rewards.',switchFilter:'Switch filter.',noRedeemRecords:'No records',noFilteredRecords:'No records',redeemAction:'Redeemed',redeemRevoked:'(Revoked)',addNote:'Add Note',noteHint:'Optional note for this check-in',notePlaceholder:'What happened…',skip:'Skip',save:'Save',undo:'Undo',importChoice:'Import Mode',importChoiceDesc:'Overwrite replaces all. Merge keeps existing.',overwriteImport:'Overwrite',mergeImport:'Merge',prev:'Back',next:'Next',start:'Start',backupReminderTitle:'Backup Reminder',backupReminderMsg:'No backup for 7+ days. Export now.',levelUpTitle:'Level Up!',levelUpBonus:'Level-up bonus +10 EXP',levelUpMsg:'Reached Lv%d! Keep it up!',achievementTitle:'Achievement Unlocked',achievementMsg:'Unlocked "%s"! +%d EXP.',resetConfirm:'Reset app?',resetMsg:'All data will be deleted.',needGoalName:'Enter goal name',needPositiveEXP:'EXP must be > 0',needWishName:'Enter wish name',needPositivePrice:'Price must be > 0',invalidJSON:'Invalid JSON',invalidFormat:'Invalid import format',importVersionTooNew:'Backup file is too new. Please update the app first.',invalidStock:'Stock: -1 or >= 0',selectDate:'Select a date',futureDate:'No future dates',alreadyChecked:'Already checked in',selectRetroDate:'Select retro date',streakReward:'%d-day streak! +%s EXP!',redeemSuccess:'Redeemed "%s"',undoCheckin:'Undone',undoCheckinConfirm:'Undo today\'s check-in for "%s"?\nEXP will be refunded.',undoRedeemConfirm:'Undo redemption of "%s"?\nEXP will be refunded.',soldoutMsg:'This item is sold out',redeemInsufficient:'Not enough EXP',goalMetNoCheckin:'Goal already met this period',redeemConfirm:'Spend %d EXP for "%s"?',redeemRevokedMsg:'Redemption undone',first_checkin:'First Check-in',first_checkinDesc:'First check-in',streak_7:'7-Day Streak',streak_7Desc:'7-day streak',streak_30:'30-Day Streak',streak_30Desc:'30-day streak',streak_100:'100-Day Streak',streak_100Desc:'100-day streak',total_10:'Rising Star',total_10Desc:'10 total check-ins',total_50:'Consistent',total_50Desc:'50 total check-ins',total_100:'Century',total_100Desc:'100 total check-ins',total_365:'Year Round',total_365Desc:'365 total check-ins',first_redeem:'First Redeem',first_redeemDesc:'First redemption',redeem_10:'Redeem Master',redeem_10Desc:'10 total redemptions',wishCount:'%d wishes',recordCount:'%d records',habitItemManage:'Manage',viewTrend:'Trend',trendTitle:'Check-in Trend',last30Days:'Last 30 days',checked:'Done',missed:'Missed',recent5Years:'Last 5 years',newGoal:'New Goal',today:'Today',month:'This Month',week:'This Week',year:'This Year',todayGroup:'Today',yesterdayGroup:'Yesterday',last7Days:'Last 7 Days',earlier:'Earlier',noRedeemRecordsDesc:'Redeemed items will appear here.',noFilterRecordsDesc:'Try switching filters.',retroCheckinTitle:'Retro Check-in',deleteHabitConfirm:'Deleting this goal will also remove related check-ins. Continue?',deleteWishConfirm:'Remove this wish from the store?',deleteRewardLogConfirm:'Delete this record?\nConsumed EXP will not be refunded.',clearRewardHistoryConfirm:'Clear all redeem history?\nConsumed EXP will not be refunded.',saveFailed:'Save failed, check storage',expGainedToast:'+%d EXP',defaultWish1:'Iced Milk Tea',defaultWish2:'2-Hour Gaming',defaultWish3:'Sleep In'}};
     const ICONS = {
             target: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>',
             gift: '<svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"></path><path d="M2 7h20v5H2z"></path><path d="M12 7v14"></path><path d="M12 7H8.5A2.5 2.5 0 1 1 11 4.5L12 7z"></path><path d="M12 7h3.5A2.5 2.5 0 1 0 13 4.5L12 7z"></path></svg>',
@@ -1184,16 +1252,14 @@
           { id: 's3', name: '睡一个懒觉', expCost: 15, stock: -1 }
         ]);
         const rewardHistory = ref([]);
-        const storeFilter = ref('all');
         const calendarSubTab = ref('calendar');
         const habitDataRange = ref('month');
         const habitDataMonth = ref(new Date().getMonth());
         const storeSort = ref('asc');
-        const rewardHistoryFilter = ref('all');
         const expLogs = ref([]);
         const achievements = ref([]);
 
-        const modals = ref({ habit: false, habitAction: false, habitTrend: false, habitCalendar: false, rewardHistory: false, retroactive: false, store: false, storeAction: false, checkInNote: false, importChoice: false, onboarding: false });
+        const modals = ref({ habit: false, habitAction: false, habitTrend: false, habitCalendar: false, rewardHistory: false, retroactive: false, store: false, storeAction: false, rewardLogAction: false, checkInNote: false, importChoice: false, onboarding: false });
         const habitForm = ref(getBlankHabit());
         const storeForm = ref(getBlankStoreItem());
         const activeRetroHabitId = ref(null);
@@ -1216,6 +1282,7 @@
 
         let habitPressTimer = null;
         let storePressTimer = null;
+        let rewardLogPressTimer = null;
         let suppressHabitTap = false;
         let saveTimer = null;
 
@@ -1589,8 +1656,7 @@
         }
         const pendingHabits = computed(() => sortHabits(activeHabits.value.filter(h => !isHabitCompleted(h))));
         const doneHabits = computed(() => sortHabits(activeHabits.value.filter(h => isHabitCompleted(h))));
-        const todayCompletedCount = computed(() => activeHabits.value.length ? doneHabits.value.length : 0);
-        const todayProgressPercent = computed(() => activeHabits.value.length ? Math.round((todayCompletedCount.value / activeHabits.value.length) * 100) : 0);
+        const todayCompletedCount = computed(() => activeHabits.value.filter(h => isHabitDoneToday(h.id)).length);
         const levelProgress = computed(() => {
           const lv = userProfile.value.level;
           const curr = LEVEL_THRESHOLDS[lv - 1] || 0;
@@ -1605,15 +1671,6 @@
         const todayRedeemCount = computed(() => rewardHistory.value.filter(log => formatDate(new Date(log.timestamp)) === todayStr.value).length);
         const filteredStoreItems = computed(() => {
           return [...storeItems.value].sort((a, b) => storeSort.value === 'asc' ? a.expCost - b.expCost : b.expCost - a.expCost);
-        });
-        const filteredRewardHistory = computed(() => {
-          const currentMonth = todayStr.value.slice(0, 7);
-          return rewardHistory.value.filter(log => {
-            const date = formatDate(new Date(log.timestamp));
-            if (rewardHistoryFilter.value === 'today') return date === todayStr.value;
-            if (rewardHistoryFilter.value === 'month') return date.slice(0, 7) === currentMonth;
-            return true;
-          }).slice(0, 100);
         });
         const groupedRewardHistory = computed(() => {
           const today = todayStr.value;
@@ -1641,38 +1698,17 @@
         const rewardStats = computed(() => {
           const currentMonth = todayStr.value.slice(0, 7);
           const validLogs = rewardHistory.value.filter(l => !l.revoked);
-          const revokedLogs = rewardHistory.value.filter(l => l.revoked);
           const monthLogs = validLogs.filter(l => formatDate(new Date(l.timestamp)).slice(0, 7) === currentMonth);
-          const todayLogs = validLogs.filter(l => formatDate(new Date(l.timestamp)) === todayStr.value);
           const avgExp = validLogs.length > 0 ? Math.round(validLogs.reduce((sum, l) => sum + l.costExp, 0) / validLogs.length) : 0;
-          const revokeRate = rewardHistory.value.length > 0 ? Math.round(revokedLogs.length / rewardHistory.value.length * 100) : 0;
-          // Top items
           const itemCounts = {};
           validLogs.forEach(l => { itemCounts[l.rewardName] = (itemCounts[l.rewardName] || 0) + 1; });
           const topItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, count]) => ({ name, count }));
-          // Week 7 data
-          const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
-          const week7Data = [];
-          const week7Counts = [];
-          for (let i = 6; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr = formatDate(d);
-            const count = validLogs.filter(l => formatDate(new Date(l.timestamp)) === dateStr).length;
-            week7Data.push({ label: dayNames[d.getDay()], count, isToday: i === 0 });
-            week7Counts.push(count);
-          }
           return {
             totalCount: validLogs.length,
             totalExp: validLogs.reduce((sum, l) => sum + l.costExp, 0),
             monthCount: monthLogs.length,
             avgExp,
-            revokedCount: revokedLogs.length,
-            revokeRate,
-            todayCount: todayLogs.length,
-            topItems,
-            week7Data,
-            week7Max: Math.max(1, ...week7Counts)
+            topItems
           };
         });
 
@@ -1692,61 +1728,76 @@
           return dates.size;
         });
 
-        function getHabitRangeStats(habit) {
+        const habitRangeStatsMap = computed(() => {
           const range = habitDataRange.value;
-          let dates;
-          if (range === 'week') {
-            const wr = getWeekRange();
-            dates = checkIns.value.filter(i => i.habitId === habit.id && i.date >= wr.start && i.date <= wr.end);
-          } else if (range === 'month') {
-            const prefix = habitDataMonthLabel.value;
-            dates = checkIns.value.filter(i => i.habitId === habit.id && i.date.startsWith(prefix));
-          } else {
-            const prefix = todayStr.value.slice(0, 4);
-            dates = checkIns.value.filter(i => i.habitId === habit.id && i.date.startsWith(prefix));
+          const map = {};
+          for (const habit of habits.value) {
+            let dates;
+            if (range === 'week') {
+              const wr = getWeekRange();
+              dates = checkIns.value.filter(i => i.habitId === habit.id && i.date >= wr.start && i.date <= wr.end);
+            } else if (range === 'month') {
+              const prefix = habitDataMonthLabel.value;
+              dates = checkIns.value.filter(i => i.habitId === habit.id && i.date.startsWith(prefix));
+            } else {
+              const prefix = todayStr.value.slice(0, 4);
+              dates = checkIns.value.filter(i => i.habitId === habit.id && i.date.startsWith(prefix));
+            }
+            const uniqueDays = new Set(dates.map(d => d.date)).size;
+            const count = dates.length;
+            let totalDays;
+            if (range === 'week') totalDays = 7;
+            else if (range === 'month') {
+              const [y, m] = habitDataMonthLabel.value.split('-').map(Number);
+              totalDays = new Date(y, m, 0).getDate();
+            } else {
+              totalDays = 365;
+            }
+            map[habit.id] = { count, days: uniqueDays, rate: totalDays > 0 ? Math.round(uniqueDays / totalDays * 100) : 0 };
           }
-          const uniqueDays = new Set(dates.map(d => d.date)).size;
-          const count = dates.length;
-          let totalDays;
-          if (range === 'week') totalDays = 7;
-          else if (range === 'month') {
-            const [y, m] = habitDataMonthLabel.value.split('-').map(Number);
-            totalDays = new Date(y, m, 0).getDate();
-          } else {
-            totalDays = 365;
-          }
-          return { count, days: uniqueDays, rate: totalDays > 0 ? Math.round(uniqueDays / totalDays * 100) : 0 };
+          return map;
+        });
+
+        function getHabitRangeStats(habit) {
+          return habitRangeStatsMap.value[habit.id] || { count: 0, days: 0, rate: 0 };
         }
 
-        function getHabitCalendarDays(habit) {
+        const habitCalendarDaysMap = computed(() => {
           const range = habitDataRange.value;
-          const checkedDates = new Set(checkIns.value.filter(i => i.habitId === habit.id).map(i => i.date));
-          const days = [];
-          if (range === 'week') {
-            const wr = getWeekRange();
-            for (let i = 0; i < 7; i++) {
-              const d = new Date(wr.start);
-              d.setDate(d.getDate() + i);
-              const ds = formatDate(d);
-              days.push({ d: d.getDate(), checked: checkedDates.has(ds) });
+          const map = {};
+          for (const habit of habits.value) {
+            const checkedDates = new Set(checkIns.value.filter(i => i.habitId === habit.id).map(i => i.date));
+            const days = [];
+            if (range === 'week') {
+              const wr = getWeekRange();
+              for (let i = 0; i < 7; i++) {
+                const d = new Date(wr.start);
+                d.setDate(d.getDate() + i);
+                const ds = formatDate(d);
+                days.push({ d: d.getDate(), checked: checkedDates.has(ds) });
+              }
+            } else if (range === 'month') {
+              const [y, m] = habitDataMonthLabel.value.split('-').map(Number);
+              const totalDays = new Date(y, m, 0).getDate();
+              for (let d = 1; d <= totalDays; d++) {
+                const ds = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                days.push({ d, checked: checkedDates.has(ds) });
+              }
+            } else {
+              for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const ds = formatDate(d);
+                days.push({ d: d.getDate(), checked: checkedDates.has(ds) });
+              }
             }
-          } else if (range === 'month') {
-            const [y, m] = habitDataMonthLabel.value.split('-').map(Number);
-            const totalDays = new Date(y, m, 0).getDate();
-            for (let d = 1; d <= totalDays; d++) {
-              const ds = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-              days.push({ d, checked: checkedDates.has(ds) });
-            }
-          } else {
-            // Year: show last 30 days
-            for (let i = 29; i >= 0; i--) {
-              const d = new Date();
-              d.setDate(d.getDate() - i);
-              const ds = formatDate(d);
-              days.push({ d: d.getDate(), checked: checkedDates.has(ds) });
-            }
+            map[habit.id] = days;
           }
-          return days;
+          return map;
+        });
+
+        function getHabitCalendarDays(habit) {
+          return habitCalendarDaysMap.value[habit.id] || [];
         }
 
         function shiftHabitDataMonth(delta) {
@@ -1777,23 +1828,34 @@
           return { start: formatDate(start), end: formatDate(end) };
         }
 
-        function getHabitWeekStats(habit) {
+        const habitWeekStatsMap = computed(() => {
           const range = getWeekRange();
-          const count = new Set(checkIns.value
-            .filter(item => item.habitId === habit.id && item.date >= range.start && item.date <= range.end)
-            .map(item => item.date)).size;
-          const target = clamp(Number(habit.weeklyTarget) || 3, 1, 7);
-          return { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
-        }
+          const map = {};
+          for (const habit of activeHabits.value) {
+            const count = new Set(checkIns.value
+              .filter(item => item.habitId === habit.id && item.date >= range.start && item.date <= range.end)
+              .map(item => item.date)).size;
+            const target = clamp(Number(habit.weeklyTarget) || 3, 1, 7);
+            map[habit.id] = { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
+          }
+          return map;
+        });
 
-        function getHabitMonthStats(habit) {
+        const habitMonthStatsMap = computed(() => {
           const prefix = todayStr.value.slice(0, 7);
-          const count = new Set(checkIns.value
-            .filter(item => item.habitId === habit.id && item.date.startsWith(prefix))
-            .map(item => item.date)).size;
-          const target = clamp(Number(habit.monthlyTarget) || 15, 1, 31);
-          return { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
-        }
+          const map = {};
+          for (const habit of activeHabits.value) {
+            const count = new Set(checkIns.value
+              .filter(item => item.habitId === habit.id && item.date.startsWith(prefix))
+              .map(item => item.date)).size;
+            const target = clamp(Number(habit.monthlyTarget) || 15, 1, 31);
+            map[habit.id] = { count, target, percent: Math.min(100, Math.round((count / target) * 100)), isMet: count >= target };
+          }
+          return map;
+        });
+
+        function getHabitWeekStats(habit) { return habitWeekStatsMap.value[habit.id] || { count: 0, target: 3, percent: 0, isMet: false }; }
+        function getHabitMonthStats(habit) { return habitMonthStatsMap.value[habit.id] || { count: 0, target: 15, percent: 0, isMet: false }; }
 
         function getHabitYearStats(habit) {
           const prefix = todayStr.value.slice(0, 4);
@@ -1842,14 +1904,20 @@
           return map;
         });
 
+        const habitItemsByDateMap = computed(() => {
+          const map = {};
+          for (const item of checkIns.value) {
+            if (!map[item.date]) map[item.date] = [];
+            const habit = habits.value.find(h => h.id === item.habitId);
+            if (habit) {
+              map[item.date].push({ id: habit.id, logId: item.id, name: habit.name, expGained: item.expGained, isRetro: item.isRetro, time: item.timestamp ? formatTime(item.timestamp) : '', note: item.note || '' });
+            }
+          }
+          return map;
+        });
+
         function getHabitItemsByDate(dateStr) {
-          const items = checkInsByDate.value.get(dateStr) || [];
-          return items
-            .map(item => {
-              const habit = habits.value.find(h => h.id === item.habitId);
-              return habit ? { id: habit.id, logId: item.id, name: habit.name, expGained: item.expGained, isRetro: item.isRetro, time: item.timestamp ? formatTime(item.timestamp) : '', note: item.note || '' } : null;
-            })
-            .filter(Boolean);
+          return habitItemsByDateMap.value[dateStr] || [];
         }
 
         function getTodayNote(habitId) {
@@ -1925,7 +1993,6 @@
         }
 
         function openRewardHistory() {
-          rewardHistoryFilter.value = 'all';
           userProfile.value.lastSeenRewardCount = rewardHistory.value.length;
           queueSaveData();
           modals.value.rewardHistory = true;
@@ -2096,7 +2163,7 @@
             undoCheckIn(habitId);
             showToast(t('undoCheckin'));
           } else if (habit && isHabitGoalMet(habit)) {
-            // Weekly/monthly goal already met, no more check-ins this period
+            showToast(t('goalMetNoCheckin'));
             return;
           } else {
             // Show note modal after check-in (feature 3)
@@ -2312,6 +2379,34 @@
           }
         }
 
+        const selectedRewardLog = ref(null);
+        function showRewardLogAction(log) {
+          cancelRewardLogLongPress();
+          selectedRewardLog.value = log;
+          modals.value.rewardLogAction = true;
+        }
+        function startRewardLogLongPress(log) {
+          cancelRewardLogLongPress();
+          if (modals.value.rewardLogAction) return;
+          rewardLogPressTimer = setTimeout(() => showRewardLogAction(log), LONG_PRESS_MS);
+        }
+        function cancelRewardLogLongPress() {
+          if (rewardLogPressTimer) { clearTimeout(rewardLogPressTimer); rewardLogPressTimer = null; }
+        }
+        async function undoRewardLogFromAction() {
+          if (!selectedRewardLog.value) return;
+          modals.value.rewardLogAction = false;
+          await undoRewardLog(selectedRewardLog.value);
+          selectedRewardLog.value = null;
+        }
+        async function deleteRewardLogFromAction() {
+          if (!selectedRewardLog.value) return;
+          const id = selectedRewardLog.value.id;
+          modals.value.rewardLogAction = false;
+          await deleteRewardLog(id);
+          selectedRewardLog.value = null;
+        }
+
         function editStoreFromAction() {
           if (!selectedStoreItem.value) return;
           modals.value.storeAction = false;
@@ -2401,7 +2496,6 @@
           const ok = await showConfirm(t('clearRewardHistoryConfirm'));
           if (!ok) return;
           rewardHistory.value = [];
-          rewardHistoryFilter.value = 'all';
           await syncStorageData();
         }
 
@@ -2789,6 +2883,18 @@
           }
           return data;
         });
+        const heatmapMonthLabels = computed(() => {
+          const labels = [];
+          let lastMonth = '';
+          heatmapData.value.forEach((week, i) => {
+            const month = week[0].date.slice(0, 7);
+            if (month !== lastMonth) {
+              labels.push({ label: month.slice(5), startWeek: i });
+              lastMonth = month;
+            }
+          });
+          return labels;
+        });
         const lastBackupDate = computed(() => userProfile.value.lastBackupReminderDate || '');
         function checkBackupReminder() {
           if (!userProfile.value.lastBackupReminderDate) return;
@@ -2959,19 +3065,19 @@
         });
 
         return {
-          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeFilter, storeSort, rewardHistoryFilter, filteredStoreItems, filteredRewardHistory, groupedRewardHistory, rewardStats, todayRedeemCount, habitDataRange, habitDataMonth, habitDataMonthLabel, allHabitsTotalCheckins, allHabitsTotalDays, getHabitRangeStats, getHabitCalendarDays, shiftHabitDataMonth, getHabitEmoji,
+          appLoading, activeTab, userProfile, habits, checkIns, storeItems, rewardHistory, expLogs, achievements, storeSort, filteredStoreItems, groupedRewardHistory, rewardStats, todayRedeemCount, habitDataRange, habitDataMonth, habitDataMonthLabel, allHabitsTotalCheckins, allHabitsTotalDays, getHabitRangeStats, getHabitCalendarDays, shiftHabitDataMonth, getHabitEmoji,
           calendarSubTab, toast, dialog, closeDialog, redeemToast, eventToast, showEventToast,
           modals, habitForm, storeForm, activeRetroHabitId, retroDate, selectedHabitItem, selectedStoreItem, habitCalendarMonth, selectedHabitDate,
           todayStr, habitCalendarMonthLabel, habitCalendarDays, selectedHabitDateItems, habitMonthStats,
-          pendingHabits, doneHabits, todayCompletedCount, todayProgressPercent, levelProgress, isAllDoneToday,
+          pendingHabits, doneHabits, todayCompletedCount, levelProgress, isAllDoneToday,
           lang, darkMode, themeColor, themeColors, isWeekend, activeHabits, archivedHabits,
           t, setDarkMode, setThemeColor, setLanguage,
           checkInNoteText, pendingNoteHabitId, heatmapSelectedDate, importFileInput, onboardingStep, safeBottom,
           weekLabels, allAchievements, unlockedAchievements, isAchievementUnlocked,
-          weeklyStats, monthlyStats, heatmapData, getHeatLevel, lastBackupDate, onboardingSteps, appVersion,
+          weeklyStats, monthlyStats, heatmapData, heatmapMonthLabels, getHeatLevel, lastBackupDate, onboardingSteps, appVersion,
           showArchived, habitSort, toggleSort, icon, getStoreItemIcon, formatDateTime, formatTime, closeModal, translateFreq, isHabitDoneToday, getHabitWeekStats, getHabitMonthStats, getHabitYearStats, getHabitStreak, getTodayNote, getHabitItemsByDate, checkInsByDate, openHabitModal, saveHabit,
           deleteHabitDirectly, showHabitAction, showHabitTrend, habitTrendData, habitTrendRate, startHabitLongPress, cancelHabitLongPress, toggleHabitToday, submitCheckInNote, editHabitFromAction, retroHabitFromAction, deleteHabitFromAction, archiveHabitFromAction, openHabitCalendar, openRewardHistory, shiftHabitCalendarMonth, selectHabitCalendarDate, triggerCheckIn, undoCheckIn, openRetroactiveModal, submitRetroCheckIn,
-          openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, canUndoRewardLog, undoRewardLog, deleteRewardLog, clearRewardHistory,
+          openStoreModal, showStoreAction, startStoreLongPress, cancelStoreLongPress, editStoreFromAction, deleteStoreFromAction, saveStoreItem, deleteStoreItem, redeemReward, canUndoRewardLog, undoRewardLog, deleteRewardLog, clearRewardHistory, selectedRewardLog, showRewardLogAction, startRewardLogLongPress, cancelRewardLogLongPress, undoRewardLogFromAction, deleteRewardLogFromAction,
           exportData, triggerImportData, importData, executeImport, unarchiveHabit, showOnboarding, closeOnboarding, resetApp, openHabitCalendarDetail: selectHabitCalendarDate
         };
 
