@@ -437,9 +437,9 @@
           <div v-if="!modals.rewardHistory" class="space-y-4">
               <!-- 商品列表 -->
               <div class="space-y-2">
-                <div class="flex justify-between items-center text-xs text-slate-400 px-1">
-                  <span class="font-medium">{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
-                  <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-slate-50 border border-slate-200 text-slate-600 font-semibold px-3 py-1.5 rounded-full min-h-[32px]">
+                <div class="flex justify-between items-center text-xs text-slate-400 px-1 gap-2">
+                  <span class="font-medium flex-1 min-w-0 truncate">{{ t('wishCount').replace('%d', filteredStoreItems.length) }}</span>
+                  <button @click="storeSort = storeSort === 'asc' ? 'desc' : 'asc'" class="bg-slate-50 border border-slate-200 text-slate-600 font-semibold px-3 py-1.5 rounded-full min-h-[32px] shrink-0 whitespace-nowrap">
                     {{t('price')}} {{ storeSort==='asc' ? t('lowToHigh') : t('highToLow') }}
                   </button>
                 </div>
@@ -843,7 +843,7 @@
     </Transition>
 
     <!-- 底部导航 -->
-    <nav class="fixed bottom-0 left-0 right-0 flex justify-around items-center z-40 px-2" :style="{height:'calc(4rem + env(safe-area-inset-bottom))',paddingBottom:'env(safe-area-inset-bottom)',background:'var(--bg-nav)',borderTop:'1px solid var(--border-card)'}">
+    <nav class="fixed bottom-0 left-0 right-0 flex justify-around items-center z-40" :style="{height:'calc(4rem + env(safe-area-inset-bottom))',paddingBottom:'env(safe-area-inset-bottom)',paddingLeft:'max(0.5rem, env(safe-area-inset-left))',paddingRight:'max(0.5rem, env(safe-area-inset-right))',background:'var(--bg-nav)',borderTop:'1px solid var(--border-card)'}">
       <!-- 滑动背景指示器 -->
       <div class="absolute top-1 bottom-1 rounded-2xl transition-all duration-300 ease-out pointer-events-none" :style="activeTab==='habit'?{left:'8px',right:'75%',background:'var(--theme-100)'}:activeTab==='store'?{left:'25%',right:'50%',background:'var(--theme-100)'}:activeTab==='calendar'?{left:'50%',right:'25%',background:'var(--theme-100)'}:{left:'75%',right:'8px',background:'var(--theme-100)'}" style="background:var(--theme-100)"></div>
 
